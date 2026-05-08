@@ -15,7 +15,7 @@ import Quickshell.Hyprland
 Item {
     id: root
 
-    property real iconSize:      18
+    property real iconSize:      23
     property real btnSize:       28
     property real btnSpacing:    2
     property real buttonPadding: 4
