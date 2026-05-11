@@ -260,9 +260,9 @@ Item {
                     iconText: Appearance.m3colors.darkmode ? "light_mode" : "dark_mode"
                     onClicked: (e) => {
                         if (Appearance.m3colors.darkmode)
-                            Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --mode light --noswitch`);
+                            Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode light --noswitch`])
                         else
-                            Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`);
+                            Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`])
                     }
                 }
             }
@@ -271,9 +271,9 @@ Item {
                 CircleUtilButton {
                     onClicked: (e) => {
                         if (Appearance.m3colors.darkmode)
-                            Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --mode light --noswitch`);
+                            Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode light --noswitch`])
                         else
-                            Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`);
+                            Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`])
                     }
                     MaterialSymbol {
                         horizontalAlignment: Qt.AlignHCenter

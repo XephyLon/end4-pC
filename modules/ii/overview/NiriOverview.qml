@@ -202,11 +202,11 @@ Item {
         if (fromWs === toWs) {
             if (toPos !== fromPos && toPos < toWsWindows.length) {
                 var targetAddr = toWsWindows[toPos].address
-                Hyprland.dispatch(`focuswindow address:${targetAddr}`)
-                Hyprland.dispatch(`swapwindow address:${addr}`)
+                Hyprland.dispatch(`hl.dsp.focus({ window = "address:${targetAddr}" })`)
+                Hyprland.dispatch(`hl.dsp.window.swap({ window = "address:${addr}" })`)
             }
         } else {
-            Hyprland.dispatch(`movetoworkspacesilent ${toWs}, address:${addr}`)
+            Hyprland.dispatch(`hl.dsp.window.move({ workspace = ${toWs}, follow = false, window = "address:${addr}" })`)
         }
     }
 
@@ -346,7 +346,7 @@ Item {
                             enabled: !root.isDragging
                             onClicked: {
                                 GlobalStates.overviewOpen = false
-                                Hyprland.dispatch(`workspace ${rowItem.wsId}`)
+                                Hyprland.dispatch(`hl.dsp.focus({ workspace = ${rowItem.wsId} })`)
                             }
                         }
                     }
@@ -509,10 +509,10 @@ Item {
                                     if (!winContainer.win) return
                                     if (event.button === Qt.LeftButton) {
                                         GlobalStates.overviewOpen = false
-                                        Hyprland.dispatch(`focuswindow address:${winContainer.win.address}`)
+                                        Hyprland.dispatch(`hl.dsp.focus({ window = "address:${winContainer.win.address}" })`)
                                         event.accepted = true
                                     } else if (event.button === Qt.MiddleButton) {
-                                        Hyprland.dispatch(`closewindow address:${winContainer.win.address}`)
+                                        Hyprland.dispatch(`hl.dsp.window.close({ window = "address:${winContainer.win.address}" })`)
                                         event.accepted = true
                                     }
                                 }
