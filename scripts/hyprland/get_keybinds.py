@@ -54,7 +54,6 @@ def parse_key_string(key_str: str):
 def autogenerate_comment(dispatcher: str, params: str = "") -> str:
     d = dispatcher.lower()
     if "exec_cmd" in d or "exec" in d:
-        # Si contiene variables Lua, no generar comentario
         if any(x in params for x in ["qsIsAlive", "qsIpcCall", "qsScripts", "hyprScripts", "grimhyprctl", "mediaNextCommand", ".."]):
             return ""
         return "Execute: {}".format(params[:60] + "..." if len(params) > 60 else params)
@@ -75,7 +74,6 @@ def parse_lua_bind(line: str, override_comment: str = "") -> Optional[KeyBinding
     if is_hidden(line):
         return None
 
-    # Must start with hl.bind
     m = re.match(r'\s*hl\.bind\s*\(\s*"([^"]+)"\s*,\s*(.*)', line, re.DOTALL)
     if not m:
         return None
