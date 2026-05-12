@@ -218,6 +218,7 @@ MouseArea {
                             { value: "local",     displayName: Translation.tr("Local") },
                             { value: "wallhaven", displayName: Translation.tr("Wallhaven") },
                             { value: "unsplash",  displayName: Translation.tr("Unsplash") },
+                            { value: "pexels",    displayName: Translation.tr("Pexels") },
                         ]
                         textRole: "displayName"
                         onCurrentIndexChanged: {

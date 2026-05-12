@@ -26,6 +26,7 @@ Singleton {
     // ─── APIs ───
     readonly property string unsplashClientId: KeyringStorage.keyringData?.apiKeys?.unsplash  ?? ""
     readonly property string wallhavenApiKey:  KeyringStorage.keyringData?.apiKeys?.wallhaven ?? ""
+    readonly property string pexelsApiKey: KeyringStorage.keyringData?.apiKeys?.pexels ?? ""
 
     // ─── Resolution ───
     readonly property var resolutionMap: ({
@@ -35,6 +36,11 @@ Singleton {
             "4K":    "3840x2160",
         },
         "unsplash": {
+            "1080p": "&w=1920&h=1080&fit=crop",
+            "2K":    "&w=2560&h=1440&fit=crop",
+            "4K":    "&w=3840&h=2160&fit=crop",
+        },
+        "pexels": {
             "1080p": "&w=1920&h=1080&fit=crop",
             "2K":    "&w=2560&h=1440&fit=crop",
             "4K":    "&w=3840&h=2160&fit=crop",
@@ -74,6 +80,8 @@ Singleton {
             _fetchWallhaven();
         } else if (root.provider === "unsplash") {
             _fetchUnsplash();
+        } else if (root.provider === "pexels") {
+            _fetchPexels();
         }
     }
 
@@ -107,6 +115,14 @@ Singleton {
         fetchProc.provider = "unsplash";
         fetchProc.command = ["curl", "-s", url];
         fetchProc.running = true;
+    }
+
+    function _fetchPexels() {
+        const q = root.query.length > 0 ? root.query : "wallpaper landscape";
+        const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=24&page=${root.page}`;
+        fetchProc.provider = "pexels";
+        fetchProc.command  = ["curl", "-s", "-H", `Authorization: ${root.pexelsApiKey}`, url];
+        fetchProc.running  = true;
     }
 
     function _parseWallhaven(jsonStr) {
@@ -146,7 +162,9 @@ Singleton {
             root.results = data.map(item => ({
                 id:               item.id,
                 thumb:            item.urls.small,
-                full:             item.urls.raw + resSuffix,
+                full: item.urls.raw + (root.resolution === "4K" ? "&w=3840&h=2160&fit=crop&fm=jpg&q=85"
+                    : root.resolution === "2K" ? "&w=2560&h=1440&fit=crop&fm=jpg&q=85"
+                    : "&w=1920&h=1080&fit=crop&fm=jpg&q=85"),
                 provider:         "unsplash",
                 title:            item.alt_description ?? item.description ?? "",
                 author:           item.user?.name ?? "",
@@ -160,6 +178,35 @@ Singleton {
             root.fetched();
         } catch (e) {
             root.fetchError("Unsplash parse error: " + e);
+        }
+    }
+
+    function _parsePexels(jsonStr) {
+        try {
+            const data = JSON.parse(jsonStr);
+            const resSuffix = root.resolutionMap["pexels"][root.resolution] ?? "&w=1920&h=1080&fit=crop";
+
+            root.totalPages = Math.ceil((data.total_results ?? 0) / 24);
+            root.results = data.photos.map(item => ({
+                id:               String(item.id),
+                thumb:            item.src.large,
+                full: root.resolution === "4K" ? item.src.original + "?auto=compress&cs=tinysrgb&w=3840&h=2160&fit=crop"
+                    : root.resolution === "2K" ? item.src.original + "?auto=compress&cs=tinysrgb&w=2560&h=1440&fit=crop"
+                    :                            item.src.original + "?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
+                provider:         "pexels",
+                title:            item.alt ?? "",
+                author:           item.photographer ?? "",
+                authorUrl:        item.photographer_url ?? "",
+                likes:            0,
+                width:            item.width ?? 0,
+                height:           item.height ?? 0,
+                avgColor:         item.avg_color ?? "",
+                downloadLocation: "",
+            }));
+
+            root.fetched();
+        } catch (e) {
+            root.fetchError("Pexels parse error: " + e);
         }
     }
 
@@ -187,8 +234,10 @@ Singleton {
             }
             if (fetchProc.provider === "wallhaven") {
                 root._parseWallhaven(fetchProc.buffer);
-            } else {
+            } else if (fetchProc.provider === "unsplash") {
                 root._parseUnsplash(fetchProc.buffer);
+            } else if (fetchProc.provider === "pexels") {
+                root._parsePexels(fetchProc.buffer);
             }
         }
     }

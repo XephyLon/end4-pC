@@ -20,15 +20,17 @@ Item {
     signal wallpaperSelected(string path)
     signal updateThumbnailsRequested()
 
-    readonly property bool unsplashMissingKey:
-        root.provider === "unsplash" &&
-        (KeyringStorage.keyringData?.apiKeys?.unsplash ?? "").length === 0
+    readonly property bool pexelsMissingKey:
+        root.provider === "pexels" &&
+        (KeyringStorage.keyringData?.apiKeys?.pexels ?? "").length === 0
+
+    readonly property bool missingKey: root.unsplashMissingKey || root.pexelsMissingKey
 
     onProviderChanged:   { root.hoveredItem = null; _syncAndFetch() }
     onResolutionChanged: _syncAndFetch()
 
     function _syncAndFetch() {
-        if (root.unsplashMissingKey) return;
+        if (root.missingKey) return;
         OnlineWallpapers.provider   = root.provider;
         OnlineWallpapers.resolution = root.resolution;
         OnlineWallpapers.fetch();
@@ -84,7 +86,7 @@ Item {
     // ─── Request API key (Unsplash only) ───
     Item {
         anchors.fill: parent
-        visible: root.unsplashMissingKey
+        visible: root.missingKey
 
         ColumnLayout {
             anchors.centerIn: parent
@@ -100,7 +102,9 @@ Item {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: Translation.tr("Unsplash API key not set")
+                text: root.unsplashMissingKey
+                    ? Translation.tr("Unsplash API key not set")
+                    : Translation.tr("Pexels API key not set")
                 font.pixelSize: Appearance.font.pixelSize.larger
                 color: Appearance.colors.colOnLayer1
             }
@@ -108,7 +112,9 @@ Item {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: Translation.tr("Open the launcher and run:\n/unsplash YOUR_API_KEY")
+                text: root.unsplashMissingKey
+                    ? Translation.tr("Open the launcher and run:\n/unsplash YOUR_API_KEY")
+                    : Translation.tr("Open the launcher and run:\n/pexels YOUR_API_KEY")
                 color: Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.normal
                 font.family: Appearance.font.family.mono
@@ -117,7 +123,9 @@ Item {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: Translation.tr("Get your free key at unsplash.com/developers")
+                text: root.unsplashMissingKey
+                    ? Translation.tr("Get your free key at unsplash.com/developers")
+                    : Translation.tr("Get your free key at pexels.com/api")
                 color: Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.small
             }
@@ -140,7 +148,7 @@ Item {
     Item {
         id: gridContainer
         anchors.fill: parent
-        visible: !root.unsplashMissingKey
+        visible: !root.missingKey
 
         // ─── Unsplash header ───
         Item {
@@ -289,8 +297,12 @@ Item {
                         root.hoveredItem = delegateItem.model
                     }
                     onClicked: event => {
-                        const url = delegateItem.model.full.toLowerCase();
-                        const ext = url.includes(".png") ? "png" : url.includes(".webp") ? "webp" : "jpg";
+                    const url = delegateItem.model.full;
+                    const urlLower = url.toLowerCase().split("?")[0];
+                    const ext = urlLower.includes(".png") ? "png"
+                            : urlLower.includes(".webp") ? "webp"
+                            : urlLower.includes(".jpeg") ? "jpg"
+                            : "jpg";
                         const fileName = `${delegateItem.model.provider}-${delegateItem.model.id}.${ext}`;
                         const picturesPath = Directories.pictures.toString().replace("file://", "");
                         const fullPath = `${picturesPath}/Wallpapers/${fileName}`;
