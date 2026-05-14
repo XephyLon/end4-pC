@@ -359,6 +359,10 @@ Singleton {
                 property JsonObject tooltips: JsonObject {
                     property bool clickToShow: false
                 }
+                property JsonObject media: JsonObject {
+                    property string preferredPlayer: ""
+                }
+
             }
 
             property JsonObject battery: JsonObject {

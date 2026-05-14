@@ -17,7 +17,16 @@ Scope {
     property bool visible: false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property var realPlayers: MprisController.players
-    readonly property var meaningfulPlayers: filterDuplicatePlayers(realPlayers)
+    readonly property var meaningfulPlayers: {
+        const preferred = Config.options.bar.media.preferredPlayer.trim().toLowerCase()
+        if (preferred.length === 0) return filterDuplicatePlayers(realPlayers)
+        const filtered = realPlayers.filter(p =>
+            (p.identity ?? "").toLowerCase().includes(preferred) ||
+            (p.desktopEntry ?? "").toLowerCase().includes(preferred)
+        )
+        if (filtered.length === 0) return filterDuplicatePlayers(realPlayers)
+        return filterDuplicatePlayers(filtered)
+    }
     readonly property real osdWidth: Appearance.sizes.osdWidth
     readonly property real widgetWidth: Appearance.sizes.mediaControlsWidth
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight

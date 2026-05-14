@@ -392,6 +392,32 @@ ContentPage {
         }
 
         ContentSection {
+            icon: "music_note"
+            shape: MaterialShape.Shape.Sunny
+            title: Translation.tr("Media")
+
+            ConfigRow {
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Preferred Player (e.g. spotify, firefox)")
+                    text: Config.options.bar.media.preferredPlayer
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.bar.media.preferredPlayer = text;
+                        mediaDebounceTimer.restart();
+                    }
+
+                    Timer {
+                        id: mediaDebounceTimer
+                        interval: 600
+                        repeat: false
+                        onTriggered: {}
+                    }
+                }
+            }
+        }
+
+        ContentSection {
             shape: MaterialShape.Shape.Puffy
             icon: "tooltip"; title: Translation.tr("Tooltips")
             ConfigSwitch {
