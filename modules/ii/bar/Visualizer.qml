@@ -11,6 +11,7 @@ Item {
     id: root
     property bool vertical: Config.options.bar.vertical
     property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool mirrored: false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property bool isPlaying: activePlayer?.isPlaying ?? false
     readonly property list<real> points: GlobalStates.visualizerPoints
@@ -33,6 +34,11 @@ Item {
             : barCount * (dotSize + dotSpacing))
         : Appearance.sizes.barHeight
 
+    transform: Scale {
+        xScale: root.mirrored ? -1 : 1
+        origin.x: root.width / 2
+    }
+
     Rectangle {
         visible: isMaterial
         anchors.centerIn: parent
@@ -45,7 +51,6 @@ Item {
         radius: Appearance.rounding.full
         color: Appearance.colors.colPrimaryContainer
 
-        // Horizontal Material
         Row {
             id: barsRow
             visible: !root.vertical
@@ -74,7 +79,6 @@ Item {
             }
         }
 
-        // Vertical Material
         Column {
             id: barsColumn
             visible: root.vertical
@@ -104,7 +108,6 @@ Item {
         }
     }
 
-    // ── Horizontal ───────────────────────────────────────────
     Row {
         visible: !isMaterial && !root.vertical
         anchors.centerIn: parent
@@ -132,7 +135,6 @@ Item {
         }
     }
 
-    // ──  Vertical ─────────────────────────────────────────────
     Column {
         visible: !isMaterial && root.vertical
         anchors.centerIn: parent

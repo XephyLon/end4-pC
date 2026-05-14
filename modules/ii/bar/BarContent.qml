@@ -22,6 +22,11 @@ Item {
         return Qt.resolvedUrl("./" + formattedName + ".qml");
     }
 
+    function getMirroredForIndex(layout, idx) {
+        const prevCount = layout.slice(0, idx).filter(w => w === "visualizer").length
+        return prevCount % 2 === 1
+    }
+
     property var screen: root.QsWindow.window?.screen
     property real useShortenedForm: (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
 
@@ -66,9 +71,17 @@ Item {
                         Layout.fillHeight: true
                         currentIndex: index
                         totalCount: Config.options.bar.layouts.leftLayout.length
-                        Loader { Layout.fillHeight: true; source: root.getWidgetUrl(modelData) }
+                        Loader {
+                            Layout.fillHeight: true
+                            source: root.getWidgetUrl(modelData)
+                            onLoaded: {
+                                if (item && item.hasOwnProperty("mirrored"))
+                                    item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.leftLayout, index)
+                            }
+                        }
                     }
                 }
+
                 Component {
                     id: leftNoGroupDelegate
                     Loader {
@@ -76,6 +89,10 @@ Item {
                         Layout.topMargin: Config.options.bar.bottom ? -5 : 3
                         Layout.alignment: Qt.AlignVCenter
                         source: root.getWidgetUrl(modelData)
+                        onLoaded: {
+                            if (item && item.hasOwnProperty("mirrored"))
+                                item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.leftLayout, index)
+                        }
                     }
                 }
             }
@@ -104,15 +121,27 @@ Item {
                         Layout.fillHeight: true
                         currentIndex: index
                         totalCount: Config.options.bar.layouts.middleLayout.length
-                        Loader { Layout.fillHeight: true; source: root.getWidgetUrl(modelData) }
+                        Loader {
+                            Layout.fillHeight: true
+                            source: root.getWidgetUrl(modelData)
+                            onLoaded: {
+                                if (item && item.hasOwnProperty("mirrored"))
+                                    item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.middleLayout, index)
+                            }
+                        }
                     }
                 }
+
                 Component {
                     id: middleNoGroupDelegate
-                    Loader { 
-                        Layout.fillHeight: false;
+                    Loader {
+                        Layout.fillHeight: false
                         Layout.topMargin: Config.options.bar.bottom ? -5 : 3
-                        source: root.getWidgetUrl(modelData) 
+                        source: root.getWidgetUrl(modelData)
+                        onLoaded: {
+                            if (item && item.hasOwnProperty("mirrored"))
+                                item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.middleLayout, index)
+                        }
                     }
                 }
             }
@@ -142,15 +171,27 @@ Item {
                         Layout.fillHeight: true
                         currentIndex: index
                         totalCount: Config.options.bar.layouts.rightLayout.length
-                        Loader { Layout.fillHeight: true; source: root.getWidgetUrl(modelData) }
+                        Loader {
+                            Layout.fillHeight: true
+                            source: root.getWidgetUrl(modelData)
+                            onLoaded: {
+                                if (item && item.hasOwnProperty("mirrored"))
+                                    item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.rightLayout, index)
+                            }
+                        }
                     }
                 }
+
                 Component {
                     id: rightNoGroupDelegate
-                    Loader { 
-                        Layout.fillHeight: false;
+                    Loader {
+                        Layout.fillHeight: false
                         Layout.topMargin: Config.options.bar.bottom ? -5 : 3
-                        source: root.getWidgetUrl(modelData) 
+                        source: root.getWidgetUrl(modelData)
+                        onLoaded: {
+                            if (item && item.hasOwnProperty("mirrored"))
+                                item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.rightLayout, index)
+                        }
                     }
                 }
             }
