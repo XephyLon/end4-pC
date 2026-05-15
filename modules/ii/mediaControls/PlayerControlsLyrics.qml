@@ -83,7 +83,6 @@ Item {
 
             Lyrics {
                 id: lyricsComp
-                player: root.player
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 textColor: root.blendedColors.colOnLayer0

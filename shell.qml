@@ -42,6 +42,7 @@ ShellRoot {
         Cliphist.refresh()
         Wallpapers.load()
         Updates.load()
+        LyricsService.restartLyrics()
     }
 
     PanelFamilyLoader {

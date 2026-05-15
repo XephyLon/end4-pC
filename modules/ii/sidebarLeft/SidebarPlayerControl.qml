@@ -199,7 +199,6 @@ Item {
             // ── Lyrics ──
             Lyrics {
                 id: lyricsComp
-                player: root.player ?? null  
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 textAlignment: Text.AlignHCenter
