@@ -41,14 +41,14 @@ Singleton {
     property string maxAvailableDiskString: kbToGbString(diskTotal)
 
     Process {
-		id: tempProc
-		command: ["bash", "-c", "cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | sort -n | tail -1 | awk '{printf \"%.0f\", $1/1000}'"]
-		stdout: StdioCollector {
-			onStreamFinished: {
-				root.cpuTemp = parseFloat(text.trim())
-			}
-		}
-	}
+        id: tempProc
+        command: ["bash", "-c", "sensors 2>/dev/null | grep -E 'Package id 0|Tctl|Tdie' | grep -oP '\\+\\K[0-9.]+(?=°C)' | head -1"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.cpuTemp = parseFloat(text.trim())
+            }
+        }
+    }
 
     Process {
         id: diskProc
