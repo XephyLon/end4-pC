@@ -117,7 +117,7 @@ Item {
             id: inputCanvas
             Layout.fillWidth: true
             isInput: true
-            containerColor: Appearance.colors.colSecondaryContainer
+            containerColor: ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.8)
             placeholderText: Translation.tr("Enter text to translate...")
             onInputTextChanged: {
                 translateTimer.restart();
@@ -198,7 +198,7 @@ Item {
             id: outputCanvas
             Layout.fillWidth: true
             isInput: false
-            containerColor: Appearance.colors.colPrimaryContainer
+            containerColor: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer, 0.8)
             placeholderText: Translation.tr("Translation goes here...")
             property bool hasTranslation: (root.translatedText.trim().length > 0)
             text: hasTranslation ? root.translatedText : ""
