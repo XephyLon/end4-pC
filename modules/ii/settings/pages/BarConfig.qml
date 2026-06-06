@@ -445,6 +445,11 @@ ContentPage {
                 }
             }
             ConfigSwitch {
+                buttonIcon: "titlecase"; text: Translation.tr("Show only title")
+                checked: Config.options.bar.media.onlyTitle
+                onCheckedChanged: { Config.options.bar.media.onlyTitle = checked; }
+            }
+            ConfigSwitch {
                 buttonIcon: "keep"; text: Translation.tr("Pin media controls")
                 checked: Config.options.bar.media.alwaysVisible
                 onCheckedChanged: { Config.options.bar.media.alwaysVisible = checked; }
