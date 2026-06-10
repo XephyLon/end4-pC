@@ -672,6 +672,42 @@ ContentPage {
         }
 
         ContentSection {
+            icon: "panorama"
+            shape: MaterialShape.Shape.SoftBoom 
+            title: Translation.tr("Widget: Custom Image")
+
+            ConfigSwitch {
+                Layout.fillWidth: true
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.customImage.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.customImage.enable = checked;
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Background shape")
+                            
+                ConfigSelectionShapeArray {
+                    currentValue: Config.options.background.widgets.customImage.shape
+                    shapeColor: Appearance.colors.colPrimary
+                    backgroundColor: Appearance.colors.colPrimaryContainer
+                    options: [
+                        "Circle", "Square", "Slanted", "Arch", "Arrow", "SemiCircle", "Oval", "Pill",
+                        "Triangle", "Diamond", "ClamShell", "Pentagon", "Gem", "Sunny", "VerySunny",
+                        "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided",
+                        "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Flower",
+                        "Puffy", "PuffyDiamond", "PixelCircle", "Bun", "Heart"
+                    ]
+                    onSelected: newValue => {
+                        Config.options.background.widgets.customImage.shape = newValue
+                    }
+                }
+            }
+        }
+
+        ContentSection {
             icon: "music_note"
             shape: MaterialShape.Shape.Cookie4Sided
             title: Translation.tr("Widget: Music")
@@ -687,54 +723,22 @@ ContentPage {
                         Config.options.background.widgets.media.enable = checked;
                     }
                 }
+            }
+        }
+        ContentSection {
+            icon: "memory"
+            shape: MaterialShape.Shape.Gem
+            title: Translation.tr("Widget: Resources")
 
-                ContentSubsection {
-                    title: Translation.tr("Background shape")
-                            
-                    ConfigSelectionShapeArray {
-                        currentValue: Config.options.background.widgets.media.backgroundShape
-                        shapeColor: Appearance.colors.colPrimary
-                        backgroundColor: Appearance.colors.colPrimaryContainer
-                        options: [
-                            "Circle", "Square", "Slanted", "Arch", "Arrow", "SemiCircle", "Oval", "Pill",
-                            "Triangle", "Diamond", "ClamShell", "Pentagon", "Gem", "Sunny", "VerySunny",
-                            "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided",
-                            "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Flower",
-                            "Puffy", "PuffyDiamond", "PixelCircle", "Bun", "Heart"
-                        ]
-                        onSelected: newValue => {
-                            Config.options.background.widgets.media.backgroundShape = newValue
-                        }
-                    }
-                }
+            ContentSubsection {
 
                 ConfigSwitch {
                     Layout.fillWidth: true
-                    buttonIcon: "subtitles"
-                    text: Translation.tr("Show Titles")
-                    checked: Config.options.background.widgets.media.showTitles
+                    buttonIcon: "check"
+                    text: Translation.tr("Enable")
+                    checked: Config.options.background.widgets.resources.enable
                     onCheckedChanged: {
-                        Config.options.background.widgets.media.showTitles = checked;
-                    }
-                }
-
-                ConfigSwitch {
-                    Layout.fillWidth: true
-                    buttonIcon: "lyrics"
-                    text: Translation.tr("Show Lyrics")
-                    checked: Config.options.background.widgets.media.showLyrics
-                    onCheckedChanged: {
-                        Config.options.background.widgets.media.showLyrics = checked;
-                    }
-                }
-
-                ConfigSwitch {
-                    Layout.fillWidth: true
-                    buttonIcon: "motion_play"
-                    text: Translation.tr("Show Controls")
-                    checked: Config.options.background.widgets.media.showControls
-                    onCheckedChanged: {
-                        Config.options.background.widgets.media.showControls = checked;
+                        Config.options.background.widgets.resources.enable = checked;
                     }
                 }
             }

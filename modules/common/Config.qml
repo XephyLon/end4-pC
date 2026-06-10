@@ -261,6 +261,22 @@ Singleton {
                         property real y: 100
                     }
 
+                    property JsonObject customImage: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property string path: ""
+                        property string shape: "Cookie4Sided"
+                    }
+
+                    property JsonObject resources: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                    }
+
                     property JsonObject media: JsonObject {
                         property bool enable: false
                         property bool showControls: true
