@@ -35,8 +35,10 @@ Item {
         : Appearance.sizes.barHeight
 
     transform: Scale {
-        xScale: root.mirrored ? -1 : 1
+        xScale: (!root.vertical && root.mirrored) ? -1 : 1
+        yScale: (root.vertical && root.mirrored) ? -1 : 1
         origin.x: root.width / 2
+        origin.y: root.height / 2
     }
 
     Rectangle {

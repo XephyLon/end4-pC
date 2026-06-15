@@ -148,7 +148,7 @@ Item {
                         anchors.left: btn.right
                         anchors.leftMargin: 8
                         anchors.verticalCenter: btn.verticalCenter
-                        reveal: recordingItem.isRecording
+                        reveal: recordingItem.isRecording && !root.vertical
 
                         StyledText {
                             width: implicitWidth
