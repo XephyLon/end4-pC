@@ -585,6 +585,8 @@ Singleton {
             }
 
             property JsonObject sidebar: JsonObject {
+                property bool banner: false
+                property string bannerImage: ""
                 property bool keepRightSidebarLoaded: true
                 property JsonObject translator: JsonObject {
                     property bool enable: false

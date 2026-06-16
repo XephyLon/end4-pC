@@ -2,9 +2,12 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
+import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell.Io
 import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Hyprland
@@ -42,6 +45,24 @@ Item {
         }
     }
 
+    Process {
+        id: fileChooser
+        command: ["kdialog", "--getopenfilename", Quickshell.env("HOME"), "image/png image/jpg image/jpeg image/webp"]
+        
+        stdout: StdioCollector {
+            id: fileChooserOutput
+        }
+        
+        onExited: (code) => {
+            if (code === 0) {
+                const path = fileChooserOutput.text.trim()
+                if (path !== "") {
+                    Config.options.sidebar.bannerImage = path
+                }
+            }
+        }
+    }
+
     implicitHeight: sidebarRightBackground.implicitHeight
     implicitWidth: sidebarRightBackground.implicitWidth
 
@@ -64,12 +85,184 @@ Item {
             anchors.margins: sidebarPadding
             spacing: sidebarPadding
 
-            SystemButtonRow {
-                Layout.fillHeight: false
+            // Banner
+            Loader {
                 Layout.fillWidth: true
-                // Layout.margins: 10
-                Layout.topMargin: 0
-                Layout.bottomMargin: 0
+                Layout.fillHeight: false
+                sourceComponent: Config.options.sidebar.banner ? bannerComponent : normalComponent
+
+                Component {
+                    id: bannerComponent
+                    Item {
+                        implicitHeight: 180
+                        implicitWidth: parent?.width ?? 0
+
+                        Rectangle {
+                            id: sysRect
+                            anchors.fill: parent
+                            radius: Config.options.hyprland.decoration.rounding - 2
+                            color: Appearance.colors.colLayer1
+
+                            Rectangle {
+                                id: wallpaperRect
+                                anchors {
+                                    top: parent.top
+                                    left: parent.left
+                                    right: parent.right
+                                    topMargin: 2
+                                    leftMargin: 2
+                                    rightMargin: 2
+                                }
+                                height: 120
+                                radius: sysRect.radius
+                                color: "transparent"
+
+                                StyledImage {
+                                    anchors.fill: parent
+                                    fillMode: Image.PreserveAspectCrop
+                                    source: Config.options.sidebar.bannerImage !== "" 
+                                        ? Config.options.sidebar.bannerImage 
+                                        : Config.options.background.wallpaperPath
+                                    cache: false
+                                    antialiasing: true
+                                    sourceSize.width: wallpaperRect.width * 2
+                                    sourceSize.height: wallpaperRect.height * 2
+                                    layer.enabled: true
+                                    layer.effect: OpacityMask {
+                                        maskSource: Rectangle {
+                                            width: wallpaperRect.width
+                                            height: wallpaperRect.height
+                                            radius: wallpaperRect.radius
+                                        }
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    onClicked: (event) => {
+                                        if (event.button === Qt.LeftButton) {
+                                            fileChooser.running = true
+                                        } else if (event.button === Qt.RightButton) {
+                                            Config.options.sidebar.bannerImage = ""
+                                        }
+                                    }
+                                }
+                            }
+
+                            Column {
+                                anchors {
+                                    left: parent.left
+                                    bottom: parent.bottom
+                                    leftMargin: 13
+                                    bottomMargin: 8
+                                }
+                                spacing: 1
+
+                                Rectangle {
+                                    id: avatarRect
+                                    width: 48; height: 48; radius: width / 2
+                                    color: Appearance.colors.colPrimaryContainer
+
+                                    Image {
+                                        id: avatarImage
+                                        anchors.fill: parent
+                                        source: "file:///home/" + (Quickshell.env("USER") ?? "user") + "/.face"
+                                        fillMode: Image.PreserveAspectCrop
+                                        layer.enabled: true
+                                        layer.effect: OpacityMask {
+                                            maskSource: Rectangle {
+                                                width: avatarRect.width
+                                                height: avatarRect.height
+                                                radius: avatarRect.radius
+                                            }
+                                        }
+                                        onStatusChanged: {
+                                            if (status === Image.Error) visible = false
+                                        }
+                                    }
+
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: "account_circle"
+                                        iconSize: 32
+                                        color: Appearance.colors.colOnPrimaryContainer
+                                        visible: avatarImage.status === Image.Error
+                                    }
+                                }
+
+                                StyledText {
+                                    text: (Quickshell.env("USER") ?? "user") + "@" + (Quickshell.env("HOSTNAME") ?? "arch")
+                                    font.pixelSize: Appearance.font.pixelSize.small
+                                    font.weight: Font.SemiBold
+                                    color: Appearance.colors.colOnLayer1
+                                }
+
+                                StyledText {
+                                    text: Translation.tr("Up • %1").arg(DateTime.uptime)
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colOnLayer1
+                                    opacity: 0.6
+                                }
+                            }
+
+                            ButtonGroup {
+                                anchors {
+                                    right: parent.right
+                                    bottom: parent.bottom
+                                    margins: 4
+                                }
+                                color: "transparent"
+                                padding: 4
+
+                                QuickToggleButton {
+                                    toggled: root.editMode
+                                    visible: Config.options.sidebar.quickToggles.style === "android"
+                                    buttonIcon: "edit"
+                                    onClicked: root.editMode = !root.editMode
+                                    StyledToolTip {
+                                        text: Translation.tr("Edit quick toggles") + (root.editMode ? Translation.tr("\nLMB to enable/disable\nRMB to toggle size\nScroll to swap position") : "")
+                                    }
+                                }
+                                QuickToggleButton {
+                                    toggled: false
+                                    buttonIcon: "restart_alt"
+                                    onClicked: {
+                                        Quickshell.execDetached(["hyprctl", "reload"])
+                                        Quickshell.reload(true);
+                                    }
+                                    StyledToolTip {
+                                        text: Translation.tr("Reload Hyprland & Quickshell")
+                                    }
+                                }
+                                QuickToggleButton {
+                                    toggled: GlobalStates.settingsOpen
+                                    buttonIcon: "settings"
+                                    onClicked: {
+                                        GlobalStates.sidebarRightOpen = false;
+                                        GlobalStates.settingsOpen = !GlobalStates.settingsOpen
+                                    }
+                                    StyledToolTip {
+                                        text: Translation.tr("Settings")
+                                    }
+                                }
+                                QuickToggleButton {
+                                    toggled: false
+                                    buttonIcon: "mode_off_on"
+                                    onClicked: GlobalStates.sessionOpen = true
+                                    StyledToolTip {
+                                        text: Translation.tr("Session")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Component {
+                    id: normalComponent
+                    SystemButtonRow {}
+                }
             }
 
             LoaderedQuickPanelImplementation {
@@ -197,21 +390,11 @@ Item {
         active: Config.options.sidebar.quickToggles.style === styleName
         Connections {
             target: quickPanelImplLoader.item
-            function onOpenAudioOutputDialog() {
-                root.showAudioOutputDialog = true;
-            }
-            function onOpenAudioInputDialog() {
-                root.showAudioInputDialog = true;
-            }
-            function onOpenBluetoothDialog() {
-                root.showBluetoothDialog = true;
-            }
-            function onOpenNightLightDialog() {
-                root.showNightLightDialog = true;
-            }
-            function onOpenWifiDialog() {
-                root.showWifiDialog = true;
-            }
+            function onOpenAudioOutputDialog() { root.showAudioOutputDialog = true; }
+            function onOpenAudioInputDialog() { root.showAudioInputDialog = true; }
+            function onOpenBluetoothDialog() { root.showBluetoothDialog = true; }
+            function onOpenNightLightDialog() { root.showNightLightDialog = true; }
+            function onOpenWifiDialog() { root.showWifiDialog = true; }
         }
     }
 
@@ -229,7 +412,7 @@ Item {
             radius: Appearance.rounding.normal
             implicitWidth: uptimeRow.implicitWidth + 24
             implicitHeight: uptimeRow.implicitHeight + 8
-            
+
             Row {
                 id: uptimeRow
                 anchors.centerIn: parent

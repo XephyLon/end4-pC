@@ -277,6 +277,15 @@ ContentPage {
             title: Translation.tr("Right Sidebar")
 
             ConfigSwitch {
+                buttonIcon: "planner_banner_ad_pt"
+                text: Translation.tr('Banner')
+                checked: Config.options.sidebar.banner
+                onCheckedChanged: {
+                    Config.options.sidebar.banner = checked;
+                }
+            }
+
+            ConfigSwitch {
                 buttonIcon: "memory"
                 text: Translation.tr('Keep right sidebar loaded')
                 checked: Config.options.sidebar.keepRightSidebarLoaded
