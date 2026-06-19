@@ -20,10 +20,14 @@ Item {
     signal wallpaperSelected(string path)
     signal updateThumbnailsRequested()
 
+    readonly property bool unsplashMissingKey:
+        root.provider === "unsplash" &&
+        (KeyringStorage.keyringData?.apiKeys?.unsplash ?? "").length === 0
+
     readonly property bool pexelsMissingKey:
         root.provider === "pexels" &&
         (KeyringStorage.keyringData?.apiKeys?.pexels ?? "").length === 0
-
+        
     readonly property bool missingKey: root.unsplashMissingKey || root.pexelsMissingKey
 
     onProviderChanged:   { root.hoveredItem = null; _syncAndFetch() }
