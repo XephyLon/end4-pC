@@ -157,7 +157,7 @@ Item {
                     id: pill
                     color: Appearance.colors.colPrimaryContainer
                     radius: Appearance.rounding.full
-                    implicitHeight: 30
+                    implicitHeight: 32
                     implicitWidth: pillRow.implicitWidth + 4 + 4
 
                     property var timeParts: DateTime.time.split(/[: ]/)
@@ -171,28 +171,27 @@ Item {
                         spacing: 6
 
                         StyledText {
-                            id: hoursText
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colPrimary
-                            text: pill.hours.padStart(2, "0")
-                            font.features: { "tnum": 1 }
-                            font.letterSpacing: -0.4
+                            visible: root.showDate
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colOnPrimaryContainer
+                            text: DateTime.longDate
                             Layout.alignment: Qt.AlignVCenter
                             leftPadding: 5
                         }
 
                         Rectangle {
-                            width: 24
-                            height: 24
+                            implicitWidth: timeText.implicitWidth + 16
+                            implicitHeight: 24
                             radius: Appearance.rounding.full
                             color: Appearance.colors.colPrimary
 
                             StyledText {
-                                id: minutesText
+                                id: timeText
                                 anchors.centerIn: parent
                                 font.pixelSize: Appearance.font.pixelSize.smallie
                                 color: Appearance.colors.colOnPrimary
-                                text: pill.minutes.padStart(2, "0")
+                                font.weight: Font.Bold
+                                text: pill.ampm !== "" ? pill.hours.padStart(2, "0") + ":" + pill.minutes.padStart(2, "0") : DateTime.time
                                 font.features: { "tnum": 1 }
                                 font.letterSpacing: -0.4
                             }
@@ -202,12 +201,13 @@ Item {
 
                 Rectangle {
                     visible: pill.ampm !== ""
+                    z: 1
                     implicitWidth: ampmText.implicitWidth + 8
                     implicitHeight: 24
                     radius: Appearance.rounding.full
                     color: Appearance.colors.colTertiaryContainer
                     Layout.alignment: Qt.AlignVCenter
-
+                    Layout.leftMargin: -13
                     StyledText {
                         id: ampmText
                         anchors.centerIn: parent

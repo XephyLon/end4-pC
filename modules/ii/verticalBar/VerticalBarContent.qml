@@ -48,51 +48,60 @@ Item {
         anchors.fill: barBackground
         anchors.margins: root.barPadding
 
-        // Center
+        // Top
         Item {
-            id: absoluteCenter
-            anchors.centerIn: parent
-            height: middleCol.implicitHeight
-            width: parent.width
+            anchors.top: parent.top
+            anchors.topMargin: root.isMaterial ? (Config.options.hyprland.general.gapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : 10)
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: root.isMaterial ? topMaterialPill.implicitHeight : topCol.implicitHeight
 
-            ColumnLayout {
-                id: middleCol
-                anchors.fill: parent
-                spacing: root.isMaterial ? -6 : 2
-                Repeater {
-                    model: Config.options.bar.layouts.middleLayout
-                    delegate: Bar.BarGroup {
-                        Layout.fillWidth: true
-                        vertical: true
-                        currentIndex: index
-                        totalCount: Config.options.bar.layouts.middleLayout.length
-                        Loader {
+            Rectangle {
+                id: topMaterialPill
+                visible: root.isMaterial
+                anchors.centerIn: parent
+                implicitWidth: topMaterialCol.implicitWidth
+                implicitHeight: topMaterialCol.implicitHeight
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colLayer0
+
+                ColumnLayout {
+                    id: topMaterialCol
+                    anchors.centerIn: parent
+                    spacing: -6
+
+                    Repeater {
+                        model: Config.options.bar.layouts.leftLayout
+                        delegate: topMaterialGroupDelegate
+                    }
+
+                    Component {
+                        id: topMaterialGroupDelegate
+                        Bar.BarGroup {
                             Layout.fillWidth: true
-                            source: root.getWidgetUrl(modelData)
-                            onLoaded: {
-                                if (item && "vertical" in item)
-                                    item.vertical = true
-                                if (item && item.hasOwnProperty("mirrored"))
-                                    item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.middleLayout, index)
+                            vertical: true
+                            currentIndex: index
+                            totalCount: Config.options.bar.layouts.leftLayout.length
+                            Loader {
+                                Layout.fillWidth: true
+                                source: root.getWidgetUrl(modelData)
+                                onLoaded: {
+                                    if (item && "vertical" in item) item.vertical = true
+                                    if (item && item.hasOwnProperty("mirrored"))
+                                        item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.leftLayout, index)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-
-        // Top
-        Item {
-            anchors.top: parent.top
-            anchors.topMargin: Config.options.bar.cornerStyle === 1 ? 4 : 10
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: topCol.implicitHeight
 
             ColumnLayout {
                 id: topCol
                 anchors.fill: parent
-                spacing: root.isMaterial ? -6 : 2
+                visible: !root.isMaterial
+                spacing: 2
+
                 Repeater {
                     model: Config.options.bar.layouts.leftLayout
                     delegate: Bar.BarGroup {
@@ -104,10 +113,83 @@ Item {
                             Layout.fillWidth: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
-                                if (item && "vertical" in item)
-                                    item.vertical = true
+                                if (item && "vertical" in item) item.vertical = true
                                 if (item && item.hasOwnProperty("mirrored"))
                                     item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.leftLayout, index)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Center
+        Item {
+            id: absoluteCenter
+            anchors.centerIn: parent
+            width: parent.width
+            height: root.isMaterial ? centerMaterialPill.implicitHeight : middleCol.implicitHeight
+
+            Rectangle {
+                id: centerMaterialPill
+                visible: root.isMaterial
+                anchors.centerIn: parent
+                implicitWidth: centerMaterialCol.implicitWidth
+                implicitHeight: centerMaterialCol.implicitHeight
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colLayer0
+
+                ColumnLayout {
+                    id: centerMaterialCol
+                    anchors.centerIn: parent
+                    spacing: -6
+
+                    Repeater {
+                        model: Config.options.bar.layouts.middleLayout
+                        delegate: centerMaterialGroupDelegate
+                    }
+
+                    Component {
+                        id: centerMaterialGroupDelegate
+                        Bar.BarGroup {
+                            Layout.fillWidth: true
+                            vertical: true
+                            currentIndex: index
+                            totalCount: Config.options.bar.layouts.middleLayout.length
+                            Loader {
+                                Layout.fillWidth: true
+                                source: root.getWidgetUrl(modelData)
+                                onLoaded: {
+                                    if (item && "vertical" in item) item.vertical = true
+                                    if (item && item.hasOwnProperty("mirrored"))
+                                        item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.middleLayout, index)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            ColumnLayout {
+                id: middleCol
+                anchors.fill: parent
+                visible: !root.isMaterial
+                spacing: 2
+
+                Repeater {
+                    model: Config.options.bar.layouts.middleLayout
+                    delegate: Bar.BarGroup {
+                        Layout.fillWidth: true
+                        vertical: true
+                        currentIndex: index
+                        totalCount: Config.options.bar.layouts.middleLayout.length
+                        Loader {
+                            Layout.fillWidth: true
+                            source: root.getWidgetUrl(modelData)
+                            onLoaded: {
+                                if (item && "vertical" in item) item.vertical = true
+                                if (item && item.hasOwnProperty("mirrored"))
+                                    item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.middleLayout, index)
                             }
                         }
                     }
@@ -118,15 +200,57 @@ Item {
         // Bottom
         Item {
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: Config.options.bar.cornerStyle === 1 ? 4 : 10
+            anchors.bottomMargin: root.isMaterial ? (Config.options.hyprland.general.gapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : 10)
             anchors.left: parent.left
             anchors.right: parent.right
-            height: bottomCol.implicitHeight
+            height: root.isMaterial ? bottomMaterialPill.implicitHeight : bottomCol.implicitHeight
+
+            Rectangle {
+                id: bottomMaterialPill
+                visible: root.isMaterial
+                anchors.centerIn: parent
+                implicitWidth: bottomMaterialCol.implicitWidth
+                implicitHeight: bottomMaterialCol.implicitHeight + 10
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colLayer0
+
+                ColumnLayout {
+                    id: bottomMaterialCol
+                    anchors.centerIn: parent
+                    spacing: 1
+
+                    Repeater {
+                        model: Config.options.bar.layouts.rightLayout
+                        delegate: bottomMaterialGroupDelegate
+                    }
+
+                    Component {
+                        id: bottomMaterialGroupDelegate
+                        Bar.BarGroup {
+                            Layout.fillWidth: true
+                            vertical: true
+                            currentIndex: index
+                            totalCount: Config.options.bar.layouts.rightLayout.length
+                            Loader {
+                                Layout.fillWidth: true
+                                source: root.getWidgetUrl(modelData)
+                                onLoaded: {
+                                    if (item && "vertical" in item) item.vertical = true
+                                    if (item && item.hasOwnProperty("mirrored"))
+                                        item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.rightLayout, index)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             ColumnLayout {
                 id: bottomCol
                 anchors.fill: parent
+                visible: !root.isMaterial
                 spacing: 2
+
                 Repeater {
                     model: Config.options.bar.layouts.rightLayout
                     delegate: Bar.BarGroup {
@@ -138,8 +262,7 @@ Item {
                             Layout.fillWidth: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
-                                if (item && "vertical" in item)
-                                    item.vertical = true
+                                if (item && "vertical" in item) item.vertical = true
                                 if (item && item.hasOwnProperty("mirrored"))
                                     item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.rightLayout, index)
                             }

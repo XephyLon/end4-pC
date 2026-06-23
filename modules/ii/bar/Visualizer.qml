@@ -43,7 +43,7 @@ Item {
         visible: isMaterial
         anchors.centerIn: parent
         width: vertical
-            ? Appearance.sizes.verticalBarWidth - 4
+            ? Appearance.sizes.verticalBarWidth - 10
             : barsRow.implicitWidth + 16
         height: vertical
             ? barsColumn.implicitHeight + 16

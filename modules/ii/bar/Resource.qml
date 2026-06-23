@@ -92,7 +92,8 @@ Item {
 
         Item {
             Layout.alignment: Qt.AlignVCenter
-            implicitWidth: fullPercentageTextMetrics.width
+            visible: Config.options.bar.resources.showValue
+            implicitWidth: visible ? fullPercentageTextMetrics.width : 0
             implicitHeight: percentageText.implicitHeight
             TextMetrics {
                 id: fullPercentageTextMetrics

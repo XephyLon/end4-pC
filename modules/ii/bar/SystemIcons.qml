@@ -32,7 +32,7 @@ Item {
         color: Appearance.colors.colPrimary
         radius: Appearance.rounding.full
         implicitWidth: root.vertical ? 36 : flow.implicitWidth + 16
-        implicitHeight: root.vertical ? flow.implicitHeight + 16 : 30
+        implicitHeight: root.vertical ? flow.implicitHeight + 16 : 32
     }
 
     Flow {

@@ -407,6 +407,11 @@ ContentPage {
                     ]
                 }
             }
+            ConfigSwitch {
+                buttonIcon: "decimal_increase"; text: Translation.tr("Show Percentage")
+                checked: Config.options.bar.resources.showValue
+                onCheckedChanged: { Config.options.bar.resources.showValue = checked; }
+            }
             ConfigSpinBox {
                 icon: "av_timer"
                 text: Translation.tr("Polling interval (ms)")

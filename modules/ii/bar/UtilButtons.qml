@@ -24,20 +24,7 @@ Item {
         color: isMaterial ? Appearance.colors.colPrimaryContainer : "transparent"
         radius: Appearance.rounding.full
         implicitWidth: isMaterial && !root.vertical ? flow.implicitWidth + 10 : root.vertical ? Appearance.sizes.verticalBarWidth - 10 : flow.implicitWidth + 4
-        implicitHeight: isMaterial && root.vertical ? flow.implicitHeight + 10 : isMaterial ? 30 : root.vertical ? flow.implicitHeight + 4 : Appearance.sizes.barHeight
-
-        Behavior on implicitWidth {
-            NumberAnimation {
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Appearance.animation.elementMoveFast.easing
-            }
-        }
-        Behavior on implicitHeight {
-            NumberAnimation {
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Appearance.animation.elementMoveFast.easing
-            }
-        }
+        implicitHeight: isMaterial && root.vertical ? flow.implicitHeight + 10 : isMaterial ? 32 : root.vertical ? flow.implicitHeight + 4 : Appearance.sizes.barHeight
 
         Flow {
             id: flow

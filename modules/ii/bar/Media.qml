@@ -195,7 +195,7 @@ Item {
             id: card
             color: Appearance.colors.colSecondaryContainer
             radius: Appearance.rounding.full
-            implicitHeight: 30
+            implicitHeight: 32
             implicitWidth: innerRow.implicitWidth + 8
 
             RowLayout {

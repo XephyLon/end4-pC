@@ -16,9 +16,10 @@ Item {
     property bool showOverflowMenu: true
     property var activeMenu: null
     readonly property bool isOnLeft: Config.options.bar.layouts.leftLayout.includes("sysTray")
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3
 
     visible: SystemTray.items.values.length > 0
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : gridLayout.implicitWidth
+    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? pill.implicitWidth : gridLayout.implicitWidth)
     implicitHeight: vertical ? gridLayout.implicitHeight : Appearance.sizes.barHeight
 
     property list<var> pinnedItems: TrayService.pinnedItems
@@ -55,6 +56,16 @@ Item {
                 root.activeMenu = null
             }
         }
+    }
+
+    Rectangle {
+        id: pill
+        visible: root.isMaterial
+        anchors.centerIn: parent
+        color: Appearance.colors.colPrimaryContainer
+        radius: Appearance.rounding.full
+        implicitWidth: root.vertical ? 36 : gridLayout.implicitWidth + 16
+        implicitHeight: root.vertical ? gridLayout.implicitHeight + 16 : 32
     }
 
     GridLayout {

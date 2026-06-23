@@ -58,7 +58,7 @@ Item {
     Rectangle {
         id: pill
         anchors.centerIn: parent
-        color:  root.isMaterial ? Appearance.colors.colSecondaryContainer : "transparent"
+        color: "transparent"
         radius: Appearance.rounding.full
 
         implicitWidth: root.isMaterial && !root.vertical

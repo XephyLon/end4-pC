@@ -62,7 +62,7 @@ MouseArea {
                 id: pill
                 color: Appearance.colors.colPrimaryContainer
                 radius: Appearance.rounding.full
-                implicitHeight: 30
+                implicitHeight: 32
                 implicitWidth: pillRow.implicitWidth + 4 + 4 
 
                 RowLayout {
@@ -79,8 +79,8 @@ MouseArea {
                     }
 
                     Rectangle {
-                        width: 24
-                        height: 24
+                        width: 25
+                        height: 25
                         radius: Appearance.rounding.full
                         color: Appearance.colors.colPrimary
 

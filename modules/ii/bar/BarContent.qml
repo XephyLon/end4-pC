@@ -50,19 +50,60 @@ Item {
         // Left
         Item {
             anchors.left: parent.left
-            anchors.leftMargin: Config.options.bar.cornerStyle === 1 ? 4 : 10
+            anchors.leftMargin: root.isMaterial ? (Config.options.hyprland.general.gapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : 10)
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: leftRow.implicitWidth
+            width: root.isMaterial ? leftMaterialPill.implicitWidth : leftRow.implicitWidth
 
+            // Material pill wrapper
+            Rectangle {
+                id: leftMaterialPill
+                visible: root.isMaterial
+                anchors.centerIn: parent
+                implicitWidth: leftMaterialRow.implicitWidth 
+                implicitHeight: leftMaterialRow.implicitHeight
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colLayer0
+
+                RowLayout {
+                    id: leftMaterialRow
+                    anchors.centerIn: parent
+                    spacing: -6
+
+                    Repeater {
+                        model: Config.options.bar.layouts.leftLayout
+                        delegate: leftMaterialGroupDelegate
+                    }
+
+                    Component {
+                        id: leftMaterialGroupDelegate
+                        BarGroup {
+                            Layout.fillHeight: true
+                            currentIndex: index
+                            totalCount: Config.options.bar.layouts.leftLayout.length
+                            Loader {
+                                Layout.fillHeight: true
+                                source: root.getWidgetUrl(modelData)
+                                onLoaded: {
+                                    if (item && item.hasOwnProperty("mirrored"))
+                                        item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.leftLayout, index)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Non-material layout
             RowLayout {
                 id: leftRow
+                visible: !root.isMaterial
                 anchors.fill: parent
-                spacing: root.isMaterial ? 4 : Config.options.bar.borderless === "transparent" ? -7 : 2
+                spacing: Config.options.bar.borderless === "transparent" ? -7 : 2
 
                 Repeater {
                     model: Config.options.bar.layouts.leftLayout
-                    delegate: root.isMaterial ? leftNoGroupDelegate : leftBarGroupDelegate
+                    delegate: leftBarGroupDelegate
                 }
 
                 Component {
@@ -102,17 +143,58 @@ Item {
         Item {
             id: absoluteCenter
             anchors.centerIn: parent
-            width: middleRow.implicitWidth
+            width: root.isMaterial ? centerMaterialPill.implicitWidth : middleRow.implicitWidth
             height: parent.height
 
+            // Material pill wrapper
+            Rectangle {
+                id: centerMaterialPill
+                visible: root.isMaterial
+                anchors.centerIn: parent
+                implicitWidth: centerMaterialRow.implicitWidth 
+                implicitHeight: centerMaterialRow.implicitHeight 
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colLayer0
+
+                RowLayout {
+                    id: centerMaterialRow
+                    anchors.centerIn: parent
+                    spacing: -6
+
+                    Repeater {
+                        model: Config.options.bar.layouts.middleLayout
+                        delegate: middleMaterialGroupDelegate
+                    }
+
+                    Component {
+                        id: middleMaterialGroupDelegate
+                        BarGroup {
+                            Layout.fillHeight: true
+                            currentIndex: index
+                            totalCount: Config.options.bar.layouts.middleLayout.length
+                            Loader {
+                                Layout.fillHeight: true
+                                source: root.getWidgetUrl(modelData)
+                                onLoaded: {
+                                    if (item && item.hasOwnProperty("mirrored"))
+                                        item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.middleLayout, index)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Non-material layout
             RowLayout {
                 id: middleRow
+                visible: !root.isMaterial
                 anchors.fill: parent
-                spacing: root.isMaterial ? 4 : Config.options.bar.borderless === "transparent" ? -7 : 2
+                spacing: Config.options.bar.borderless === "transparent" ? -7 : 2
 
                 Repeater {
                     model: Config.options.bar.layouts.middleLayout
-                    delegate: root.isMaterial ? middleNoGroupDelegate : middleBarGroupDelegate
+                    delegate: middleBarGroupDelegate
                 }
 
                 Component {
@@ -150,19 +232,60 @@ Item {
         // Right
         Item {
             anchors.right: parent.right
-            anchors.rightMargin: Config.options.bar.cornerStyle === 1 ? 4 : 10
+            anchors.rightMargin: root.isMaterial ? (Config.options.hyprland.general.gapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : 10)
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: rightRow.implicitWidth
+            width: root.isMaterial ? rightMaterialPill.implicitWidth : rightRow.implicitWidth
 
+            // Material pill wrapper
+            Rectangle {
+                id: rightMaterialPill
+                visible: root.isMaterial
+                anchors.centerIn: parent
+                implicitWidth: rightMaterialRow.implicitWidth 
+                implicitHeight: rightMaterialRow.implicitHeight 
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colLayer0
+
+                RowLayout {
+                    id: rightMaterialRow
+                    anchors.centerIn: parent
+                    spacing: -6
+
+                    Repeater {
+                        model: Config.options.bar.layouts.rightLayout
+                        delegate: rightMaterialGroupDelegate
+                    }
+
+                    Component {
+                        id: rightMaterialGroupDelegate
+                        BarGroup {
+                            Layout.fillHeight: true
+                            currentIndex: index
+                            totalCount: Config.options.bar.layouts.rightLayout.length
+                            Loader {
+                                Layout.fillHeight: true
+                                source: root.getWidgetUrl(modelData)
+                                onLoaded: {
+                                    if (item && item.hasOwnProperty("mirrored"))
+                                        item.mirrored = root.getMirroredForIndex(Config.options.bar.layouts.rightLayout, index)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Non-material layout
             RowLayout {
                 id: rightRow
+                visible: !root.isMaterial
                 anchors.fill: parent
-                spacing: root.isMaterial ? 4 : Config.options.bar.borderless === "transparent" ? -7 : 2
+                spacing: Config.options.bar.borderless === "transparent" ? -7 : 2
 
                 Repeater {
                     model: Config.options.bar.layouts.rightLayout
-                    delegate: root.isMaterial ? rightNoGroupDelegate : rightBarGroupDelegate
+                    delegate: rightBarGroupDelegate
                 }
 
                 Component {
