@@ -180,7 +180,7 @@ ContentPage {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: contentRow.implicitHeight + 40
-                radius: Appearance.rounding.cardRounding
+                radius: Appearance.rounding.full
                 color: "transparent"
 
                 RowLayout {
@@ -223,7 +223,7 @@ ContentPage {
 
                                 StyledText {
                                     text: SystemInfo.distroName
-                                    font.pixelSize: Appearance.font.pixelSize.display
+                                    font.pixelSize: Appearance.font.pixelSize.small
                                     font.weight: Font.Bold
                                     color: Appearance.colors.colOnSurface
                                 }

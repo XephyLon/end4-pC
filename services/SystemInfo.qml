@@ -12,7 +12,7 @@ Singleton {
     id: root
     property string distroName: "Unknown"
     property string distroId: "unknown"
-    property string distroIcon: "linux-symbolic"
+    property string distroIcon: ""
     property string username: "user"
     property string homeUrl: ""
     property string documentationUrl: ""
@@ -73,7 +73,7 @@ Singleton {
                 case "kali": distroIcon = "debian-symbolic"; break;
                 case "funtoo":
                 case "gentoo": distroIcon = "gentoo-symbolic"; break;
-                default: distroIcon = "linux-symbolic"; break;
+                default: distroIcon = "arch-symbolic"; break;
             }
             if (textOsRelease.toLowerCase().includes("nyarch")) {
                 distroIcon = "nyarch-symbolic"

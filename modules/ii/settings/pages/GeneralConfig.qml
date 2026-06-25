@@ -414,12 +414,6 @@ ContentPage {
                         onValueChanged: {
                             Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset = value;
                         }
-                        MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.NoButton
-                        }
                     }
                 }
 
