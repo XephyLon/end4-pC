@@ -130,7 +130,7 @@ MouseArea {
             Rectangle {
                 color: Appearance.colors.colPrimaryContainer
                 radius: Appearance.rounding.full
-                implicitWidth: 36
+                implicitWidth: 38
                 implicitHeight: pillCol.implicitHeight + 12
 
                 ColumnLayout {
@@ -147,8 +147,8 @@ MouseArea {
                     }
 
                     Rectangle {
-                        width: 24
-                        height: 24
+                        width: 27
+                        height: 27
                         radius: Appearance.rounding.full
                         color: Appearance.colors.colPrimary
                         Layout.alignment: Qt.AlignHCenter
