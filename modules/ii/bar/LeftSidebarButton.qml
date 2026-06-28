@@ -8,6 +8,7 @@ import qs.modules.common.functions
 Item {
     id: root
     property bool showPing: false
+    property bool vertical: Config.options.bar.vertical
     property bool aiChatEnabled: Config.options.policies.ai !== 0
     property bool translatorEnabled: Config.options.sidebar.translator.enable
     property bool animeEnabled: Config.options.policies.weeb !== 0
@@ -108,8 +109,8 @@ Item {
             CustomIcon {
                 id: distroIcon
                 anchors.centerIn: parent
-                width: 22
-                height: 22
+                width: root.vertical ? 28 : 22
+                height: root.vertical ? 28 : 22
                 source: Config.options.custom.distroIcon
                 colorize: Config.options.custom.colorizeIcon
                 color: Appearance.colors.colPrimary
