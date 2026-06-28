@@ -64,8 +64,8 @@ Item {
         anchors.centerIn: parent
         color: Appearance.colors.colPrimaryContainer
         radius: Appearance.rounding.full
-        implicitWidth: root.vertical ? 36 : gridLayout.implicitWidth + 16
-        implicitHeight: root.vertical ? gridLayout.implicitHeight + 16 : 32
+        implicitWidth: root.vertical ? 36 : gridLayout.implicitWidth + 8
+        implicitHeight: root.vertical ? gridLayout.implicitHeight : 32
     }
 
     GridLayout {
