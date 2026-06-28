@@ -86,7 +86,7 @@ Item {
                 id: topMaterialPill
                 visible: root.isMaterial
                 anchors.centerIn: parent
-                implicitWidth: topMaterialCol.implicitWidth
+                implicitWidth: topMaterialCol.implicitWidth - 4
                 implicitHeight: topMaterialCol.implicitHeight
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0
@@ -160,7 +160,7 @@ Item {
                 id: centerMaterialPill
                 visible: root.isMaterial
                 anchors.centerIn: parent
-                implicitWidth: centerMaterialCol.implicitWidth
+                implicitWidth: centerMaterialCol.implicitWidth 
                 implicitHeight: centerMaterialCol.implicitHeight
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0
@@ -235,7 +235,7 @@ Item {
                 id: bottomMaterialPill
                 visible: root.isMaterial
                 anchors.centerIn: parent
-                implicitWidth: bottomMaterialCol.implicitWidth
+                implicitWidth: bottomMaterialCol.implicitWidth - 4
                 implicitHeight: bottomMaterialCol.implicitHeight
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0

@@ -52,7 +52,7 @@ Item {
         Component {
             id: colMaterial
             ColumnLayout {
-                spacing: -4
+                spacing: -6
                 property var timeParts: DateTime.time.split(/[: ]/)
                 property string hours: timeParts[0] ?? "00"
                 property string minutes: timeParts[1] ?? "00"
@@ -62,8 +62,8 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     color: Appearance.colors.colPrimary
                     radius: Appearance.rounding.full
-                    implicitWidth: 36
-                    implicitHeight: 30
+                    implicitWidth: 32
+                    implicitHeight: 32
                     StyledText {
                         anchors.centerIn: parent
                         font.pixelSize: Appearance.font.pixelSize.normal
@@ -73,20 +73,12 @@ Item {
                     }
                 }
 
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: ":"
-                    color: Appearance.colors.colPrimary
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    rotation: 90
-                }
-
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     color: Appearance.colors.colSecondaryContainer
                     radius: Appearance.rounding.full
-                    implicitWidth: 36
-                    implicitHeight: 30
+                    implicitWidth: 32
+                    implicitHeight: 32
                     StyledText {
                         anchors.centerIn: parent
                         font.pixelSize: Appearance.font.pixelSize.normal

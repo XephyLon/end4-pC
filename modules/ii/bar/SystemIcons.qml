@@ -31,7 +31,7 @@ Item {
         anchors.centerIn: parent
         color: Appearance.colors.colPrimary
         radius: Appearance.rounding.full
-        implicitWidth: root.vertical ? 36 : flow.implicitWidth + 16
+        implicitWidth: root.vertical ? 32 : flow.implicitWidth + 16
         implicitHeight: root.vertical ? flow.implicitHeight + 6 : 32
     }
 
