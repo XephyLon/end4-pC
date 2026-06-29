@@ -149,6 +149,13 @@ Singleton {
                 }
             }
 
+            property JsonObject profile: JsonObject {
+                property string avatarPath: ""
+                property string avatarPicture: ""
+                property string descriptionText: "::distro::"
+
+            }
+
             property JsonObject hyprland: JsonObject {
                 property JsonObject animations: JsonObject {
                     property string animation: "normal"

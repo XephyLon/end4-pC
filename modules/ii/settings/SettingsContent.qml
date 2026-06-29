@@ -7,6 +7,7 @@ import Qt5Compat.GraphicalEffects
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.ii.settings.pages
 import qs.modules.common.widgets
 import qs.modules.common.functions as CF
 
@@ -14,6 +15,7 @@ Item {
     id: root
     property real contentPadding: 8
     property int currentPage: 0
+    property bool showingProfile: false
 
     Connections {
         target: GlobalStates
@@ -28,6 +30,7 @@ Item {
             
             if (idx >= 0) {
                 root.currentPage = idx;
+                root.showingProfile = false;
                 
                 if (searchTerm !== "") {
                     let loader = pagesRepeater.itemAt(idx);
@@ -67,13 +70,13 @@ Item {
     ]
 
     Component.onCompleted: {
-        MaterialThemeLoader.reapplyTheme()
         Config.readWriteDelay = 0
         Qt.callLater(() => {
             for (let i = 0; i < root.pages.length; i++) {
                 let loader = pagesRepeater.itemAt(i)
                 if (loader) loader.active = true
             }
+            if (profileLoader) profileLoader.active = true
         })
     }
 
@@ -81,27 +84,6 @@ Item {
         anchors {
             fill: parent
             margins: contentPadding
-        }
-
-        Keys.onPressed: (event) => {
-            if (event.modifiers === Qt.ControlModifier) {
-                if (event.key === Qt.Key_PageDown) {
-                    root.currentPage = Math.min(root.currentPage + 1, root.pages.length - 1)
-                    event.accepted = true;
-                }
-                else if (event.key === Qt.Key_PageUp) {
-                    root.currentPage = Math.max(root.currentPage - 1, 0)
-                    event.accepted = true;
-                }
-                else if (event.key === Qt.Key_Tab) {
-                    root.currentPage = (root.currentPage + 1) % root.pages.length;
-                    event.accepted = true;
-                }
-                else if (event.key === Qt.Key_Backtab) {
-                    root.currentPage = (root.currentPage - 1 + root.pages.length) % root.pages.length;
-                    event.accepted = true;
-                }
-            }
         }
 
         RowLayout {
@@ -144,7 +126,9 @@ Item {
                             Image {
                                 id: avatarImage
                                 anchors.fill: parent
-                                source: "file:///home/" + (Quickshell.env("USER") ?? "user") + "/.face"
+                                source: Config.options.profile.avatarPath !== "" 
+                                    ? "file://" + Config.options.profile.avatarPicture 
+                                    : "file:///home/" + (Quickshell.env("USER") ?? "user") + "/.face"
                                 sourceSize.width: avatarImage.width * 2
                                 sourceSize.height: avatarImage.height * 2
                                 fillMode: Image.PreserveAspectCrop
@@ -184,18 +168,33 @@ Item {
 
                             StyledText {
                                 id: distroText
+                                property string cachedDistro: ""
                                 font.pixelSize: Appearance.font.pixelSize.smaller
                                 color: Appearance.colors.colSubtext
+                                elide: Text.ElideRight
+                                Layout.maximumWidth: 100
+
+                                text: {
+                                    const d = Config.options.profile.descriptionText
+                                    if (d === "::uptime::") return Translation.tr("Up • %1").arg(DateTime.uptime)
+                                    return cachedDistro
+                                }
 
                                 Process {
                                     id: distroProc
                                     command: ["bash", "-c", "source /etc/os-release && echo $PRETTY_NAME"]
                                     running: true
                                     stdout: SplitParser {
-                                        onRead: data => distroText.text = data.trim()
+                                        onRead: data => distroText.cachedDistro = data.trim()
                                     }
                                 }
                             }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.showingProfile = !root.showingProfile
                         }
                     }
 
@@ -241,13 +240,17 @@ Item {
                     NavigationRailTabArray {
                         currentIndex: root.currentPage
                         expanded: navRail.expanded
+                        colToggled: root.showingProfile ? "transparent" : Appearance.colors.colSecondaryContainer
                         Repeater {
                             model: root.pages
                             NavigationRailButton {
                                 required property var index
                                 required property var modelData
-                                toggled: root.currentPage === index
-                                onPressed: root.currentPage = index
+                                toggled: root.currentPage === index && !root.showingProfile
+                                onPressed: {
+                                    root.currentPage = index
+                                    root.showingProfile = false
+                                }
                                 expanded: navRail.expanded
                                 buttonIcon: modelData.icon
                                 buttonIconRotation: modelData.iconRotation || 0
@@ -267,6 +270,7 @@ Item {
 
                 Item {
                     anchors.fill: parent
+
                     Repeater {
                         id: pagesRepeater
                         model: root.pages
@@ -280,7 +284,7 @@ Item {
 
                             anchors.fill: parent
 
-                            property bool isActive: root.currentPage === index
+                            property bool isActive: root.currentPage === index && !root.showingProfile
                             opacity: isActive ? 1 : 0
                             enabled: isActive
                             visible: isActive
@@ -306,6 +310,34 @@ Item {
                             Behavior on anchors.topMargin {
                                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                             }
+                        }
+                    }
+
+                    Loader {
+                        id: profileLoader
+                        active: false
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("pages/Profile.qml")
+
+                        property bool isActive: root.showingProfile
+                        opacity: isActive ? 1 : 0
+                        enabled: isActive
+                        visible: isActive
+                        anchors.topMargin: isActive ? 0 : 12
+
+                        onIsActiveChanged: {
+                            if (isActive && item) {
+                                GlobalStates.currentPageInstance = item;
+                            } else if (!isActive && GlobalStates.currentPageInstance === item) {
+                                GlobalStates.currentPageInstance = null;
+                            }
+                        }
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                        }
+                        Behavior on anchors.topMargin {
+                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                         }
                     }
                 }

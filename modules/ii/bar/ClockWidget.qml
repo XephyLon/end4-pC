@@ -46,6 +46,14 @@ Item {
                         text: modelData.padStart(2, "0")
                     }
                 }
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: 5
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    color: Appearance.colors.colOnLayer1
+                    opacity: 0.8
+                    text: DateTime.shortDate
+                }
             }
         }
 
@@ -75,7 +83,7 @@ Item {
 
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
-                    color: Appearance.colors.colSecondaryContainer
+                    color: Appearance.colors.colPrimaryContainer
                     radius: Appearance.rounding.full
                     implicitWidth: 32
                     implicitHeight: 32
@@ -84,6 +92,21 @@ Item {
                         font.pixelSize: Appearance.font.pixelSize.normal
                         color: Appearance.colors.colPrimary
                         text: parent.parent.minutes.padStart(2, "0")
+                        font.features: { "tnum": 1 }
+                    }
+                }
+
+                Rectangle {
+                    Layout.alignment: Qt.AlignHCenter
+                    color: Appearance.colors.colSecondaryContainer
+                    radius: Appearance.rounding.full
+                    implicitWidth: 32
+                    implicitHeight: 18
+                    StyledText {
+                        anchors.centerIn: parent
+                        font.pixelSize: Appearance.font.pixelSize.smallest - 1
+                        color: Appearance.colors.colPrimary
+                        text: DateTime.shortDate
                         font.features: { "tnum": 1 }
                     }
                 }
