@@ -34,7 +34,7 @@ Item {
                     font.weight: Font.DemiBold
                     fill: 1
                     text: root.iconName
-                    iconSize: vertical ? 13 : Appearance.font.pixelSize.normal
+                    iconSize: Appearance.font.pixelSize.normal
                     color: Appearance.colors.colOnSecondaryContainer
                 }
             }
