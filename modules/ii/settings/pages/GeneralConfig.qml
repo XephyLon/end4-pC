@@ -121,8 +121,7 @@ ContentPage {
                     }
                 }
                 ConfigRow {
-                    uniform: false
-                    Layout.fillWidth: false
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "pause"
                         text: Translation.tr("Automatic suspend")
