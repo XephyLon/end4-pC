@@ -68,8 +68,6 @@ ContentPage {
         Qt.callLater(() => GlobalStates.settingsOpen = false)
     }
 
-    Component.onCompleted: refresh()
-
     Process {
         id: desktopProcess
         command: ["bash", "-c", "if [ -n \"$HYPRLAND_INSTANCE_SIGNATURE\" ]; then echo 'Hyprland'; elif pgrep -x hyprland >/dev/null; then echo 'Hyprland'; else echo \"${XDG_CURRENT_DESKTOP:-Unknown}\"; fi"]
