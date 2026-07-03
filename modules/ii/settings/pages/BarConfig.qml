@@ -52,7 +52,7 @@ ContentPage {
         { id: "docktoPanel",       name: Translation.tr("Dock to Panel"),        icon: "apps" },
         { id: "visualizer",        name: Translation.tr("Visualizer"),           icon: "graphic_eq" },
         { id: "hyprlandXkbIndicator",   name: Translation.tr("Keyboard Layout"), icon: "keyboard" },
-        { id: "divisor",            name: Translation.tr("Divisor"),             icon: "horizontal_distribute" },
+        { id: "divisor",            name: Translation.tr("Divider"),             icon: "horizontal_distribute" },
     ]
 
     function availableFor() {
