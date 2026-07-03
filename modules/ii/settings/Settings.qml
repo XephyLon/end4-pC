@@ -76,7 +76,7 @@ Scope {
             id: settingsWindow
             anchors.centerIn: parent
             width: Math.min(parent.width - 80, 980)
-            height: Math.min(parent.height - 80, 660)
+            height: Math.min(parent.height - 80, 665)
             color: Appearance.colors.colLayer0
             border.width: 1
             border.color: Appearance.colors.colLayer0Border
