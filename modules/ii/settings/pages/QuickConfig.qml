@@ -247,7 +247,7 @@ ContentPage {
                                 color: Appearance.colors.colPrimary
                             }
                             StyledText {
-                                text: Translation.tr("Bar Position")
+                                text: Translation.tr("Bar position")
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 color: Appearance.colors.colOnLayer1
                                 font.weight: Font.Medium
@@ -298,7 +298,7 @@ ContentPage {
                                 color: Appearance.colors.colPrimary
                             }
                             StyledText {
-                                text: Translation.tr("Bar Style")
+                                text: Translation.tr("Bar style")
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 color: Appearance.colors.colOnLayer1
                                 font.weight: Font.Medium
