@@ -262,11 +262,25 @@ Singleton {
                         property real y: 100
                     }
 
+                    property JsonObject calendar: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
+                        property real x: 400
+                        property real y: 100
+                    }
+
                     property JsonObject images: JsonObject {
                         property bool enable: false
                         property string placementStrategy: "free"
                         property real x: 400
                         property real y: 100
+                    }
+
+                    property JsonObject visualizer: JsonObject {
+                        property bool enable: true
+                        property string placementStrategy: "free"
+                        property real x: 0
+                        property real y: 0
                     }
 
                     property JsonObject customImage: JsonObject {

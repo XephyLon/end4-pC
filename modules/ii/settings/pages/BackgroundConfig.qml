@@ -663,13 +663,11 @@ ContentPage {
             icon: "widgets"
             shape: MaterialShape.Shape.Pill
             title: Translation.tr("Widgets")
-
             GridLayout {
                 Layout.fillWidth: true
                 columns: 2
                 rowSpacing: 8
                 columnSpacing: 8
-
                 Repeater {
                     model: [
                         {
@@ -692,8 +690,17 @@ ContentPage {
                             name: Translation.tr("Resources"),
                             enabled: Config.options.background.widgets.resources.enable
                         },
+                        {
+                            icon: "graphic_eq",
+                            name: Translation.tr("Visualizer"),
+                            enabled: Config.options.background.widgets.visualizer.enable
+                        },
+                        {
+                            icon: "calendar_month",
+                            name: Translation.tr("Calendar"),
+                            enabled: Config.options.background.widgets.calendar.enable
+                        },
                     ]
-
                     delegate: Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 105
@@ -701,7 +708,6 @@ ContentPage {
                         color: Appearance.colors.colLayer1
                         border.width: 1
                         border.color: Appearance.colors.colLayer0Border
-
                         ColumnLayout {
                             anchors {
                                 top: parent.top
@@ -710,18 +716,14 @@ ContentPage {
                                 margins: 12
                             }
                             spacing: 0
-
                             RowLayout {
                                 Layout.fillWidth: true
-
                                 MaterialSymbol {
                                     text: modelData.icon
                                     iconSize: Appearance.font.pixelSize.normal + 5
                                     color: Appearance.colors.colPrimary
                                 }
-
                                 Item { Layout.fillWidth: true }
-
                                 ConfigSwitch {
                                     Layout.fillWidth: false
                                     checked: modelData.enabled
@@ -734,16 +736,18 @@ ContentPage {
                                             Config.options.background.widgets.media.enable = checked
                                         else if (modelData.icon === "memory")
                                             Config.options.background.widgets.resources.enable = checked
+                                        else if (modelData.icon === "graphic_eq")
+                                            Config.options.background.widgets.visualizer.enable = checked
+                                        else if (modelData.icon === "calendar_month")
+                                            Config.options.background.widgets.calendar.enable = checked
                                     }
                                 }
                             }
-
                             StyledText {
                                 text: modelData.name
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 color: Appearance.colors.colOnLayer1
                             }
-
                             StyledText {
                                 text: modelData.enabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
                                 font.pixelSize: Appearance.font.pixelSize.small

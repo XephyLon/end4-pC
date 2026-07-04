@@ -20,6 +20,8 @@ import qs.modules.ii.background.widgets.weather
 import qs.modules.ii.background.widgets.media
 import qs.modules.ii.background.widgets.images
 import qs.modules.ii.background.widgets.resources
+import qs.modules.ii.background.widgets.visualizer
+import qs.modules.ii.background.widgets.calendar
 
 Variants {
     id: root
@@ -308,6 +310,26 @@ Variants {
                         scaledScreenWidth:  bgRoot.screen.width
                         scaledScreenHeight: bgRoot.screen.height
                         wallpaperScale:     1
+                    }
+                }
+                FadeLoader {
+                    shown: Config.options.background.widgets.visualizer.enable
+                    sourceComponent: VisualizerWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                    }
+                }
+                FadeLoader {
+                    shown: Config.options.background.widgets.calendar.enable
+                    sourceComponent: CalendarWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
                     }
                 }
             }
