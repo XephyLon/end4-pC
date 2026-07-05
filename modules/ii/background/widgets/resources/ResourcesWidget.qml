@@ -1,168 +1,107 @@
-import Quickshell
 import QtQuick
 import QtQuick.Layouts
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.common.widgets.widgetCanvas
 import qs.modules.ii.background.widgets
 
 AbstractBackgroundWidget {
     id: root
-
     configEntryName: "resources"
 
-    property real pillHeight:  54
-    property real pillPadding: 14
-    property real pillRadius:  Appearance.rounding?.verylarge ?? 30
-    property real iconSize:    20
-    property real valueRadius: Appearance.rounding?.large ?? 16
+    property real widgetWidth: 420
+    property real cardSpacing: 12
+    property real cardHeight: 120
+    property real cardWidth: (widgetWidth - cardSpacing * 2) / 3
 
-    property real cpuTextWidth:  38   
-    property real tempTextWidth: 44   
-    property real ramTextWidth:  52   
+    property bool hasBattery: Battery.available
 
-    implicitWidth:  row.implicitWidth
+    implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
-    function pct(v)  { return Math.round(v * 100) + "%" }
-    function temp(v) { return (v > 0 ? v.toFixed(0) : "--") + "°C" }
-    function memGb(kb) {
-        const gb = kb / (1024 * 1024)
-        return gb >= 10 ? gb.toFixed(0) : gb.toFixed(1)
+    component StatCard: Rectangle {
+    id: statCard
+    property string icon: ""
+    property string value: ""
+    property string label: ""
+    property int shape: MaterialShape.Shape.Cookie12Sided
+
+    implicitWidth: root.cardWidth
+    implicitHeight: root.cardHeight
+    radius: Appearance.rounding?.verylarge ?? 30
+    color: Appearance.colors.colPrimaryContainer
+
+    StyledRectangularShadow {
+        target: statCard
+        z: -2
     }
+
+    ColumnLayout {
+        anchors {
+            fill: parent
+            margins: 14
+        }
+        spacing: 2
+
+        MaterialShapeWrappedMaterialSymbol {
+            Layout.alignment: Qt.AlignRight
+            shape: statCard.shape
+            color: Appearance.colors.colPrimary
+            colSymbol: Appearance.colors.colOnPrimary
+            text: statCard.icon
+            iconSize: 18
+            fill: 1
+            padding: 6
+            implicitWidth: 34
+            implicitHeight: 34
+        }
+
+        Item { Layout.fillHeight: true }
+
+        StyledText {
+            text: statCard.value
+            font.pixelSize: Appearance.font.pixelSize.hugeass
+            font.weight: Font.Bold
+            color: Appearance.colors.colOnPrimaryContainer
+        }
+
+        StyledText {
+            text: statCard.label
+            font.pixelSize: Appearance.font.pixelSize.small
+            color: Appearance.colors.colOnPrimaryContainer
+            opacity: 0.6
+        }
+    }
+}
 
     RowLayout {
-        id: row
-        spacing: 16
+    id: row
+    spacing: root.cardSpacing
 
-        // ── CPU pill ─────────────────────────────────────────────
-        Rectangle {
-            id: cpuCard
-            implicitHeight: root.pillHeight
-            implicitWidth:  cpuRow.implicitWidth + root.pillPadding * 2
-            radius:         root.pillRadius
-            color:          Appearance.colors.colPrimaryContainer
-
-            StyledRectangularShadow { target: cpuCard; z: -1 }
-
-            RowLayout {
-                id: cpuRow
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: root.pillPadding
-                spacing: 10
-
-                MaterialSymbol {
-                    text: "planner_review"
-                    iconSize: root.iconSize
-                    fill: 1
-                    color: Appearance.colors.colOnPrimaryContainer
-                }
-
-                Rectangle {
-                    width:          root.cpuTextWidth + root.tempTextWidth + 36 + 20
-                    implicitHeight: root.pillHeight - 16
-                    radius:         root.valueRadius
-                    color:          Appearance.colors.colPrimary
-
-                    RowLayout {
-                        id: cpuInner
-                        anchors.centerIn: parent
-                        spacing: 6
-
-                        StyledText {
-                            width:          root.cpuTextWidth
-                            horizontalAlignment: Text.AlignHCenter
-                            text:           pct(ResourceUsage.cpuUsage)
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight:    Font.SemiBold
-                            color:          Appearance.colors.colOnPrimary
-                        }
-
-                        StyledText {
-                            text:    "/"
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            color:   Appearance.colors.colOnPrimary
-                            opacity: 0.5
-                        }
-
-                        StyledText {
-                            width:          root.tempTextWidth
-                            horizontalAlignment: Text.AlignHCenter
-                            text:           temp(ResourceUsage.cpuTemp)
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight:    Font.SemiBold
-                            color:          Appearance.colors.colOnPrimary
-                        }
-                    }
-                }
-            }
-        }
-
-        // ── RAM pill ─────────────────────────────────────────────
-        Rectangle {
-            id: ramCard
-            implicitHeight: root.pillHeight
-            implicitWidth:  ramRow.implicitWidth + root.pillPadding * 2
-            radius:         root.pillRadius
-            color:          Appearance.colors.colPrimaryContainer
-
-            StyledRectangularShadow { target: ramCard; z: -1 }
-
-            RowLayout {
-                id: ramRow
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: root.pillPadding
-                spacing: 10
-
-                MaterialSymbol {
-                    text: "memory"
-                    iconSize: root.iconSize
-                    fill: 1
-                    color: Appearance.colors.colOnPrimaryContainer
-                }
-
-                Rectangle {
-                    width:          root.ramTextWidth * 2 + 36 + 20
-                    implicitHeight: root.pillHeight - 16
-                    radius:         root.valueRadius
-                    color:          Appearance.colors.colPrimary
-
-                    RowLayout {
-                        id: ramInner
-                        anchors.centerIn: parent
-                        spacing: 6
-
-                        StyledText {
-                            width:          root.ramTextWidth
-                            horizontalAlignment: Text.AlignHCenter
-                            text:           memGb(ResourceUsage.memoryUsed) + " GB"
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight:    Font.SemiBold
-                            color:          Appearance.colors.colOnPrimary
-                        }
-
-                        StyledText {
-                            text:    "/"
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            color:   Appearance.colors.colOnPrimary
-                            opacity: 0.5
-                        }
-
-                        StyledText {
-                            width:          root.ramTextWidth
-                            horizontalAlignment: Text.AlignHCenter
-                            text:           memGb(ResourceUsage.memoryTotal) + " GB"
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight:    Font.SemiBold
-                            color:          Appearance.colors.colOnPrimary
-                        }
-                    }
-                }
-            }
-        }
+    StatCard {
+        icon: "planner_review"
+        value: Math.round(ResourceUsage.cpuUsage * 100) + "%"
+        label: "CPU"
+        shape: MaterialShape.Shape.Gem
     }
+
+    StatCard {
+        icon: "memory"
+        value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%"
+        label: "RAM"
+        shape: MaterialShape.Shape.Cookie4Sided
+    }
+
+    StatCard {
+        icon: root.hasBattery ? "battery_full" : "storage"
+        value: root.hasBattery
+            ? Math.round(Battery.percentage * 100) + "%"
+            : Math.round(ResourceUsage.diskUsedPercentage * 100) + "%"
+        label: root.hasBattery ? "Battery" : "Disk"
+        shape: MaterialShape.Shape.Cookie12Sided
+    }
+}
 }

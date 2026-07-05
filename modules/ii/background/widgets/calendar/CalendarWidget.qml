@@ -65,14 +65,14 @@ AbstractBackgroundWidget {
         anchors.fill: parent
         color: Appearance.colors.colPrimaryContainer
         radius: Appearance.rounding.normal
-        implicitWidth: calendarColumn.implicitWidth + 24
-        implicitHeight: calendarColumn.implicitHeight + 24
+        implicitWidth: calendarColumn.implicitWidth + 40
+        implicitHeight: calendarColumn.implicitHeight + 40
 
         ColumnLayout {
             id: calendarColumn
             anchors {
                 fill: parent
-                margins: 12
+                margins: 20
             }
             spacing: 8
 
@@ -143,8 +143,8 @@ AbstractBackgroundWidget {
             Rectangle {
                 color: Appearance.colors.colLayer0
                 radius: Appearance.rounding.normal
-                implicitWidth: weeksColumn.implicitWidth + 12
-                implicitHeight: weeksColumn.implicitHeight + 12
+                implicitWidth: weeksColumn.implicitWidth + 17
+                implicitHeight: weeksColumn.implicitHeight + 17
 
                 ColumnLayout {
                     id: weeksColumn
