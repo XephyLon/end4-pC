@@ -1,8 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import Quickshell.Hyprland
+
 
 ContentPage {
     id: page
@@ -663,6 +666,18 @@ ContentPage {
             icon: "widgets"
             shape: MaterialShape.Shape.Pill
             title: Translation.tr("Widgets")
+
+            ContentSubsection {
+                title: Translation.tr("Show widgets on")
+                visible: Hyprland.monitors.values.length > 1
+                Layout.bottomMargin: 10
+
+                WidgetsMonitorSelector {
+                    configEntry: Config.options.background
+                }
+            }
+
+            
             GridLayout {
                 Layout.fillWidth: true
                 columns: 2

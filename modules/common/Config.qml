@@ -323,6 +323,7 @@ Singleton {
                         property real y: 500
                     }
                 }
+                property list<string> screenList: [] 
                 property string wallpaperPath: ""
                 property string wallpaperAnimation: "magic"
                 property string thumbnailPath: ""
