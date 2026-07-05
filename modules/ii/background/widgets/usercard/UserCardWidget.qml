@@ -20,6 +20,8 @@ AbstractBackgroundWidget {
     property int blurMargin: 18   
     property int avatarSize: 64
     property string hostname: Quickshell.env("HOSTNAME") ?? "host"
+    property string username: Quickshell.env("USER") ?? "user"
+    property string userDisplay: username.length > 10 ? username : (username + "@" + hostname)
     property var currentQuip: weatherQuip()
     
 
@@ -267,7 +269,7 @@ AbstractBackgroundWidget {
             
 
             StyledText {
-                text: (Quickshell.env("USER") ?? "user") + "@" + hostname
+                text: root.userDisplay
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.DemiBold
                 color: Appearance.colors.colOnLayer1
