@@ -152,7 +152,7 @@ ContentPage {
             AboutCard {
                 icon: "monitor"
                 label: "GPU"
-                value: SystemInfo.gpu || "sudo pacman -S mesa-utils"
+                value: SystemInfo.gpu || "N/A"
                 iconColor: Appearance.colors.colPrimary
                 iconShape: MaterialShape.Shape.ClamShell
                 Layout.fillWidth: true

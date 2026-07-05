@@ -139,17 +139,20 @@ Singleton {
         id: getGpu
         running: false
         command: ["bash", "-c", `
-            glxinfo | grep 'renderer string' | grep -o 'Intel(R) HD Graphics [0-9]\\{4\\}' | sed 's/Intel(R)/Intel®/' \\
-            || lspci | grep -iE 'vga|3d|display' | head -1 | sed -E '
-                s/.*: //;
-                s/\\(rev [0-9a-f]+\\)//;
-                s/Advanced Micro Devices, Inc\\. \\[AMD\\/ATI\\]//;
-                s/NVIDIA Corporation//;
-                s/Intel Corporation//;
-                s/.*\\[([^]]+)\\]$/\\1/;
-                s/^ *//;
-                s/ *$//
-            '
+            gpu=$(glxinfo 2>/dev/null | grep 'renderer string' | grep -o 'Intel(R) HD Graphics [0-9]\\{4\\}' | sed 's/Intel(R)/Intel®/')
+            if [ -z "$gpu" ]; then
+                gpu=$(lspci | grep -iE 'vga|3d|display' | head -1 | sed -E '
+                    s/.*: //;
+                    s/\\(rev [0-9a-f]+\\)//;
+                    s/Advanced Micro Devices, Inc\\. \\[AMD\\/ATI\\]//;
+                    s/NVIDIA Corporation//;
+                    s/Intel Corporation//;
+                    s/.*\\[([^]]+)\\]$/\\1/;
+                    s/^ *//;
+                    s/ *$//
+                ')
+            fi
+            echo "$gpu"
         `]
         stdout: SplitParser { onRead: data => root.gpu = data.trim() }
     }
