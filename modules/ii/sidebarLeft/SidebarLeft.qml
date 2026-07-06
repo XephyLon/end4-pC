@@ -14,6 +14,7 @@ Scope { // Scope
     property bool pin: false
     property Component contentComponent: SidebarLeftContent {}
     property Item sidebarContent
+    readonly property bool centerOnly: Config.options.bar.layouts.leftLayout.length === 0 && Config.options.bar.layouts.rightLayout.length === 0 && !Config.options.bar.vertical
 
     function toggleDetach() {
         root.detach = !root.detach;
@@ -108,6 +109,19 @@ Scope { // Scope
                 top: true
                 left: true
                 bottom: true
+            }
+
+            margins {
+                top: {
+                    if (!centerOnly) return 0;
+                    switch (Config.options.bar.cornerStyle) {
+                        case 0: return -Appearance.sizes.barHeight;
+                        case 1: return -Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut;
+                        case 2: return -Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut;
+                        case 3: return -Appearance.sizes.barHeight - Appearance.sizes.hyprlandGapsOut;
+                        default: return 0;
+                    }
+                }
             }
 
             mask: Region {
