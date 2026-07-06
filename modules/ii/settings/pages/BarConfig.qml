@@ -413,7 +413,7 @@ ContentPage {
                 }
 
                 GroupedList {
-                    Layout.topMargin: -55
+                    Layout.topMargin: -57 // fixme later
                     ConfigSwitch {
                         buttonIcon: "storage"
                         text: Translation.tr("Disk")
