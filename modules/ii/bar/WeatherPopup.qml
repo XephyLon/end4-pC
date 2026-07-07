@@ -22,7 +22,7 @@ StyledPopup {
             spacing: 7
 
             MaterialShapeWrappedMaterialSymbol {
-                shape: MaterialShape.Shape.Circle
+                shape: MaterialShape.Shape.Sunny
                 text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                 iconSize: Appearance.font.pixelSize.large
                 implicitSize: 36
