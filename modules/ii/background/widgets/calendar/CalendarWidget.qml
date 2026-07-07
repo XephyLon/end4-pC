@@ -88,10 +88,13 @@ AbstractBackgroundWidget {
                     text: root.viewingDate.toLocaleDateString(Qt.locale(), "MMMM yyyy")
                 }
 
-                MaterialShape {
-                    shape: MaterialShape.Shape.Circle
+                Rectangle {
+                    border.width: 1
+                    border.color: Appearance.colors.colPrimary
                     color: "transparent"
-                    implicitSize: 26
+                    implicitWidth: 26
+                    implicitHeight: 26
+                    radius: Appearance.rounding.full
                     MaterialSymbol {
                         iconSize: Appearance.font.pixelSize.normal
                         text: "chevron_left"
@@ -105,10 +108,13 @@ AbstractBackgroundWidget {
                     }
                 }
 
-                MaterialShape {
-                    shape: MaterialShape.Shape.Circle
+                Rectangle {
+                    border.width: 1
+                    border.color: Appearance.colors.colPrimary
                     color: "transparent"
-                    implicitSize: 26
+                    implicitWidth: 26
+                    implicitHeight: 26
+                    radius: Appearance.rounding.full
                     MaterialSymbol {
                         iconSize: Appearance.font.pixelSize.normal
                         text: "chevron_right"
