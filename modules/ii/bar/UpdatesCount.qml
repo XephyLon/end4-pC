@@ -8,14 +8,9 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 
-MouseArea {
+BarWidgetSwitcherArea {
     id: root
-    property bool vertical: false
     property bool borderless: Config.options.bar.borderless
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
-
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? (rowLoader.item?.implicitWidth ?? 0) : (rowLoader.item?.implicitWidth ?? 0) + 12)
-    implicitHeight: vertical ? (colLoader.item?.implicitHeight ?? 0) : Appearance.sizes.barHeight
 
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -78,7 +73,7 @@ MouseArea {
             leftPadding: 5
             rightPadding: 3
             font.pixelSize: Appearance.font.pixelSize.small
-            color: isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+            color: root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
             text: Updates.count
         }
     }
@@ -90,7 +85,7 @@ MouseArea {
             rightPadding: 3
             text: "progress_activity"
             iconSize: Appearance.font.pixelSize.normal
-            color: isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+            color: root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
             RotationAnimation on rotation {
                 from: 0; to: 360
                 duration: 1000
@@ -100,134 +95,96 @@ MouseArea {
         }
     }
 
-    // Horizontal
-    Loader {
-        id: rowLoader
-        active: !root.vertical
-        visible: active
-        anchors.centerIn: parent
-        sourceComponent: root.isMaterial ? rowMaterial : rowDefault
-
-        Component {
-            id: rowDefault
-            RowLayout {
-                spacing: 4
-                MaterialSymbol {
-                    Layout.alignment: Qt.AlignVCenter
-                    text: "deployed_code_update"
-                    iconSize: Appearance.font.pixelSize.normal
-                    color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
-                        : Updates.updateAdvised ? Appearance.colors.colTertiary
-                        : Appearance.colors.colOnLayer1
-                }
-                Loader {
-                    Layout.alignment: Qt.AlignVCenter
-                    sourceComponent: Updates.checking ? spinnerComp : textComp
-                }
+    rowDefault: Component {
+        RowLayout {
+            spacing: 4
+            MaterialSymbol {
+                Layout.alignment: Qt.AlignVCenter
+                text: "deployed_code_update"
+                iconSize: Appearance.font.pixelSize.normal
+                color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
+                    : Updates.updateAdvised ? Appearance.colors.colTertiary
+                    : Appearance.colors.colOnLayer1
             }
-        }
-
-        Component {
-            id: rowMaterial
-            Rectangle {
-                color: Appearance.colors.colPrimaryContainer
-                radius: Appearance.rounding.full
-                implicitHeight: 32
-                implicitWidth: pillRow.implicitWidth + 8
-
-                RowLayout {
-                    id: pillRow
-                    anchors.centerIn: parent
-                    spacing: 3
-
-                    Rectangle {
-                        width: 24
-                        height: 24
-                        radius: Appearance.rounding.full
-                        color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
-                            : Updates.updateAdvised ? Appearance.colors.colTertiary
-                            : Appearance.colors.colPrimary
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: "deployed_code_update"
-                            iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPrimary
-                        }
-                    }
-
-                    Loader {
-                        Layout.alignment: Qt.AlignVCenter
-                        sourceComponent: Updates.checking ? spinnerComp : textComp
-                    }
-                }
+            Loader {
+                Layout.alignment: Qt.AlignVCenter
+                sourceComponent: Updates.checking ? spinnerComp : textComp
             }
         }
     }
 
-    // Vertical
-    Loader {
-        id: colLoader
-        active: root.vertical
-        visible: active
-        anchors.centerIn: parent
-        sourceComponent: root.isMaterial ? colMaterial : colDefault
+    rowMaterial: Component {
+        MaterialPill {
+            vertical: false
+            mainAxisPadding: 8
 
-        Component {
-            id: colDefault
-            ColumnLayout {
-                spacing: 4
+            Rectangle {
+                width: 24
+                height: 24
+                radius: Appearance.rounding.full
+                color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
+                    : Updates.updateAdvised ? Appearance.colors.colTertiary
+                    : Appearance.colors.colPrimary
+
                 MaterialSymbol {
-                    Layout.alignment: Qt.AlignHCenter
+                    anchors.centerIn: parent
                     text: "deployed_code_update"
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
-                        : Updates.updateAdvised ? Appearance.colors.colTertiary
-                        : Appearance.colors.colOnLayer1
-                }
-                Loader {
-                    Layout.alignment: Qt.AlignHCenter
-                    sourceComponent: Updates.checking ? spinnerComp : textComp
+                    color: Appearance.colors.colOnPrimary
                 }
             }
+
+            Loader {
+                Layout.alignment: Qt.AlignVCenter
+                sourceComponent: Updates.checking ? spinnerComp : textComp
+            }
         }
+    }
 
-        Component {
-            id: colMaterial
+    colDefault: Component {
+        ColumnLayout {
+            spacing: 4
+            MaterialSymbol {
+                Layout.alignment: Qt.AlignHCenter
+                text: "deployed_code_update"
+                iconSize: Appearance.font.pixelSize.normal
+                color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
+                    : Updates.updateAdvised ? Appearance.colors.colTertiary
+                    : Appearance.colors.colOnLayer1
+            }
+            Loader {
+                Layout.alignment: Qt.AlignHCenter
+                sourceComponent: Updates.checking ? spinnerComp : textComp
+            }
+        }
+    }
+
+    colMaterial: Component {
+        MaterialPill {
+            vertical: true
+            mainAxisPadding: 8
+
             Rectangle {
-                color: Appearance.colors.colPrimaryContainer
+                width: 24
+                height: 24
                 radius: Appearance.rounding.full
-                implicitWidth: 32
-                implicitHeight: pillCol.implicitHeight + 8
+                color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
+                    : Updates.updateAdvised ? Appearance.colors.colTertiary
+                    : Appearance.colors.colPrimary
+                Layout.alignment: Qt.AlignHCenter
 
-                ColumnLayout {
-                    id: pillCol
+                MaterialSymbol {
                     anchors.centerIn: parent
-                    spacing: 3
-
-                    Rectangle {
-                        width: 24
-                        height: 24
-                        radius: Appearance.rounding.full
-                        color: Updates.updateStronglyAdvised ? Appearance.m3colors.m3error
-                            : Updates.updateAdvised ? Appearance.colors.colTertiary
-                            : Appearance.colors.colPrimary
-                        Layout.alignment: Qt.AlignHCenter
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: "deployed_code_update"
-                            iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPrimary
-                        }
-                    }
-
-                    Loader {
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: 3
-                        sourceComponent: Updates.checking ? spinnerComp : textComp
-                    }
+                    text: "deployed_code_update"
+                    iconSize: Appearance.font.pixelSize.normal
+                    color: Appearance.colors.colOnPrimary
                 }
+            }
+
+            Loader {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 3
+                sourceComponent: Updates.checking ? spinnerComp : textComp
             }
         }
     }

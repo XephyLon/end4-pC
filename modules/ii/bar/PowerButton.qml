@@ -4,63 +4,40 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 
-Item {
+RippleButton {
     id: root
     property bool isMaterial: Config.options.bar.cornerStyle === 3
     property bool vertical: Config.options.bar.vertical
+    property real buttonPadding: 5
 
-    implicitWidth: loader.implicitWidth
-    implicitHeight: loader.implicitHeight
+    implicitWidth: isMaterial ? 32 : (Config.options.bar.cornerStyle === 2 ? 27 : 27 + buttonPadding)
+    implicitHeight: implicitWidth
 
-    Loader {
-        id: loader
-        anchors.fill: parent
-        sourceComponent: isMaterial ? materialStyle : defaultStyle
+    buttonRadius: Appearance.rounding.full
+    colBackground: isMaterial ? Appearance.colors.colPrimary : "transparent"
+    colBackgroundHover: isMaterial ? Appearance.colors.colPrimaryHover : Appearance.colors.colLayer1Hover
+    colRipple: isMaterial ? Appearance.colors.colPrimaryActive : Appearance.colors.colLayer1Active
+
+    onPressed: {
+        GlobalStates.sessionOpen = !GlobalStates.sessionOpen
     }
 
-    Component {
-        id: defaultStyle
-        RippleButton {
-            property real buttonPadding: 5
-            implicitWidth: Config.options.bar.cornerStyle === 2 ? 27 : 27 + buttonPadding
-            implicitHeight: Config.options.bar.cornerStyle === 2 ? 27 : 27 + buttonPadding
-            buttonRadius: Appearance.rounding.full
-            colBackgroundHover: Appearance.colors.colLayer1Hover
-            colRipple: Appearance.colors.colLayer1Active
-            onPressed: {
-                GlobalStates.sessionOpen = !GlobalStates.sessionOpen
-            }
-            MaterialSymbol {
-                anchors.centerIn: parent
-                text: "power_settings_new"
-                iconSize: Appearance.font.pixelSize.larger
-                color: Appearance.colors.colOnLayer0
-            }
-        }
+    MaterialSymbol {
+        anchors.centerIn: parent
+        visible: !root.isMaterial
+        text: "power_settings_new"
+        iconSize: Appearance.font.pixelSize.larger
+        color: Appearance.colors.colOnLayer0
     }
 
-    Component {
-        id: materialStyle
-        RippleButton {
-            implicitWidth: 32
-            implicitHeight: 32
-            buttonRadius: Appearance.rounding.full
-            colBackground: Appearance.colors.colPrimary
-            colBackgroundHover: Appearance.colors.colPrimaryHover
-            colRipple: Appearance.colors.colPrimaryActive
-            onPressed: {
-                GlobalStates.sessionOpen = !GlobalStates.sessionOpen
-            }
-
-            MaterialShapeWrappedMaterialSymbol {
-                anchors.centerIn: parent
-                text: "power_settings_new"
-                iconSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnPrimary
-                colSymbol: Appearance.colors.colPrimary
-                wrappedShape: MaterialShape.Shape.Cookie12Sided
-                padding: 2
-            }
-        }
+    MaterialShapeWrappedMaterialSymbol {
+        anchors.centerIn: parent
+        visible: root.isMaterial
+        text: "power_settings_new"
+        iconSize: Appearance.font.pixelSize.normal
+        color: Appearance.colors.colOnPrimary
+        colSymbol: Appearance.colors.colPrimary
+        wrappedShape: MaterialShape.Shape.Cookie12Sided
+        padding: 2
     }
 }

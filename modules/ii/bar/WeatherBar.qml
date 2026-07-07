@@ -6,14 +6,10 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-MouseArea {
+BarWidgetSwitcherArea {
     id: root
     property bool hovered: false
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
 
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : root.isMaterial ? (rowLoader.item?.implicitWidth ?? 0) : (rowLoader.item?.implicitWidth ?? 0) + 6
-    implicitHeight: vertical ? (colLoader.item?.implicitHeight - 1 ?? 0) : Appearance.sizes.barHeight
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 
@@ -29,138 +25,98 @@ MouseArea {
         }
     }
 
-    // Horizontal layout
-    Loader {
-        id: rowLoader
-        active: !root.vertical
-        visible: active
-        anchors.centerIn: parent
-        sourceComponent: root.isMaterial ? rowMaterial : rowDefault
-
-        Component {
-            id: rowDefault
-            RowLayout {
-                MaterialSymbol {
-                    fill: 0
-                    text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
-                    iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer1
-                    Layout.alignment: Qt.AlignVCenter
-                }
-                StyledText {
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnLayer1
-                    text: Weather.data?.temp ?? "--°"
-                    Layout.alignment: Qt.AlignVCenter
-                }
+    rowDefault: Component {
+        RowLayout {
+            MaterialSymbol {
+                fill: 0
+                text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                iconSize: Appearance.font.pixelSize.large
+                color: Appearance.colors.colOnLayer1
+                Layout.alignment: Qt.AlignVCenter
+            }
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colOnLayer1
+                text: Weather.data?.temp ?? "--°"
+                Layout.alignment: Qt.AlignVCenter
             }
         }
+    }
 
-        Component {
-            id: rowMaterial
+    rowMaterial: Component {
+        MaterialPill {
+            vertical: false
+            mainAxisPadding: 8
+
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colPrimary
+                text: Weather.data?.temp ?? "--°"
+                Layout.alignment: Qt.AlignVCenter
+                leftPadding: 5
+            }
+
             Rectangle {
-                id: pill
-                color: Appearance.colors.colPrimaryContainer
+                width: 25
+                height: 25
                 radius: Appearance.rounding.full
-                implicitHeight: 32
-                implicitWidth: pillRow.implicitWidth + 4 + 4 
+                color: Appearance.colors.colPrimary
 
-                RowLayout {
-                    id: pillRow
+                MaterialSymbol {
                     anchors.centerIn: parent
-                    spacing: 6
-
-                    StyledText {
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colPrimary
-                        text: Weather.data?.temp ?? "--°"
-                        Layout.alignment: Qt.AlignVCenter
-                        leftPadding: 5
-                    }
-
-                    Rectangle {
-                        width: 25
-                        height: 25
-                        radius: Appearance.rounding.full
-                        color: Appearance.colors.colPrimary
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            fill: 0
-                            text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
-                            iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPrimary
-                        }
-                    }
+                    fill: 0
+                    text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                    iconSize: Appearance.font.pixelSize.normal
+                    color: Appearance.colors.colOnPrimary
                 }
             }
         }
     }
 
-    // Vertical layout
-    Loader {
-        id: colLoader
-        active: root.vertical
-        visible: active
-        anchors.centerIn: parent
-        sourceComponent: root.isMaterial ? colMaterial : colDefault
-
-        Component {
-            id: colDefault
-            ColumnLayout {
-                spacing: 4
-                MaterialSymbol {
-                    fill: 0
-                    text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
-                    iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer1
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                StyledText {
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnLayer1
-                    text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
-                    Layout.alignment: Qt.AlignHCenter
-                }
+    colDefault: Component {
+        ColumnLayout {
+            spacing: 4
+            MaterialSymbol {
+                fill: 0
+                text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                iconSize: Appearance.font.pixelSize.large
+                color: Appearance.colors.colOnLayer1
+                Layout.alignment: Qt.AlignHCenter
+            }
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colOnLayer1
+                text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
+                Layout.alignment: Qt.AlignHCenter
             }
         }
+    }
 
-        Component {
-            id: colMaterial
+    colMaterial: Component {
+        MaterialPill {
+            vertical: true
+
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colPrimary
+                text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 3
+            }
+
             Rectangle {
-                color: Appearance.colors.colPrimaryContainer
+                width: 25
+                height: 25
                 radius: Appearance.rounding.full
-                implicitWidth: 32
-                implicitHeight: pillCol.implicitHeight + 10
+                color: Appearance.colors.colPrimary
+                Layout.alignment: Qt.AlignHCenter
 
-                ColumnLayout {
-                    id: pillCol
+                MaterialSymbol {
                     anchors.centerIn: parent
-                    spacing: 3
-
-                    StyledText {
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colPrimary
-                        text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: 3
-                    }
-
-                    Rectangle {
-                        width: 25
-                        height: 25
-                        radius: Appearance.rounding.full
-                        color: Appearance.colors.colPrimary
-                        Layout.alignment: Qt.AlignHCenter
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            fill: 0
-                            text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
-                            iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPrimary
-                        }
-                    }
+                    fill: 0
+                    text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                    iconSize: Appearance.font.pixelSize.normal
+                    color: Appearance.colors.colOnPrimary
                 }
             }
         }

@@ -8,15 +8,26 @@ MouseArea {
     id: root
     property bool vertical: false
     property bool borderless: Config.options.bar.borderless
+    property bool isMaterial: Config.options.bar.cornerStyle === 3
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
     readonly property bool isPluggedIn: Battery.isPluggedIn
     readonly property real percentage: Battery.percentage
     readonly property bool isLow: percentage <= Config.options.battery.low / 100
 
-    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.valueBarWidth + 10
-    implicitHeight: vertical ? batteryProgress.valueBarWidth + 10 : Appearance.sizes.barHeight
+    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.valueBarWidth + 20
+    implicitHeight: vertical ? batteryProgress.valueBarWidth + 20 : Appearance.sizes.barHeight
+
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+
+    Rectangle {
+        visible: root.isMaterial
+        anchors.centerIn: parent
+        width: vertical ? 32 : batteryProgress.valueBarWidth + 20
+        height: vertical ? batteryProgress.valueBarHeight + 30 : 32
+        radius: Appearance.rounding.full
+        color: Appearance.colors.colPrimaryContainer
+    }
 
     ClippedProgressBar {
         id: batteryProgress
@@ -24,12 +35,10 @@ MouseArea {
         value: percentage
         rotation: root.vertical ? -90 : 0
         highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : Appearance.colors.colOnSecondaryContainer
-
         Item {
             anchors.centerIn: parent
             width: batteryProgress.valueBarWidth
             height: batteryProgress.valueBarHeight
-
             // Horizontal
             Loader {
                 id: rowLoader
@@ -56,7 +65,6 @@ MouseArea {
                     }
                 }
             }
-
             // Vertical
             Loader {
                 id: colLoader
