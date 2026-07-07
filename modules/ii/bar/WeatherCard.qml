@@ -1,44 +1,55 @@
 import QtQuick
 import QtQuick.Layouts
-
 import qs.modules.common
 import qs.modules.common.widgets
 
 Rectangle {
     id: root
     radius: Appearance.rounding.small
-    color: Appearance.colors.colSurfaceContainerHigh
+    property color bgColor: Appearance.colors.colSurfaceContainerHigh
+    property color fgColor: Appearance.colors.colOnSurfaceVariant
+    color: root.bgColor
     implicitWidth: columnLayout.implicitWidth + 14 * 2
-    implicitHeight: columnLayout.implicitHeight + 14 * 2
-    Layout.fillWidth: parent
-
+    implicitHeight: columnLayout.implicitHeight + 10 * 2
+    Layout.fillWidth: true
     property alias title: title.text
     property alias value: value.text
     property alias symbol: symbol.text
 
     ColumnLayout {
         id: columnLayout
-        anchors.fill: parent
-        spacing: -10
+        anchors {
+            fill: parent
+            margins: 10
+        }
+        spacing: -4
+
         RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            MaterialSymbol {
-                id: symbol
-                fill: 0
-                iconSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnSurfaceVariant
-            }
+            Layout.fillWidth: true
+
             StyledText {
                 id: title
+                Layout.alignment: Qt.AlignLeft
                 font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colOnSurfaceVariant
+                color: root.fgColor
+            }
+
+            Item { Layout.fillWidth: true }
+
+            MaterialSymbol {
+                id: symbol
+                Layout.alignment: Qt.AlignRight
+                fill: 0
+                iconSize: Appearance.font.pixelSize.normal
+                color: root.fgColor
             }
         }
+
         StyledText {
             id: value
-            Layout.alignment: Qt.AlignHCenter
             font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnSurfaceVariant
+            color: root.fgColor
+            opacity: 0.6
         }
     }
 }

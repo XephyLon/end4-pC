@@ -60,7 +60,7 @@ StyledPopup {
                 Layout.rightMargin: 8
                 font.pixelSize: Appearance.font.pixelSize.huge
                 font.weight: Font.Bold
-                color: Appearance.colors.colPrimary
+                color: Appearance.colors.colOnSurfaceVariant
                 text: Weather.data?.temp ?? ""
             }
         }
@@ -103,25 +103,19 @@ StyledPopup {
                 value: Weather.data?.press ?? ""
             }
             WeatherCard {
+                bgColor: Appearance.colors.colPrimary
+                fgColor: Appearance.colors.colOnPrimary
                 title: Translation.tr("Sunrise")
                 symbol: "wb_twilight"
                 value: Weather.data?.sunrise ?? ""
             }
             WeatherCard {
+                bgColor: Appearance.colors.colPrimaryContainer
+                fgColor: Appearance.colors.colOnPrimaryContainer
                 title: Translation.tr("Sunset")
                 symbol: "bedtime"
                 value: Weather.data?.sunset ?? ""
             }
-        }
-
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            text: Translation.tr("Last refresh: %1").arg(Weather.data?.lastRefresh ?? "")
-            font {
-                weight: Font.Medium
-                pixelSize: Appearance.font.pixelSize.smaller
-            }
-            color: Appearance.colors.colOnSurfaceVariant
         }
     }
 }
