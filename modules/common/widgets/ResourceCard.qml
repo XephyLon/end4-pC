@@ -33,6 +33,7 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.topMargin: -4
             spacing: 0
 
             MaterialShapeWrappedMaterialSymbol {
