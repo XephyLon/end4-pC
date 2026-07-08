@@ -18,11 +18,9 @@ StyledPopup {
         Layout.rightMargin: -8
 
         Rectangle {
-            id: weatherHeroBanner
             Layout.fillWidth: true
-            Layout.preferredHeight: 160
-            z: -4
-            
+            Layout.preferredHeight: 125
+                        
             topLeftRadius: Appearance.rounding.normal - 2
             topRightRadius: Appearance.rounding.normal - 2
             bottomLeftRadius: Appearance.rounding.normal
@@ -131,13 +129,13 @@ StyledPopup {
                 title: Translation.tr("Sunrise")
                 symbol: "wb_twilight"
                 value: Weather.data?.sunrise ?? "07:34 AM"
-                fgColor: Appearance.colors.colOnPrimary
+                fgColor: Appearance.colors.colLayer0
             }
             WeatherCard {
                 title: Translation.tr("Sunset")
                 symbol: "bedtime"
                 value: Weather.data?.sunset ?? "05:21 PM"
-                fgColor: Appearance.colors.colOnPrimary
+                fgColor: Appearance.colors.colLayer0
             }
         }
     }
