@@ -16,7 +16,7 @@ Item {
     property bool isMaterial: Config.options.bar.cornerStyle === 3
 
     implicitWidth: root.vertical ? 32 : flow.implicitWidth + 4
-    implicitHeight: root.vertical ? flow.implicitHeight + 6 : 32
+    implicitHeight: root.vertical ? flow.implicitHeight + 4 : 32
 
     MouseArea {
         anchors.fill: parent
