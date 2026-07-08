@@ -73,7 +73,7 @@ StyledPopup {
                 MaterialShapeWrappedMaterialSymbol {
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.topMargin: 4
+                    anchors.topMargin: -3
                     shape: MaterialShape.Shape.Sunny
                     text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                     iconSize: 40
@@ -85,8 +85,8 @@ StyledPopup {
                 ColumnLayout {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.rightMargin: 4
-                    anchors.bottomMargin: -4
+                    anchors.rightMargin: 6
+                    anchors.bottomMargin: -1
                     spacing: -2
 
                     RowLayout {
