@@ -54,7 +54,7 @@ Singleton {
 
     function hasActive(element) {
         return element?.activeFocus || Array.from(
-            element?.children
+            element?.children ?? []
         ).some(
             (child) => hasActive(child)
         );
