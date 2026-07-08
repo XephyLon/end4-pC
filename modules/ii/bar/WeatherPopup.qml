@@ -72,13 +72,54 @@ StyledPopup {
 
                 MaterialShapeWrappedMaterialSymbol {
                     anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 4
                     shape: MaterialShape.Shape.Sunny
                     text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                     iconSize: 40
                     implicitSize: 64
                     color: Qt.alpha(Appearance.colors.colOnLayer0, 0.15)
                     colSymbol: Appearance.colors.colPrimary
+                }
+
+                ColumnLayout {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: 4
+                    anchors.bottomMargin: -4
+                    spacing: -2
+
+                    RowLayout {
+                        spacing: 4
+                        Layout.alignment: Qt.AlignRight
+                        MaterialSymbol {
+                            text: "wb_twilight"
+                            iconSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colPrimary
+                        }
+                        StyledText {
+                            text: Weather.data?.sunrise ?? "07:34 AM"
+                            font.pixelSize: Appearance.font.pixelSize.smallest
+                            color: Appearance.colors.colOnLayer0
+                            opacity: 0.8
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 4
+                        Layout.alignment: Qt.AlignRight
+                        MaterialSymbol {
+                            text: "bedtime"
+                            iconSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colPrimary
+                        }
+                        StyledText {
+                            text: Weather.data?.sunset ?? "05:21 PM"
+                            font.pixelSize: Appearance.font.pixelSize.smallest
+                            color: Appearance.colors.colOnLayer0
+                            opacity: 0.8
+                        }
+                    }
                 }
             }
         }
@@ -124,18 +165,6 @@ StyledPopup {
                 title: Translation.tr("Pressure")
                 symbol: "readiness_score"
                 value: Weather.data?.press ?? "720 hpa"
-            }
-            WeatherCard {
-                title: Translation.tr("Sunrise")
-                symbol: "wb_twilight"
-                value: Weather.data?.sunrise ?? "07:34 AM"
-                fgColor: Appearance.colors.colLayer0
-            }
-            WeatherCard {
-                title: Translation.tr("Sunset")
-                symbol: "bedtime"
-                value: Weather.data?.sunset ?? "05:21 PM"
-                fgColor: Appearance.colors.colLayer0
             }
         }
     }
