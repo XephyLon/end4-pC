@@ -28,11 +28,12 @@ AbstractBackgroundWidget {
         property string value: ""
         property string label: ""
         property int shape: MaterialShape.Shape.Cookie12Sided
+        property color bgColor: Appearance.colors.colPrimaryContainer
 
         implicitWidth: root.cardWidth
         implicitHeight: root.cardHeight
         radius: Appearance.rounding?.verylarge ?? 30
-        color: Appearance.colors.colPrimaryContainer
+        color: statCard.bgColor
 
         StyledRectangularShadow {
             target: statCard
@@ -93,6 +94,7 @@ AbstractBackgroundWidget {
             value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%"
             label: "RAM"
             shape: MaterialShape.Shape.Cookie4Sided
+            bgColor: Appearance.colors.colSecondaryContainer
         }
 
         StatCard {
@@ -102,6 +104,7 @@ AbstractBackgroundWidget {
                 : Math.round(ResourceUsage.diskUsedPercentage * 100) + "%"
             label: root.hasBattery ? "Battery" : "Disk"
             shape: MaterialShape.Shape.Cookie12Sided
+            bgColor: Appearance.colors.colTertiaryContainer
         }
     }
 }
