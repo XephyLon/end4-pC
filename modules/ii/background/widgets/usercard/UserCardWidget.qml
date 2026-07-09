@@ -80,14 +80,14 @@ AbstractBackgroundWidget {
                 maskSource: Rectangle {
                     width: outerRect.width
                     height: outerRect.height
-                    radius: Appearance.rounding.large
+                    radius: Appearance.rounding?.verylarge ?? 30
                 }
             }
         }
 
         Rectangle {
             anchors.fill: blurredBg
-            radius: Appearance.rounding.large
+            radius: Appearance.rounding?.verylarge ?? 30
             color: Appearance.colors.colScrim
             opacity: 0.1
         }

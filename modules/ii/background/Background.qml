@@ -29,12 +29,58 @@ Variants {
     id: root
     model: Quickshell.screens
 
+    function getShapeFromName(name) {
+        switch (name) {
+            case "Circle":        return MaterialShape.Shape.Circle
+            case "Square":        return MaterialShape.Shape.Square
+            case "Slanted":       return MaterialShape.Shape.Slanted
+            case "Arch":          return MaterialShape.Shape.Arch
+            case "Fan":           return MaterialShape.Shape.Fan
+            case "Arrow":         return MaterialShape.Shape.Arrow
+            case "SemiCircle":    return MaterialShape.Shape.SemiCircle
+            case "Oval":          return MaterialShape.Shape.Oval
+            case "Pill":          return MaterialShape.Shape.Pill
+            case "Triangle":      return MaterialShape.Shape.Triangle
+            case "Diamond":       return MaterialShape.Shape.Diamond
+            case "ClamShell":     return MaterialShape.Shape.ClamShell
+            case "Pentagon":      return MaterialShape.Shape.Pentagon
+            case "Gem":           return MaterialShape.Shape.Gem
+            case "Sunny":         return MaterialShape.Shape.Sunny
+            case "VerySunny":     return MaterialShape.Shape.VerySunny
+            case "Cookie4Sided":  return MaterialShape.Shape.Cookie4Sided
+            case "Cookie6Sided":  return MaterialShape.Shape.Cookie6Sided
+            case "Cookie7Sided":  return MaterialShape.Shape.Cookie7Sided
+            case "Cookie9Sided":  return MaterialShape.Shape.Cookie9Sided
+            case "Cookie12Sided": return MaterialShape.Shape.Cookie12Sided
+            case "Ghostish":      return MaterialShape.Shape.Ghostish
+            case "Clover4Leaf":   return MaterialShape.Shape.Clover4Leaf
+            case "Clover8Leaf":   return MaterialShape.Shape.Clover8Leaf
+            case "Burst":         return MaterialShape.Shape.Burst
+            case "SoftBurst":     return MaterialShape.Shape.SoftBurst
+            case "Boom":          return MaterialShape.Shape.Boom
+            case "SoftBoom":      return MaterialShape.Shape.SoftBoom
+            case "Flower":        return MaterialShape.Shape.Flower
+            case "Puffy":         return MaterialShape.Shape.Puffy
+            case "PuffyDiamond":  return MaterialShape.Shape.PuffyDiamond
+            case "PixelCircle":   return MaterialShape.Shape.PixelCircle
+            case "PixelTriangle": return MaterialShape.Shape.PixelTriangle
+            case "Bun":           return MaterialShape.Shape.Bun
+            case "Heart":         return MaterialShape.Shape.Heart
+            default:              return MaterialShape.Shape.Cookie7Sided
+        }
+    }
+
     PanelWindow {
         id: bgRoot
 
         required property var modelData
         property string currentWallpaperSource: Config.options.background.wallpaperPath
         property string previousWallpaperSource: Config.options.background.wallpaperPath
+
+        //centered Wallpaper
+        property bool centeredWallpaperEnabled: Config.options.background.centeredWallpaper
+        property int centeredWallpaperShape: getShapeFromName(Config.options.background.centeredWallpaperShape)
+        property int centeredWallpaperSize: Config.options.background.centeredWallpaperSize
 
         property var shaderList: ["circlePit", "circleSelect", "magic", "Doom", "Peel", "transition", "pixelate", "stripes"]
         property string currentShader: "pixelate"
@@ -174,7 +220,7 @@ Variants {
                 smooth: true
                 asynchronous: true
                 layer.enabled: true
-                visible: bgRoot.wallpaperAnimation === "" && !blurLoader.active
+                visible: bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled
                 onStatusChanged: {
                     if (status === Image.Ready && bgRoot.transitionProgress === 0.0) {
                         transitionAnim.restart()
@@ -185,7 +231,7 @@ Variants {
             ShaderEffect {
                 id: transitionEffect
                 anchors.fill: parent
-                visible: !blurLoader.active && bgRoot.wallpaperAnimation !== ""
+                visible: !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled
                 property var fromImage: previousWallpaper
                 property var toImage: wallpaper
                 property real progress: bgRoot.transitionProgress
@@ -220,6 +266,42 @@ Variants {
                         anchors.fill: parent
                         color: CF.ColorUtils.transparentize(Appearance.colors.colLayer0, 0.7)
                     }
+                }
+            }
+
+            Rectangle {
+                id: centeredWallpaperBg
+                anchors.fill: parent
+                visible: bgRoot.centeredWallpaperEnabled
+                color: Appearance.colors.colPrimaryContainer
+            }
+
+            MaterialShape {
+                id: centeredWallpaperShapeItem
+                anchors.centerIn: parent
+                width: bgRoot.centeredWallpaperSize
+                height: bgRoot.centeredWallpaperSize
+                visible: bgRoot.centeredWallpaperEnabled
+                color: Appearance.colors.colPrimaryContainer
+                shape: bgRoot.centeredWallpaperShape
+
+                layer.enabled: true
+                layer.effect: OpacityMask {
+                    maskSource: MaterialShape {
+                        width: centeredWallpaperShapeItem.width
+                        height: centeredWallpaperShapeItem.height
+                        shape: bgRoot.centeredWallpaperShape
+                    }
+                }
+
+                StyledImage {
+                    anchors.fill: parent
+                    source: bgRoot.wallpaperPath
+                    fillMode: Image.PreserveAspectCrop
+                    cache: false
+                    antialiasing: true
+                    sourceSize.width: parent.width
+                    sourceSize.height: parent.height
                 }
             }
 

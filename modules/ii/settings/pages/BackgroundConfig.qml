@@ -110,6 +110,59 @@ ContentPage {
                     ]
                 }
             }
+            ContentSubsection {
+                title: Translation.tr("Centered wallpaper")
+                Layout.fillWidth: true
+
+                GroupedList {
+                    ConfigSwitch {
+                        Layout.fillWidth: true
+                        buttonIcon: "check"
+                        text: Translation.tr("Enable")
+                        checked: Config.options.background.centeredWallpaper
+                        onCheckedChanged: {
+                            Config.options.background.centeredWallpaper = checked;
+                        }
+                    }
+                }
+
+                ContentSubsection {
+                    visible: Config.options.background.centeredWallpaper
+                    title: Translation.tr("Shape")
+
+                    ConfigSelectionShapeArray {
+                        currentValue: Config.options.background.centeredWallpaperShape
+                        shapeColor: Appearance.colors.colPrimary
+                        backgroundColor: Appearance.colors.colPrimaryContainer
+                        options: [
+                            "Circle", "Square", "Slanted", "Arch", "Arrow", "SemiCircle", "Oval", "Pill",
+                            "Triangle", "Diamond", "ClamShell", "Pentagon", "Gem", "Sunny", "VerySunny",
+                            "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided",
+                            "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Flower",
+                            "Puffy", "PuffyDiamond", "PixelCircle", "Bun", "Heart"
+                        ]
+                        onSelected: newValue => {
+                            Config.options.background.centeredWallpaperShape = newValue
+                        }
+                    }
+                }
+                GroupedList {
+                    Layout.topMargin: 10
+                    ConfigSlider {
+                        visible: Config.options.background.centeredWallpaper
+                        text: Translation.tr("Size")
+                        value: Config.options.background.centeredWallpaperSize
+                        usePercentTooltip: false
+                        buttonIcon: "aspect_ratio"
+                        from: 100
+                        to: 800
+                        stopIndicatorValues: [400]
+                        onValueChanged: {
+                            Config.options.background.centeredWallpaperSize = value;
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {

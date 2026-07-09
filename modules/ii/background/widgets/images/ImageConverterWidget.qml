@@ -144,7 +144,7 @@ AbstractBackgroundWidget {
     Rectangle {
         id: contentItem
         color: Appearance.colors.colPrimaryContainer
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding?.verylarge ?? 30
         implicitWidth: 340
         implicitHeight: columnLayout.implicitHeight + 24
 

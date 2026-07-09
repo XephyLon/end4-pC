@@ -64,7 +64,7 @@ AbstractBackgroundWidget {
         id: contentRect
         anchors.fill: parent
         color: Appearance.colors.colPrimaryContainer
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding?.verylarge ?? 30
         implicitWidth: calendarColumn.implicitWidth + 40
         implicitHeight: calendarColumn.implicitHeight + 40
 
@@ -148,7 +148,7 @@ AbstractBackgroundWidget {
 
             Rectangle {
                 color: Appearance.colors.colLayer1
-                radius: Appearance.rounding.normal
+                radius: Appearance.rounding.verylarge - 8
                 implicitWidth: weeksColumn.implicitWidth + 16
                 implicitHeight: weeksColumn.implicitHeight + 16
 

@@ -325,6 +325,9 @@ Singleton {
                 }
                 property list<string> screenList: [] 
                 property string wallpaperPath: ""
+                property bool centeredWallpaper: false
+                property string centeredWallpaperShape: "Cookie7Sided"
+                property int centeredWallpaperSize: 400
                 property string wallpaperAnimation: "magic"
                 property string thumbnailPath: ""
                 property bool hideWhenFullscreen: true

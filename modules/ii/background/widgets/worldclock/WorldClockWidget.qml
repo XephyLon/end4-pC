@@ -27,7 +27,7 @@ AbstractBackgroundWidget {
         id: contentRect
         anchors.fill: parent
         color: Appearance.colors.colPrimaryContainer
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding?.verylarge ?? 30
         implicitWidth: mainColumn.implicitWidth + 24
         implicitHeight: mainColumn.implicitHeight + 24
 
