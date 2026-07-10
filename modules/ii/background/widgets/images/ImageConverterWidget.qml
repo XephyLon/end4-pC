@@ -171,7 +171,7 @@ AbstractBackgroundWidget {
                 id: dropZone
                 Layout.fillWidth: true
                 implicitHeight: 120
-                radius: Appearance.rounding.normal
+                radius: Appearance.rounding.large
                 color: {
                     switch (root.dropStatus) {
                         case "hover":      return Appearance.colors.colPrimaryContainer
@@ -181,7 +181,7 @@ AbstractBackgroundWidget {
                                                 Appearance.colors.colError.r,
                                                 Appearance.colors.colError.g,
                                                 Appearance.colors.colError.b, 0.15)
-                        default:           return Appearance.colors.colSurfaceContainerHigh
+                        default:           return Appearance.colors.colSurfaceContainerLow 
                     }
                 }
                 border.color: {
@@ -289,6 +289,7 @@ AbstractBackgroundWidget {
                 spacing: 8
 
                 StyledText {
+                    Layout.leftMargin: 3
                     text: "Convert to:"
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colOnLayer1
