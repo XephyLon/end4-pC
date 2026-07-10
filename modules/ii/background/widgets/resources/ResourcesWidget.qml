@@ -11,12 +11,13 @@ import qs.modules.ii.background.widgets
 AbstractBackgroundWidget {
     id: root
     configEntryName: "resources"
+    hoverEnabled: true
 
     property real widgetWidth: 420
     property real cardSpacing: 12
     property real cardHeight: 120
     property real cardWidth: (widgetWidth - cardSpacing * 2) / 3
-
+    property bool isVertical: root.configEntry.vertical ?? false
     property bool hasBattery: Battery.available
 
     implicitWidth: row.implicitWidth
@@ -79,9 +80,15 @@ AbstractBackgroundWidget {
         }
     }
 
-    RowLayout {
+    Grid {
         id: row
+        columns: root.isVertical ? 1 : 3
+        rows: root.isVertical ? 3 : 1
         spacing: root.cardSpacing
+
+        Behavior on columns {
+            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+        }
 
         StatCard {
             icon: "planner_review"
@@ -89,7 +96,6 @@ AbstractBackgroundWidget {
             label: "CPU"
             shape: MaterialShape.Shape.Gem
         }
-
         StatCard {
             icon: "memory"
             value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%"
@@ -98,7 +104,6 @@ AbstractBackgroundWidget {
             bgColor: Appearance.colors.colSecondaryContainer
             shapeColor: Appearance.colors.colSecondary
         }
-
         StatCard {
             icon: root.hasBattery ? "battery_full" : "storage"
             value: root.hasBattery
@@ -108,6 +113,50 @@ AbstractBackgroundWidget {
             shape: MaterialShape.Shape.Cookie12Sided
             bgColor: Appearance.colors.colTertiaryContainer
             shapeColor: Appearance.colors.colTertiary
+        }
+    }
+    Rectangle {
+        id: toggleHandle
+        width: 16
+        height: 16
+        radius: 6
+        color: Appearance.colors.colOnPrimaryContainer
+        anchors {
+            left: parent.right
+            bottom: parent.bottom
+            margins: -6
+        }
+        opacity: root.containsMouse || toggleArea.containsMouse ? 0.7 : 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 150 }
+        }
+
+        MaterialSymbol {
+            anchors.centerIn: parent
+            text: "rotate_right"
+            iconSize: 11
+            color: Appearance.colors.colPrimaryContainer
+
+            RotationAnimation on rotation {
+                running: toggleArea.containsMouse
+                from: 0
+                to: 360
+                duration: 1000
+                loops: Animation.Infinite
+            }
+        }
+
+        MouseArea {
+            id: toggleArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                root.isVertical = !root.isVertical
+                root.configEntry.vertical = root.isVertical
+            }
         }
     }
 }

@@ -260,6 +260,7 @@ Singleton {
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 400
                         property real y: 100
+                        property string sizeMode: "1x3"
                     }
 
                     property JsonObject calendar: JsonObject {
@@ -267,6 +268,7 @@ Singleton {
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 400
                         property real y: 100
+                        property string sizeMode: "2x2"
                     }
                     property JsonObject worldClock: JsonObject {
                         property bool enable: false
@@ -310,6 +312,7 @@ Singleton {
                         property string placementStrategy: "free"
                         property real x: 400
                         property real y: 100
+                        property bool vertical: false
                     }
 
                     property JsonObject media: JsonObject {

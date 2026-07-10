@@ -36,8 +36,8 @@ AbstractBackgroundWidget {
     property int queueDone: 0
     property var batchPaths: []
 
-    implicitWidth:  contentItem.implicitWidth
-    implicitHeight: contentItem.implicitHeight
+    implicitWidth:  276
+    implicitHeight: 252
 
     Process {
         id: converter
@@ -145,8 +145,8 @@ AbstractBackgroundWidget {
         id: contentItem
         color: Appearance.colors.colPrimaryContainer
         radius: Appearance.rounding?.verylarge ?? 30
-        implicitWidth: 340
-        implicitHeight: columnLayout.implicitHeight + 24
+        implicitWidth: 276
+        implicitHeight: 252
 
         ColumnLayout {
             id: columnLayout
@@ -154,7 +154,7 @@ AbstractBackgroundWidget {
                 left: parent.left
                 right: parent.right
                 top: parent.top
-                margins: 12
+                margins: 16
             }
             spacing: 12
 
@@ -170,7 +170,7 @@ AbstractBackgroundWidget {
             Rectangle {
                 id: dropZone
                 Layout.fillWidth: true
-                implicitHeight: 120
+                implicitHeight: 144
                 radius: Appearance.rounding.large
                 color: {
                     switch (root.dropStatus) {

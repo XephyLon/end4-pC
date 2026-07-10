@@ -39,10 +39,9 @@ AbstractBackgroundWidget {
     property string artFilePath: `${artDownloadLocation}/${artFileName}`
 
     property real widgetWidth: 420
-    property real widgetHeight: 70
-    property real artSize: 50
-    property real buttonSize: 36
-    property real buttonIconSize: 20
+    property real widgetHeight: 120
+    property real buttonSize: 34
+    property real buttonIconSize: 18
 
     property bool downloaded: false
     property bool showLyrics: false
@@ -84,9 +83,10 @@ AbstractBackgroundWidget {
     Rectangle {
         id: card
         implicitWidth: root.widgetWidth
-        implicitHeight: root.widgetHeight + (root.showLyrics ? 267 : 0)
+        implicitHeight: root.widgetHeight + (root.showLyrics ? 264 : 0)
         radius: Appearance.rounding?.verylarge ?? 30
         color: Appearance.colors.colPrimaryContainer
+        clip: true
 
         Behavior on implicitHeight {
             NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
@@ -102,28 +102,31 @@ AbstractBackgroundWidget {
             spacing: 0
 
             // Main Row
-            RowLayout {
+            Item {
                 width: parent.width
                 height: root.widgetHeight
-                spacing: 12
 
-                Item { width: 0; height: 1 }
-
-                // Art
                 Rectangle {
                     id: artRect
-                    implicitWidth: root.artSize
-                    implicitHeight: root.artSize
-                    radius: Appearance.rounding?.full ?? 999
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: root.widgetHeight
                     color: Appearance.colors.colSurfaceContainerLow
-                    Layout.alignment: Qt.AlignVCenter
+                    topLeftRadius: card.radius
+                    bottomLeftRadius: card.radius
+                    topRightRadius: 0
+                    bottomRightRadius: 0
                     clip: true
                     layer.enabled: true
                     layer.effect: OpacityMask {
                         maskSource: Rectangle {
                             width: artRect.width
                             height: artRect.height
-                            radius: artRect.radius
+                            topLeftRadius: card.radius
+                            bottomLeftRadius: card.radius
+                            topRightRadius: 0
+                            bottomRightRadius: 0
                         }
                     }
 
@@ -133,8 +136,8 @@ AbstractBackgroundWidget {
                         fillMode: Image.PreserveAspectCrop
                         cache: false
                         antialiasing: true
-                        sourceSize.width: artRect.width
-                        sourceSize.height: artRect.height
+                        sourceSize.width: artRect.width * 2
+                        sourceSize.height: artRect.height * 2
                         visible: root.displayedArtFilePath !== ""
                     }
 
@@ -142,105 +145,127 @@ AbstractBackgroundWidget {
                         anchors.centerIn: parent
                         fill: 1
                         text: "music_note"
-                        iconSize: root.artSize / 2
+                        iconSize: root.widgetHeight / 3
                         color: Appearance.colors.colOnSecondaryContainer
                         visible: root.displayedArtFilePath === ""
                     }
                 }
 
-                // Artist + Title
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignVCenter
-                    spacing: 2
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: root.currentPlayer?.trackArtist ?? "Play"
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnPrimaryContainer
-                        elide: Text.ElideRight
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: root.currentPlayer?.trackTitle ?? Translation.tr("Something")
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colOnPrimaryContainer
-                        opacity: 0.6
-                        elide: Text.ElideRight
-                    }
-                }
-
-                // Buttons
                 RowLayout {
-                    spacing: 4
-                    Layout.alignment: Qt.AlignVCenter
-
-                    RippleButton {
-                        implicitWidth: root.buttonSize
-                        implicitHeight: root.buttonSize
-                        buttonRadius: Appearance.rounding?.full ?? 999
-                        colBackground: root.showLyrics
-                            ? Appearance.colors.colPrimary
-                            : ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.85)
-                        colBackgroundHover: Appearance.colors.colPrimaryHover
-                        colRipple: Appearance.colors.colPrimaryActive
-                        downAction: () => { root.showLyrics = !root.showLyrics }
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: "lyrics"
-                            iconSize: root.buttonIconSize
-                            fill: root.showLyrics ? 1 : 0
-                            color: root.showLyrics
-                                ? Appearance.colors.colOnPrimary
-                                : Appearance.colors.colOnPrimaryContainer
-                        }
+                    anchors {
+                        left: artRect.right
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                        leftMargin: 16
+                        rightMargin: 14
+                        topMargin: 40
                     }
+                    spacing: 12
 
-                    MaterialShapeWrappedMaterialSymbol {
-                        shape: MaterialShape.Shape.Cookie12Sided
-                        color: Appearance.colors.colPrimary
-                        colSymbol: Appearance.colors.colOnPrimary
-                        text: root.currentPlayer?.isPlaying ? "pause" : "play_arrow"
-                        iconSize: root.buttonIconSize
-                        fill: 1
-                        padding: 8
+                    // Artist + Title
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 2
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: root.currentPlayer?.togglePlaying()
-                        }
-                    }
-
-                    RippleButton {
-                        implicitWidth: root.buttonSize
-                        implicitHeight: root.buttonSize
-                        buttonRadius: Appearance.rounding?.full ?? 999
-                        colBackground: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.85)
-                        colBackgroundHover: Appearance.colors.colPrimaryContainerHover
-                        colRipple: Appearance.colors.colPrimaryContainerActive
-                        downAction: () => root.currentPlayer?.next()
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: "skip_next"
-                            iconSize: root.buttonIconSize
-                            fill: 1
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: root.currentPlayer?.trackArtist ?? "Play"
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            font.weight: Font.DemiBold
                             color: Appearance.colors.colOnPrimaryContainer
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: root.currentPlayer?.trackTitle ?? Translation.tr("Something")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colOnPrimaryContainer
+                            opacity: 0.65
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    // Controls 
+                    Rectangle {
+                        id: controlsPill
+                        Layout.alignment: Qt.AlignVCenter
+                        implicitWidth: controlsRow.implicitWidth + 10
+                        implicitHeight: root.buttonSize + 8
+                        radius: Appearance.rounding?.full ?? 999
+                        color: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.9)
+
+                        RowLayout {
+                            id: controlsRow
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            RippleButton {
+                                implicitWidth: root.buttonSize
+                                implicitHeight: root.buttonSize
+                                buttonRadius: Appearance.rounding?.full ?? 999
+                                colBackground: root.showLyrics
+                                    ? Appearance.colors.colPrimary
+                                    : "transparent"
+                                colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                                colRipple: Appearance.colors.colPrimaryContainerActive
+                                downAction: () => { root.showLyrics = !root.showLyrics }
+
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: "lyrics"
+                                    iconSize: root.buttonIconSize
+                                    fill: root.showLyrics ? 1 : 0
+                                    color: root.showLyrics
+                                        ? Appearance.colors.colOnPrimary
+                                        : Appearance.colors.colOnPrimaryContainer
+                                }
+                            }
+
+                            MaterialShapeWrappedMaterialSymbol {
+                                shape: MaterialShape.Shape.Cookie12Sided
+                                color: Appearance.colors.colPrimary
+                                colSymbol: Appearance.colors.colOnPrimary
+                                text: root.currentPlayer?.isPlaying ? "pause" : "play_arrow"
+                                iconSize: root.buttonIconSize + 12
+                                fill: 1
+                                padding: 8
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: root.currentPlayer?.togglePlaying()
+                                }
+                            }
+
+                            RippleButton {
+                                implicitWidth: root.buttonSize
+                                implicitHeight: root.buttonSize
+                                buttonRadius: Appearance.rounding?.full ?? 999
+                                colBackground: "transparent"
+                                colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                                colRipple: Appearance.colors.colPrimaryContainerActive
+                                downAction: () => root.currentPlayer?.next()
+                                altAction: () => root.currentPlayer?.previous()
+
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: "skip_next"
+                                    iconSize: root.buttonIconSize
+                                    fill: 1
+                                    color: Appearance.colors.colOnPrimaryContainer
+                                }
+                            }
                         }
                     }
                 }
-
-                Item { width: 5; height: 1 }
             }
 
             // Divisor
             Item {
                 width: parent.width
-                height: root.showLyrics ? 16 : 0
+                height: root.showLyrics ? 2 : 0
                 visible: root.showLyrics
 
                 Rectangle {
@@ -258,7 +283,6 @@ AbstractBackgroundWidget {
                 }
             }
 
-            // Lyrics
             Item {
                 width: parent.width
                 height: root.showLyrics ? 250 : 0

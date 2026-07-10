@@ -10,8 +10,8 @@ import qs.modules.ii.background.widgets
 AbstractBackgroundWidget {
     id: root
     configEntryName: "worldClock"
-    implicitHeight: contentRect.implicitHeight
-    implicitWidth: contentRect.implicitWidth
+    implicitHeight: 252
+    implicitWidth: 276
 
     property string localCityName: Weather.data?.city ?? "..."
     property string localTime: DateTime.time

@@ -13,10 +13,10 @@ import qs.modules.ii.background.widgets
 AbstractBackgroundWidget {
     id: root
     configEntryName: "userCard"
-    implicitWidth: outerRect.implicitWidth
-    implicitHeight: outerRect.implicitHeight
+    implicitWidth: 276
+    implicitHeight: 252
 
-    property int cardWidth: 260
+    property int cardWidth: 276
     property int blurMargin: 18   
     property int avatarSize: 64
     property string hostname: Quickshell.env("HOSTNAME") ?? "host"
@@ -29,14 +29,14 @@ AbstractBackgroundWidget {
         const desc = (Weather.data?.description ?? "").toLowerCase();
         const temp = Weather.data?.temp ?? "--";
         if (desc.includes("rain"))
-            return { text: `${temp} • raining, grab a coffee`, icon: "coffee" };
+            return { text: `• raining, grab a coffee`, icon: "coffee" };
         if (desc.includes("clear"))
-            return { text: `${temp} • good day to touch grass`, icon: "eco" };
+            return { text: `• good day to touch grass`, icon: "eco" };
         if (desc.includes("cloud"))
-            return { text: `${temp} • a bit cloudy today`, icon: "cloud" };
+            return { text: `• a bit cloudy today`, icon: "cloud" };
         if (desc.includes("snow"))
-            return { text: `${temp} • snowing`, icon: "ac_unit" };
-        return { text: `${temp} • ${Weather.data?.description ?? ""}`, icon: "thermostat" };
+            return { text: `• snowing`, icon: "ac_unit" };
+        return { text: `• ${Weather.data?.description ?? ""}`, icon: "thermostat" };
     }
 
     Process {
@@ -57,8 +57,8 @@ AbstractBackgroundWidget {
 
     Item {
         id: outerRect
-        implicitWidth: root.cardWidth + root.blurMargin * 2
-        implicitHeight: contentBox.implicitHeight + root.blurMargin * 2 + 60
+        implicitWidth: root.cardWidth 
+        implicitHeight: 252
 
         Image {
             id: bgImage
@@ -96,7 +96,7 @@ AbstractBackgroundWidget {
             id: contentBox
             x: root.blurMargin
             y: root.avatarSize / 2 + root.blurMargin + 30
-            width: root.cardWidth
+            width: 240
             color: Appearance.colors.colPrimaryContainer
             radius: Appearance.rounding.large
             implicitHeight: contentColumn.implicitHeight + 30
@@ -163,7 +163,7 @@ AbstractBackgroundWidget {
                                 font.pixelSize: Appearance.font.pixelSize.small
                                 font.weight: Font.DemiBold
                                 color: Appearance.colors.colPrimaryContainer
-                                text: "Lock"
+                                text: GlobalStates.screenLocked ? "Locked" : "Lock"
                             }
                         }
                         MouseArea {
