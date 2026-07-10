@@ -35,6 +35,29 @@ git clone https://github.com/pctrade/end4-pC.git
 killall qs 2>/dev/null; qs -c end4-pC > /dev/null 2>&1 & disown
 ```
 
+### 🔧 Set as your default shell (optional)
+
+If you like it and want it to load by default instead of `ii`, edit:
+
+```bash
+~/.config/hypr/hyprland/variables.conf
+```
+
+And change this line:
+
+```lua
+hl.env("qsConfig", "ii")
+```
+
+to:
+
+```lua
+hl.env("qsConfig", "end4-pC")
+```
+
+> [!TIP]
+> After saving, restart Hyprland or run `hyprctl reload` to apply the change.
+
 ---
 
 ## 🙏 Credits
@@ -43,6 +66,7 @@ Huge thanks to the people who made this possible:
 
 - **[@end-4](https://github.com/end-4)** — for creating the original [dots-hyprland](https://github.com/end-4/dots-hyprland) / illogical-impulse shell. An absolute masterpiece of a dotfiles project 🫡
 - **[@gh0stzk](https://github.com/gh0stzk)** — for providing the weather API integration that made the weather widget possible 🙌
+- **[@StarS2112](https://github.com/StarS2112)** — for showcasing this fork 🙌
 
 ---
 
