@@ -140,6 +140,7 @@ AbstractBackgroundWidget {
 
             GridLayout {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
                 columns: 2
                 rowSpacing: 6
                 columnSpacing: 6
