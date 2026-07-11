@@ -10,7 +10,7 @@ MouseArea {
     property alias animateXPos: xBehavior.enabled
     property alias animateYPos: yBehavior.enabled
     property bool draggable: true
-    property int gridSize: 6
+    property int gridSize: 12
     property bool snapEnabled: true
     readonly property bool dragging: drag.active
 
@@ -61,13 +61,8 @@ MouseArea {
         var canvas = findCanvas(root.parent)
         if (canvas) canvas.setDragging(dragging)
 
-        if (dragging) {
-            dragProxy.x = root.x
-            dragProxy.y = root.y
-        } else {
-            dragProxy.x = root.x
-            dragProxy.y = root.y
-        }
+        dragProxy.x = root.x
+        dragProxy.y = root.y
     }
 
     Behavior on x {

@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.common
 
 MouseArea {
     id: root
@@ -17,7 +18,7 @@ MouseArea {
             x: index * root.gridSize
             width: 1
             height: root.height
-            color: Qt.rgba(1, 1, 1, 0.15)
+            color: Appearance.colors.colLayer0Border
         }
     }
 
@@ -28,7 +29,7 @@ MouseArea {
             y: index * root.gridSize
             width: root.width
             height: 1
-            color: Qt.rgba(1, 1, 1, 0.15)
+            color: Appearance.colors.colLayer0Border
         }
     }
 }
