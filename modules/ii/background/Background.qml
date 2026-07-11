@@ -386,6 +386,18 @@ Variants {
                     }
                 }
                 FadeLoader {
+                    shown: Config.options.background.widgets.customImage.enable
+                        && (Config.options.background.screenList.length === 0
+                            || Config.options.background.screenList.includes(bgRoot.screen.name))
+                    sourceComponent: CustomImage {
+                        screenWidth:        bgRoot.screen.width
+                        screenHeight:       bgRoot.screen.height
+                        scaledScreenWidth:  bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale:     1
+                    }
+                }
+                FadeLoader {
                     shown: Config.options.background.widgets.weather.enable
                         && (Config.options.background.screenList.length === 0
                             || Config.options.background.screenList.includes(bgRoot.screen.name))
@@ -438,18 +450,6 @@ Variants {
                         && (Config.options.background.screenList.length === 0
                             || Config.options.background.screenList.includes(bgRoot.screen.name))
                     sourceComponent: ImageConverterWidget {
-                        screenWidth:        bgRoot.screen.width
-                        screenHeight:       bgRoot.screen.height
-                        scaledScreenWidth:  bgRoot.screen.width
-                        scaledScreenHeight: bgRoot.screen.height
-                        wallpaperScale:     1
-                    }
-                }
-                FadeLoader {
-                    shown: Config.options.background.widgets.customImage.enable
-                        && (Config.options.background.screenList.length === 0
-                            || Config.options.background.screenList.includes(bgRoot.screen.name))
-                    sourceComponent: CustomImage {
                         screenWidth:        bgRoot.screen.width
                         screenHeight:       bgRoot.screen.height
                         scaledScreenWidth:  bgRoot.screen.width

@@ -13,9 +13,11 @@ AbstractBackgroundWidget {
     id: root
 
     configEntryName: "customImage"
+    hoverEnabled: true
 
     property string imagePath: Config.options.background.widgets.customImage.path ?? ""
     property bool dropHover: false
+    property real widgetSize: Config.options.background.widgets.customImage.size ?? 200
 
     implicitWidth: contentItem.implicitWidth
     implicitHeight: contentItem.implicitHeight
@@ -63,8 +65,15 @@ AbstractBackgroundWidget {
 
     Item {
         id: contentItem
-        implicitWidth: 200
-        implicitHeight: 200
+        implicitWidth: root.widgetSize
+        implicitHeight: root.widgetSize
+
+        Behavior on implicitWidth {
+            animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
+        }
+        Behavior on implicitHeight {
+            animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
+        }
 
         MaterialShape {
             id: shadowShape
@@ -139,6 +148,54 @@ AbstractBackgroundWidget {
                         }
                     }
                     root.dropHover = false
+                }
+            }
+        }
+
+        Rectangle {
+            id: resizeHandle
+            width: 16
+            height: 16
+            radius: 4
+            color: Appearance.colors.colOnPrimaryContainer
+            anchors {
+                right: imageShape.right
+                bottom: imageShape.bottom
+                margins: 6
+            }
+            opacity: (root.containsMouse || resizeArea.containsMouse || resizeArea.pressed) ? 0.5 : 0
+            visible: opacity > 0
+            z: 1
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
+
+            MouseArea {
+                id: resizeArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.SizeFDiagCursor
+                preventStealing: true
+
+                property real startSize: 0
+                property real startX: 0
+                property real startY: 0
+
+                onPressed: (mouse) => {
+                    startSize = root.widgetSize
+                    var globalPos = mapToItem(null, mouse.x, mouse.y)
+                    startX = globalPos.x
+                    startY = globalPos.y
+                }
+                onPositionChanged: (mouse) => {
+                    if (!pressed) return
+                    var globalPos = mapToItem(null, mouse.x, mouse.y)
+                    var delta = Math.max(globalPos.x - startX, globalPos.y - startY)
+                    root.widgetSize = Math.max(80, startSize + delta)
+                }
+                onReleased: {
+                    Config.options.background.widgets.customImage.size = root.widgetSize
                 }
             }
         }

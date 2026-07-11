@@ -305,6 +305,7 @@ Singleton {
                         property real y: 100
                         property string path: ""
                         property string shape: "Cookie4Sided"
+                        property real size: 200
                     }
 
                     property JsonObject resources: JsonObject {
