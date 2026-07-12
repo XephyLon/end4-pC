@@ -13,6 +13,13 @@ LazyLoader {
     property real popupBackgroundMargin: 0
     active: hoverTarget && hoverTarget.containsMouse
 
+    readonly property bool barVertical: Config.options.bar.vertical
+    readonly property string barEdge: {
+        if (!barVertical) return Config.options.bar.bottom ? "bottom" : "top"
+        return Config.options.bar.bottom ? "right" : "left"
+    }
+    readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
+
     component: PanelWindow {
         id: popupWindow
 
@@ -20,13 +27,32 @@ LazyLoader {
         property Item innerContent: root.contentItem
 
         color: "transparent"
-        anchors.left: !Config.options.bar.vertical || (Config.options.bar.vertical && !Config.options.bar.bottom)
-        anchors.right: Config.options.bar.vertical && Config.options.bar.bottom
-        anchors.top: Config.options.bar.vertical || (!Config.options.bar.vertical && !Config.options.bar.bottom)
-        anchors.bottom: !Config.options.bar.vertical && Config.options.bar.bottom
+        anchors.left: root.barEdge !== "right"
+        anchors.right: root.barEdge === "right"
+        anchors.top: root.barEdge !== "bottom"
+        anchors.bottom: root.barEdge === "bottom"
 
         implicitWidth: popupBackground.implicitWidth + Appearance.sizes.elevationMargin * 2 + root.popupBackgroundMargin
         implicitHeight: popupBackground.implicitHeight + Appearance.sizes.elevationMargin * 2 + root.popupBackgroundMargin
+
+        readonly property real centerOffsetX: {
+            const base = root.QsWindow?.mapFromItem(
+                root.hoverTarget,
+                (root.hoverTarget.width - popupBackground.implicitWidth) / 2, 0
+            ).x ?? 0
+            const margin = Appearance.sizes.elevationMargin
+            const maxLeft = popupWindow.screen.width - popupBackground.implicitWidth - margin - 10
+            return Math.max(margin, Math.min(base, maxLeft))
+        }
+        readonly property real centerOffsetY: {
+            const base = root.QsWindow?.mapFromItem(
+                root.hoverTarget,
+                0, (root.hoverTarget.height - popupBackground.implicitHeight) / 2
+            ).y ?? 0
+            const margin = Appearance.sizes.elevationMargin
+            const maxTop = popupWindow.screen.height - popupBackground.implicitHeight - margin - 15
+            return Math.max(margin, Math.min(base, maxTop))
+        }
 
         mask: Region {
             item: popupBackground
@@ -36,30 +62,17 @@ LazyLoader {
 
         margins {
             left: {
-                if (!Config.options.bar.vertical) {
-                    const base = root.QsWindow?.mapFromItem(
-                        root.hoverTarget,
-                        (root.hoverTarget.width - popupBackground.implicitWidth) / 2, 0
-                    ).x
-                    const margin = Appearance.sizes.elevationMargin
-                    const maxLeft = popupWindow.screen.width - popupBackground.implicitWidth - margin - 10
-                    return Math.max(margin, Math.min(base, maxLeft))
-                }
-                if (!Config.options.bar.bottom) return Appearance.sizes.verticalBarWidth
-                return 0
+                if (root.barEdge === "right") return 0
+                if (root.barEdge === "left") return root.barThickness
+                return centerOffsetX 
             }
             top: {
-                if (!Config.options.bar.vertical) return Appearance.sizes.barHeight
-                const base = root.QsWindow?.mapFromItem(
-                    root.hoverTarget,
-                    0, (root.hoverTarget.height - popupBackground.implicitHeight) / 2
-                ).y  
-                const margin = Appearance.sizes.elevationMargin
-                const maxTop = popupWindow.screen.height - popupBackground.implicitHeight - margin - 15
-                return Math.max(margin, Math.min(base, maxTop))
+                if (root.barEdge === "bottom") return 0
+                if (root.barEdge === "top") return root.barThickness
+                return centerOffsetY
             }
-            right: Config.options.bar.vertical && Config.options.bar.bottom ? Appearance.sizes.verticalBarWidth : 0  
-            bottom: Config.options.bar.vertical ? 0 : Appearance.sizes.barHeight  
+            right: root.barEdge === "right" ? root.barThickness : 0
+            bottom: root.barEdge === "bottom" ? root.barThickness : 0
         }
         WlrLayershell.namespace: "quickshell:popup"
         WlrLayershell.layer: WlrLayer.Overlay
