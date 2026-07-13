@@ -11,8 +11,9 @@ fi
 
 set_recording_state() {
     local state=$1
+    local STATE_FILE="$HOME/.local/state/quickshell/states.json"
     local tmp=$(mktemp)
-    jq ".bar.utilButtons.isRecording = $state" "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+    jq ".record.enable = $state" "$STATE_FILE" > "$tmp" && mv "$tmp" "$STATE_FILE"
 }
 
 getdate() {

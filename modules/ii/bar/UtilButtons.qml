@@ -89,7 +89,7 @@ Item {
                 implicitWidth: btn.implicitWidth + timerRevealer.implicitWidth
                 implicitHeight: btn.implicitHeight
 
-                property bool isRecording: Config.options.bar.utilButtons.isRecording
+                property bool isRecording: Persistent.states.record.enable
                 property int elapsedSeconds: 0
 
                 onIsRecordingChanged: {
@@ -152,8 +152,8 @@ Item {
         Component {
             id: screenRecordM3
             UtilButton {
-                iconText: Config.options.bar.utilButtons.isRecording ? "stop_circle" : "screen_record"
-                forceHovered: Config.options.bar.utilButtons.isRecording
+                iconText: Persistent.states.record.enable ? "stop_circle" : "screen_record"
+                forceHovered: Persistent.states.record.enable
                 onClicked: Quickshell.execDetached([Directories.recordScriptPath])
             }
         }
