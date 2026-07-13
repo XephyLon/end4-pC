@@ -175,7 +175,7 @@ BarWidgetSwitcher {
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colTertiaryContainer
                 Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: -13
+                Layout.leftMargin: -10
                 StyledText {
                     id: ampmText
                     anchors.centerIn: parent
