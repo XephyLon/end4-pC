@@ -15,7 +15,11 @@ Customized and maintained by **pctrade**
 
 ## 🎬 Showcase
 
-https://www.youtube.com/watch?v=o0Vsh7eVchs
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=o0Vsh7eVchs">
+    <img src="https://img.youtube.com/vi/o0Vsh7eVchs/maxresdefault.jpg" alt="Material 3 Expressive x Linux" width="85%" style="border-radius: 12px; box-shadow: 0px 10px 30px rgba(0,0,0,0.5);"/>
+  </a>
+</p>
 
 </div>
 
