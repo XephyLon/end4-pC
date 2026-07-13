@@ -74,11 +74,13 @@ hl.env("qsConfig", "end4-pC")
 
 ### ⚙️ Settings keybind
 
-To open the settings panel, add this to your Hyprland config: eg
+To open the settings panel, add this to your Hyprland config:
 
 ```lua
 hl.bind("SUPER + escape", hl.dsp.global("quickshell:settingsToggle"), {description = "Toggle settings"})
 ```
+
+> **Note:** Settings is an overlay panel, not a regular window — `Super + Q` won't close it. Use the same keybind to toggle it or press `Escape`.
 
 ## 🙏 Credits
 
