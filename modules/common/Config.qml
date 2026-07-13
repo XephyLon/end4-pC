@@ -273,9 +273,11 @@ Singleton {
                     }
                     property JsonObject worldClock: JsonObject {
                         property bool enable: false
+                        property list<string> timezones: ["Australia/Sydney", "Asia/Tokyo", "Europe/London", "America/New_York"]
                         property string placementStrategy: "free"
                         property real x: 400
                         property real y: 100
+                        property string sizeMode: "2x2" 
                     }
 
                     property JsonObject userCard: JsonObject {
