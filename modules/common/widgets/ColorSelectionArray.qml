@@ -14,24 +14,33 @@ RowLayout {
     property string text: "Color"
     property string currentValue: ""
     property var options: ["primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer1", "layer0"]
+    property bool showLabel: true
+    property real itemSpacing: 10
     signal selected(string newValue)
 
     MaterialSymbol {
+        visible: root.showLabel
         text: root.icon
         iconSize: Appearance.font.pixelSize.normal + 5
         color: Appearance.colors.colOnLayer1
     }
 
     StyledText {
+        visible: root.showLabel
         text: root.text
         font.pixelSize: Appearance.font.pixelSize.normal
         color: Appearance.colors.colOnLayer1
     }
 
-    Item { Layout.fillWidth: true }
+    Item {
+        visible: root.showLabel
+        Layout.fillWidth: true
+    }
 
-    RowLayout {
-        spacing: 10
+    Flow {
+        Layout.fillWidth: !root.showLabel
+        Layout.preferredWidth: root.showLabel ? implicitWidth : -1
+        spacing: root.itemSpacing
 
         Repeater {
             model: root.options

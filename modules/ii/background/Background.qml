@@ -25,7 +25,6 @@ import qs.modules.ii.background.widgets.calendar
 import qs.modules.ii.background.widgets.worldclock
 import qs.modules.ii.background.widgets.usercard
 
-
 Variants {
     id: root
     model: Quickshell.screens
@@ -402,6 +401,18 @@ Variants {
                     }
                 }
                 FadeLoader {
+                    shown: Config.options.background.widgets.calendar.enable
+                        && (Config.options.background.screenList.length === 0
+                            || Config.options.background.screenList.includes(bgRoot.screen.name))
+                    sourceComponent: CalendarWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                    }
+                }
+                FadeLoader {
                     shown: Config.options.background.widgets.weather.enable
                         && (Config.options.background.screenList.length === 0
                             || Config.options.background.screenList.includes(bgRoot.screen.name))
@@ -474,18 +485,6 @@ Variants {
                     }
                 }
                 FadeLoader {
-                    shown: Config.options.background.widgets.calendar.enable
-                        && (Config.options.background.screenList.length === 0
-                            || Config.options.background.screenList.includes(bgRoot.screen.name))
-                    sourceComponent: CalendarWidget {
-                        screenWidth: bgRoot.screen.width
-                        screenHeight: bgRoot.screen.height
-                        scaledScreenWidth: bgRoot.screen.width
-                        scaledScreenHeight: bgRoot.screen.height
-                        wallpaperScale: 1
-                    }
-                }
-                FadeLoader {
                     shown: Config.options.background.widgets.worldClock.enable
                         && (Config.options.background.screenList.length === 0
                             || Config.options.background.screenList.includes(bgRoot.screen.name))
@@ -508,6 +507,18 @@ Variants {
                         scaledScreenHeight: bgRoot.screen.height
                         wallpaperScale: 1
                     }
+                }
+            }
+            MouseArea {
+                id: desktopRightClickArea
+                anchors.fill: parent
+                z: -2
+                acceptedButtons: Qt.RightButton
+                onClicked: (mouse) => {
+                    GlobalStates.desktopMenuScreen = bgRoot.screen
+                    GlobalStates.desktopMenuX = mouse.x
+                    GlobalStates.desktopMenuY = mouse.y
+                    GlobalStates.desktopMenuOpen = true
                 }
             }
         }

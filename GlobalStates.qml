@@ -35,6 +35,10 @@ Singleton {
     property Item currentPageInstance: null
     property list<real> visualizerPoints: []
     property bool desktopWidgetKeyboardFocus: false
+    property bool desktopMenuOpen: false
+    property var desktopMenuScreen: null
+    property real desktopMenuX: 0
+    property real desktopMenuY: 0
 
     onSidebarRightOpenChanged: {
         if (GlobalStates.sidebarRightOpen) {

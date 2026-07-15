@@ -38,26 +38,28 @@ ContentPage {
 
     Component.onCompleted: {
         const h = Config.options.hyprland
-        HyprlandConfig.set("decoration:rounding",                   h.decoration.rounding)
-        HyprlandConfig.set("decoration:blur:enabled",               h.decoration.blur.enabled ? 1 : 0)
-        HyprlandConfig.set("decoration:blur:size",                  h.decoration.blur.size)
-        HyprlandConfig.set("decoration:blur:passes",                h.decoration.blur.passes)
-        HyprlandConfig.set("decoration:active_opacity",             h.decoration.activeOpacity)
-        HyprlandConfig.set("decoration:inactive_opacity",           h.decoration.inactiveOpacity)
-        HyprlandConfig.set("general:border_size",                   h.general.borderSize)
-        HyprlandConfig.set("general:gaps_in",                       h.general.gapsIn)
-        HyprlandConfig.set("general:gaps_out",                      h.general.gapsOut)
-        HyprlandConfig.set("general:layout",                        h.general.layout)
-        HyprlandConfig.set("animations:enabled",                    h.animations.enable ? 1 : 0)
-        HyprlandConfig.set("input:kb_layout",                       h.input.kbLayout)
-        HyprlandConfig.set("input:numlock_by_default",              h.input.numlock ? 1 : 0)
-        HyprlandConfig.set("input:repeat_delay",                    h.input.repeatDelay)
-        HyprlandConfig.set("input:repeat_rate",                     h.input.repeatRate)
-        HyprlandConfig.set("input:follow_mouse",                    h.input.followMouse)
-        HyprlandConfig.set("input:touchpad:natural_scroll",         h.input.touchpad.naturalScroll ? 1 : 0)
-        HyprlandConfig.set("input:touchpad:disable_while_typing",   h.input.touchpad.disableWhileTyping ? 1 : 0)
-        HyprlandConfig.set("input:touchpad:clickfinger_behavior",   h.input.touchpad.clickfingerBehavior ? 1 : 0)
-        HyprlandConfig.set("input:touchpad:scroll_factor",          h.input.touchpad.scrollFactor)
+        HyprlandConfig.setMany({
+            "decoration:rounding":                  h.decoration.rounding,
+            "decoration:blur:enabled":              h.decoration.blur.enabled ? 1 : 0,
+            "decoration:blur:size":                 h.decoration.blur.size,
+            "decoration:blur:passes":               h.decoration.blur.passes,
+            "decoration:active_opacity":            h.decoration.activeOpacity,
+            "decoration:inactive_opacity":          h.decoration.inactiveOpacity,
+            "general:border_size":                  h.general.borderSize,
+            "general:gaps_in":                      h.general.gapsIn,
+            "general:gaps_out":                     h.general.gapsOut,
+            "general:layout":                       h.general.layout,
+            "animations:enabled":                   h.animations.enable ? 1 : 0,
+            "input:kb_layout":                      h.input.kbLayout,
+            "input:numlock_by_default":             h.input.numlock ? 1 : 0,
+            "input:repeat_delay":                   h.input.repeatDelay,
+            "input:repeat_rate":                    h.input.repeatRate,
+            "input:follow_mouse":                   h.input.followMouse,
+            "input:touchpad:natural_scroll":        h.input.touchpad.naturalScroll ? 1 : 0,
+            "input:touchpad:disable_while_typing":  h.input.touchpad.disableWhileTyping ? 1 : 0,
+            "input:touchpad:clickfinger_behavior":  h.input.touchpad.clickfingerBehavior ? 1 : 0,
+            "input:touchpad:scroll_factor":         h.input.touchpad.scrollFactor
+        })
     }
     MonitorConfigOption { id: monitorConfig }
 

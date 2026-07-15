@@ -75,7 +75,14 @@ Item {
     }
 
     Layout.fillHeight: true
-    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? materialRow.implicitWidth : Math.min(rowLayout.implicitWidth + 8, 280))
+    implicitWidth: vertical 
+        ? Appearance.sizes.verticalBarWidth 
+        : (isMaterial 
+            ? materialRow.implicitWidth 
+            : Math.max(
+                Config.options.bar.media.minWidth,
+                Math.min(rowLayout.implicitWidth + 8, Config.options.bar.media.maxWidth)
+            ))
     implicitHeight: vertical ? (isMaterial ? 32 : mediaCircProg.implicitHeight) : Appearance.sizes.barHeight
 
     Timer {

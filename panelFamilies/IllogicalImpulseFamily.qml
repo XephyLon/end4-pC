@@ -22,6 +22,7 @@ import qs.modules.ii.sidebarRight
 import qs.modules.ii.overlay
 import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
+import qs.modules.ii.desktopMenu
 
 Scope {
     PanelLoader { extraCondition: !Config.options.bar.vertical; component: Bar {} }
@@ -44,4 +45,5 @@ Scope {
     PanelLoader { extraCondition: Config.options.bar.vertical; component: VerticalBar {} }
     PanelLoader { component: WallpaperSelector {} }
     PanelLoader { component: Settings {} }
+    PanelLoader { component: DesktopMenu {} }
 }

@@ -495,6 +495,17 @@ ContentPage {
                     checked: Config.options.bar.media.alwaysVisible
                     onCheckedChanged: { Config.options.bar.media.alwaysVisible = checked; }
                 }
+                ConfigSpinBox {
+                    icon: "width"
+                    text: Translation.tr("Max media width")
+                    value: Config.options.bar.media.maxWidth
+                    from: 100
+                    to: 500
+                    stepSize: 10
+                    onValueChanged: {
+                        Config.options.bar.media.maxWidth = value;
+                    }
+                }
             }
         }
 
