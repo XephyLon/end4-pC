@@ -45,6 +45,7 @@ Scope {
         return Config.options.bar.bottom ? "right" : "left"
     }
     readonly property real gap: Config.options.bar.cornerStyle === 3 ? Appearance.sizes.hyprlandGapsOut : 0
+    readonly property bool cornerStyleReducesGap: Config.options.bar.cornerStyle === 1 || Config.options.bar.cornerStyle === 2
     readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
 
     function filterDuplicatePlayers(players) {
@@ -125,16 +126,16 @@ Scope {
             }
             margins {
                 top: {
-                    if (root.barEdge === "top") return root.barThickness + root.gap
-                    if (root.barEdge === "bottom") return panelWindow.screen.height - root.barThickness - root.gap - playerColumnLayout.implicitHeight
+                    if (root.barEdge === "top") return root.barThickness + (root.cornerStyleReducesGap ? -root.gap -6 : root.gap)
+                    if (root.barEdge === "bottom") return panelWindow.screen.height - root.barThickness - (root.cornerStyleReducesGap ? -root.gap : root.gap) - playerColumnLayout.implicitHeight
                     if (root.mediaPosition === "left") return root.gap
                     if (root.mediaPosition === "right") return panelWindow.screen.height - playerColumnLayout.implicitHeight - root.gap
                     return (panelWindow.screen.height - playerColumnLayout.implicitHeight) / 2
                 }
                 left: {
-                    if (root.barEdge === "left") return root.barThickness + root.gap
-                    if (root.barEdge === "right") return panelWindow.screen.width - root.barThickness - root.gap - root.widgetWidth
-                    if (root.mediaPosition === "left") return root.gap
+                    if (root.barEdge === "left") return root.barThickness + (root.cornerStyleReducesGap ? -root.gap : root.gap)
+                    if (root.barEdge === "right") return panelWindow.screen.width - root.barThickness - (root.cornerStyleReducesGap ? -root.gap : root.gap) - root.widgetWidth
+                    if (root.mediaPosition === "left") return 0
                     if (root.mediaPosition === "right") return panelWindow.screen.width - root.widgetWidth - root.gap
                     return (panelWindow.screen.width - root.widgetWidth) / 2
                 }
