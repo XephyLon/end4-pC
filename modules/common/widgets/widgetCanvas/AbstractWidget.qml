@@ -42,11 +42,25 @@ MouseArea {
         return null
     }
 
+    function updateCenterHighlight() {
+        var canvas = findCanvas(root.parent)
+        if (!canvas) return
+        var widgetCenterX = dragProxy.x + root.width / 2
+        var widgetCenterY = dragProxy.y + root.height / 2
+        var threshold = root.gridSize
+        var nearX = Math.abs(widgetCenterX - canvas.width / 2) < threshold
+        var nearY = Math.abs(widgetCenterY - canvas.height / 2) < threshold
+        canvas.setCenterActive(nearX, nearY)
+    }
+
     Item {
         id: dragProxy
         parent: root.parent
         x: root.x
         y: root.y
+
+        onXChanged: if (root.dragging) root.updateCenterHighlight()
+        onYChanged: if (root.dragging) root.updateCenterHighlight()
     }
 
     Binding {
@@ -67,6 +81,24 @@ MouseArea {
     onDraggingChanged: {
         var canvas = findCanvas(root.parent)
         if (canvas) canvas.setDragging(dragging)
+
+        if (!dragging && canvas) {
+            var left = root.x
+            var right = root.x + root.width
+            var top = root.y
+            var bottom = root.y + root.height
+            var verticalLines = [left, right]
+            var horizontalLines = [top, bottom]
+
+            var widgetCenterX = root.x + root.width / 2
+            var widgetCenterY = root.y + root.height / 2
+            if (Math.abs(widgetCenterX - canvas.width / 2) < root.gridSize / 2)
+                verticalLines.push(canvas.width / 2)
+            if (Math.abs(widgetCenterY - canvas.height / 2) < root.gridSize / 2)
+                horizontalLines.push(canvas.height / 2)
+
+            canvas.flashLines(verticalLines, horizontalLines)
+        }
 
         dragProxy.x = root.x
         dragProxy.y = root.y
