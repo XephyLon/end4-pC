@@ -6,6 +6,7 @@ MouseArea {
     property int gridSize: 24
     property bool showGrid: false
     readonly property bool isWidgetCanvas: true
+    readonly property bool gridVisible: showGrid && Config.options.background.showGrid
 
     property bool centerXActive: false
     property bool centerYActive: false
@@ -24,7 +25,7 @@ MouseArea {
     }
 
     Repeater {
-        model: root.showGrid ? Math.ceil(root.width / root.gridSize) : 0
+        model: root.gridVisible ? Math.ceil(root.width / root.gridSize) : 0
         delegate: Rectangle {
             required property int index
             x: index * root.gridSize
@@ -35,7 +36,7 @@ MouseArea {
     }
 
     Repeater {
-        model: root.showGrid ? Math.ceil(root.height / root.gridSize) : 0
+        model: root.gridVisible ? Math.ceil(root.height / root.gridSize) : 0
         delegate: Rectangle {
             required property int index
             y: index * root.gridSize
@@ -47,7 +48,7 @@ MouseArea {
 
     Rectangle {
         id: centerLineV
-        visible: root.showGrid
+        visible: root.gridVisible
         x: root.width / 2 - width / 2
         width: root.centerXActive ? 2 : 1
         height: root.height
@@ -67,7 +68,7 @@ MouseArea {
 
     Rectangle {
         id: centerLineH
-        visible: root.showGrid
+        visible: root.gridVisible
         y: root.height / 2 - height / 2
         width: root.width
         height: root.centerYActive ? 2 : 1

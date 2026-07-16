@@ -97,7 +97,8 @@ MouseArea {
             if (Math.abs(widgetCenterY - canvas.height / 2) < root.gridSize / 2)
                 horizontalLines.push(canvas.height / 2)
 
-            canvas.flashLines(verticalLines, horizontalLines)
+            if (Config.options.background.showSnapLines)
+                canvas.flashLines(verticalLines, horizontalLines)
         }
 
         dragProxy.x = root.x

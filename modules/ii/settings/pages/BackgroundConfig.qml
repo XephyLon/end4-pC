@@ -749,7 +749,6 @@ ContentPage {
                     configEntry: Config.options.background
                 }
             }
-
             
             GridLayout {
                 Layout.fillWidth: true
@@ -855,6 +854,31 @@ ContentPage {
                                 font.pixelSize: Appearance.font.pixelSize.small
                                 color: Appearance.colors.colSubtext
                             }
+                        }
+                    }
+                }
+            }
+            ContentSubsection {
+                title: Translation.tr("Canvas")
+                Layout.bottomMargin: 10
+
+                GroupedList {
+                    ConfigSwitch {
+                        Layout.fillWidth: true
+                        buttonIcon: "grid_4x4"
+                        text: Translation.tr("Show alignment grid while dragging")
+                        checked: Config.options.background.showGrid
+                        onCheckedChanged: {
+                            Config.options.background.showGrid = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        Layout.fillWidth: true
+                        buttonIcon: "align_horizontal_center"
+                        text: Translation.tr("Show snap lines when dropping")
+                        checked: Config.options.background.showSnapLines
+                        onCheckedChanged: {
+                            Config.options.background.showSnapLines = checked;
                         }
                     }
                 }
