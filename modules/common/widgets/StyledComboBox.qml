@@ -75,6 +75,7 @@ ComboBox {
             }
 
             StyledText {
+                id: buttonLabel
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 color: Appearance.colors.colOnSecondaryContainer
@@ -83,6 +84,13 @@ ComboBox {
                 verticalAlignment: Text.AlignVCenter
             }
         }
+    }
+
+    StyledToolTip {
+        extraVisibleCondition: false
+        alternativeVisibleCondition: root.hovered && buttonLabel.truncated
+        delay: 500
+        text: buttonLabel.text
     }
 
     delegate: ItemDelegate {
@@ -147,6 +155,7 @@ ComboBox {
             }
 
             StyledText {
+                id: label
                 Layout.fillWidth: true
                 Layout.preferredHeight: Appearance.font.pixelSize.larger
                 color: itemDelegate.colText
@@ -154,6 +163,13 @@ ComboBox {
                 elide: Text.ElideRight
                 verticalAlignment: Text.AlignVCenter
             }
+        }
+
+        StyledToolTip {
+            extraVisibleCondition: false
+            alternativeVisibleCondition: itemDelegate.hovered && label.truncated
+            delay: 500
+            text: label.text
         }
     }
 
