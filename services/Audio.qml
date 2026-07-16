@@ -20,7 +20,7 @@ Singleton {
     property real value: sink?.audio.volume ?? 0
     
     function friendlyDeviceName(node) {
-        return (node.nickname || node.description || Translation.tr("Unknown"));
+        return (node.description || node.nickname || Translation.tr("Unknown"));
     }
     function appNodeDisplayName(node) {
         return (node.properties["application.name"] || node.description || node.name)
