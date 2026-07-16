@@ -193,21 +193,25 @@ ContentPage {
                         { displayName: Translation.tr("Separated"), icon: "view_column_2",  value: "separated" }
                     ]
                 }
-                ConfigSelectionArray {
-                    text: Translation.tr("Automatically hide")
-                    icon: "preview_off"
-                    currentValue: Config.options.bar.autoHide.enable
-                    onSelected: newValue => { Config.options.bar.autoHide.enable = newValue; }
-                    options: [
-                        { displayName: Translation.tr("No"),  icon: "close", value: false },
-                        { displayName: Translation.tr("Yes"), icon: "check", value: true }
-                    ]
-                }
-                ConfigSwitch {
-                    buttonIcon: "variable_insert"
-                    text: Translation.tr("Show Background")
-                    checked: Config.options.bar.showBackground
-                    onCheckedChanged: { Config.options.bar.showBackground = checked; }
+                ConfigRow{
+                    uniform: true
+                    ConfigSwitch {
+                        buttonIcon: "variable_insert"
+                        text: Translation.tr("Show Background")
+                        enabled: Config.options.bar.cornerStyle === 0 || Config.options.bar.cornerStyle === 1
+                        checked: Config.options.bar.showBackground
+                        onCheckedChanged: { Config.options.bar.showBackground = checked; }
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Autohide")
+                        icon: "preview_off"
+                        currentValue: Config.options.bar.autoHide.enable
+                        onSelected: newValue => { Config.options.bar.autoHide.enable = newValue; }
+                        options: [
+                            { displayName: Translation.tr("No"),  icon: "close", value: false },
+                            { displayName: Translation.tr("Yes"), icon: "check", value: true }
+                        ]
+                    }
                 }
             }
         }
