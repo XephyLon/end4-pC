@@ -12,7 +12,7 @@ Singleton {
     function rebuildFromLoadedFiles() {
         let loaded = [];
         let map = {};
-        [clockManifestFile, batteryManifestFile].forEach(fileView => {
+        [clockManifestFile, batteryManifestFile, dockerManifestFile].forEach(fileView => {
             if (!fileView.loaded) return;
             try {
                 const text = fileView.text();
@@ -36,6 +36,11 @@ Singleton {
     FileView {
         id: batteryManifestFile
         path: Quickshell.shellPath("modules/common/plugins/bundled/battery/manifest.json")
+        onLoaded: root.rebuildFromLoadedFiles()
+    }
+    FileView {
+        id: dockerManifestFile
+        path: Quickshell.shellPath("modules/common/plugins/bundled/docker/manifest.json")
         onLoaded: root.rebuildFromLoadedFiles()
     }
 }
