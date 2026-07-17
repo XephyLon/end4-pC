@@ -111,7 +111,7 @@ services/                  Singletons wrapping external state/processes - one pe
   HyprlandXkb.qml              Tracks active keyboard layout via Hyprland's `activelayout` IPC event
   Notifications.qml            org.freedesktop.Notifications server + notification history
   Brightness.qml, Battery.qml, Hyprsunset.qml, Network.qml, BluetoothStatus.qml, TrayService.qml,
-  MprisController.qml, Weather.qml, ... (one per integration)
+  MprisController.qml, Weather.qml, Docker.qml, ... (one per integration)
 
 panelFamilies/              PanelLoader.qml (thin LazyLoader) + IllogicalImpulseFamily.qml (the
                             actual list of panels for the "ii" family)
