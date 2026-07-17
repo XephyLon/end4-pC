@@ -268,3 +268,13 @@ concurrently, not as a default for every subagent dispatch.
 - Don't add config options, abstractions, or generalized "for future use" plumbing beyond what was
   asked. This is a personal shell config, not a library - concrete and specific beats flexible and
   speculative.
+- **Give interactive elements (buttons, toggles, fields) an explicit `id`, regardless of which
+  `RowLayout`/`ColumnLayout` they end up nested in.** A component's conceptual scope (e.g. "this
+  action is per-item" vs. "this action is section-wide") doesn't have to dictate where it's declared
+  in the tree - but Qt Quick Layouts (`RowLayout`, `ColumnLayout`) only apply their `Layout.*`
+  positioning to their own *direct* children, so grouping unrelated-scope actions into one shared
+  row still means they're literal siblings in that row's declaration. Use `id`s to keep each element
+  individually addressable/referenceable (bindings, tooltips, future logic) independent of that
+  physical grouping, rather than relying on structural position alone. See the AI provider action
+  buttons in `ServicesConfig.qml` (`removeProviderButton`, `addProviderButton`, `fetchModelsButton`)
+  for the pattern.
