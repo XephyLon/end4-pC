@@ -79,6 +79,10 @@ Singleton {
                 property string provider: "yandere"
             }
 
+            property JsonObject night: JsonObject {
+                property bool temperatureActive: false
+            }
+
             property JsonObject idle: JsonObject {
                 property bool inhibit: false
             }

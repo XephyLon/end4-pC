@@ -20,9 +20,5 @@ QuickToggleModel {
     }
     hasMenu: true
 
-    Component.onCompleted: {
-        Hyprsunset.fetchState()
-    }
-    
     tooltipText: Translation.tr("Night Light | Right-click to configure")
 }

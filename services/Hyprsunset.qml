@@ -88,7 +88,19 @@ Singleton {
 
     function load() {
         root.startHyprsunset();
-        root.ensureState();
+        if (root.automatic) {
+            root.ensureState();
+        } else {
+            // Not in automatic mode: there's no reliable way to query hyprsunset's actual
+            // on/off state back (hyprctl hyprsunset temperature always reports the last
+            // explicitly-set numeric value, identity mode never resets it), so restore
+            // whatever we last explicitly set instead of guessing from that query.
+            if (Persistent.states.night.temperatureActive) {
+                root.enableTemperature();
+            } else {
+                root.disableTemperature();
+            }
+        }
     }
 
     Timer {
@@ -103,6 +115,7 @@ Singleton {
 
     function enableTemperature() {
         root.temperatureActive = true;
+        Persistent.states.night.temperatureActive = true;
 
         // console.log("[Hyprsunset] Enabling");
         root.startHyprsunset();
@@ -111,6 +124,7 @@ Singleton {
 
     function disableTemperature() {
         root.temperatureActive = false;
+        Persistent.states.night.temperatureActive = false;
         // console.log("[Hyprsunset] Disabling");
         Quickshell.execDetached(["hyprctl", "hyprsunset", "identity"]);
     }
@@ -122,27 +136,6 @@ Singleton {
 
         root.startHyprsunset();
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset gamma ${root.gamma}`]);
-    }
-
-    function fetchState() {
-        fetchProc.running = true;
-    }
-
-    Process {
-        id: fetchProc
-        running: true
-        command: ["bash", "-c", "hyprctl hyprsunset temperature"]
-        stdout: StdioCollector {
-            id: stateCollector
-            onStreamFinished: {
-                const output = stateCollector.text.trim();
-                if (output.length == 0 || output.startsWith("Couldn't"))
-                    root.temperatureActive = false;
-                else
-                    root.temperatureActive = (output != "6500"); // 6500 is the default when off
-                // console.log("[Hyprsunset] Fetched state:", output, "->", root.temperatureActive);
-            }
-        }
     }
 
     function toggleTemperature(active = undefined) {
