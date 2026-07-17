@@ -110,6 +110,44 @@ into every layout variant that repeats the pattern (this codebase often has near
 for e.g. horizontal-bar vs vertical-bar vs "material style" variants of the same widget - grep for
 the sibling property name to find all of them before considering the wiring complete).
 
+## New features and bugfixes need tests
+
+`tests/` (see `tests/README.md`) covers pure-logic code — singletons and functions that don't
+require a live Hyprland/PipeWire session (color math, config schema defaults, device-name
+selection logic, output parsers, etc.) via `qmltestrunner`. When you add a new feature or fix a
+bug in anything that qualifies:
+
+- **Add or extend a test that would have caught the bug**, or that exercises the new logic - not
+  just a happy-path smoke test, but the actual edge case that was wrong or that the feature needs
+  to keep working.
+- **Run `./tests/run_tests.sh` before committing** and confirm it's green. A change that breaks an
+  existing test is a regression, full stop - fix the change, don't loosen or delete the test to
+  make it pass, unless the test itself was wrong (and if so, say so explicitly in the commit).
+- If the code you're touching depends on live compositor/audio state and genuinely can't be unit
+  tested with the current harness (most `modules/ii/*` UI), that's fine - fall back to this file's
+  "Verify against the live shell" workflow instead, but say so rather than silently skipping tests.
+- CI (`.github/workflows/tests.yml`) runs this suite on every PR - a red check is a blocker, not a
+  suggestion.
+
+## Keep AGENT.md in sync
+
+`AGENT.md` is the architecture reference agents read *before* touching this repo - it goes stale
+the moment a change it describes lands without an update. If your change does any of the
+following, update the relevant section of `AGENT.md` in the same PR/commit series:
+
+- Adds, removes, or repurposes a directory, singleton, or service (the "Directory map" section).
+- Changes how the Config system, Hyprland integration, or layer-shell behavior works (their
+  respective sections) - not just adds a new leaf setting, but changes a mechanism.
+- Introduces a new non-obvious gotcha future agents will hit (a new entry in the relevant gotchas
+  list, in the style of the existing `colLayer0` vs `colLayer1` note).
+- Adds or changes anything about the test suite (`tests/`) - keep `AGENT.md`'s description of it,
+  and `tests/README.md`, matching what actually exists.
+
+A feature that only adds a leaf-level setting or a new widget instance using existing patterns
+usually doesn't need an `AGENT.md` update - use judgment, but when in doubt, a one-line addition to
+the relevant section costs little and saves the next agent from re-discovering what you just
+learned.
+
 ## Multi-agent / parallel workflows (git worktrees)
 
 This repo lives at `~/.config/quickshell/end4-pC` and is loaded by exactly one running process,
