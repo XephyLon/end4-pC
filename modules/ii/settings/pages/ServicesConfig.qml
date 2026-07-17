@@ -129,6 +129,8 @@ ContentPage {
                             DialogButton {
                                 Layout.alignment: Qt.AlignRight
                                 buttonText: Translation.tr("Remove Provider")
+                                toggled: true
+                                colEnabled: Appearance.colors.colOnPrimary
                                 onClicked: {
                                     let providers = [...Config.options.ai.customProviders];
                                     providers.splice(index, 1);
@@ -146,6 +148,8 @@ ContentPage {
                         Layout.alignment: Qt.AlignCenter
                         Layout.topMargin: 10
                         buttonText: Translation.tr("Add Provider")
+                        toggled: true
+                        colEnabled: Appearance.colors.colOnPrimary
                         onClicked: {
                             let providers = [...(Config.options.ai.customProviders || [])];
                             providers.push({ enabled: false, name: "New Provider", baseUrl: "" });
@@ -158,6 +162,8 @@ ContentPage {
                     Layout.alignment: Qt.AlignRight
                     Layout.topMargin: 10
                     buttonText: Translation.tr("Fetch Models")
+                    toggled: true
+                    colEnabled: Appearance.colors.colOnPrimary
                     onClicked: {
                         Ai.fetchCustomModels();
                     }
