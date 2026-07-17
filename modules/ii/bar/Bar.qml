@@ -52,12 +52,39 @@ Scope {
                 }
                 property bool superShow: false
                 property bool mustShow: hoverRegion.containsMouse || superShow
+                property var thisMonitorData: HyprlandData.monitors.find(m => m.name === barRoot.screen?.name)
+                property bool monitorHasFullscreen: HyprlandData.workspaceById[thisMonitorData?.activeWorkspace?.id]?.hasfullscreen ?? false
+                property bool monitorHasSpecialOpen: (thisMonitorData?.specialWorkspace?.name ?? "") !== ""
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 : Appearance.sizes.baseBarHeight + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0) + (Config.options.bar.cornerStyle === 2 ? -6 : 0)
                 WlrLayershell.namespace: "quickshell:bar"
+                // Overlay layer only while special workspace sits on top of a fullscreen window on this monitor,
+                // else Top layer so fullscreen apps cover the bar as normal (Hyprland buries Top layer under fullscreen+special).
+                WlrLayershell.layer: (monitorHasFullscreen && monitorHasSpecialOpen) ? WlrLayer.Overlay : WlrLayer.Top
                 implicitHeight: Appearance.sizes.barHeight + Appearance.rounding.screenRounding
+                // When Overlay-layer, bar shares a layer with the screen-corner click zones (ScreenCorners.qml)
+                // and same-layer overlap is resolved by stacking, not layer priority - bar was winning and
+                // swallowing the tiny corner-open hit rects. Carve them out of the bar's own mask so clicks
+                // reach the corners underneath. Only relevant on the edge the bar and corners share.
+                property bool cutOutCornerOpenZones: (monitorHasFullscreen && monitorHasSpecialOpen) && (Config.options.bar.bottom === Config.options.sidebar.cornerOpen.bottom)
+                property int cornerOpenCutWidth: cutOutCornerOpenZones ? Config.options.sidebar.cornerOpen.cornerRegionWidth : 0
+                property int cornerOpenCutHeight: cutOutCornerOpenZones ? Config.options.sidebar.cornerOpen.cornerRegionHeight : 0
                 mask: Region {
                     item: hoverMaskRegion
+                    Region {
+                        intersection: Intersection.Subtract
+                        x: 0
+                        y: Config.options.bar.bottom ? (barRoot.height - barRoot.cornerOpenCutHeight) : 0
+                        width: barRoot.cornerOpenCutWidth
+                        height: barRoot.cornerOpenCutHeight
+                    }
+                    Region {
+                        intersection: Intersection.Subtract
+                        x: barRoot.width - barRoot.cornerOpenCutWidth
+                        y: Config.options.bar.bottom ? (barRoot.height - barRoot.cornerOpenCutHeight) : 0
+                        width: barRoot.cornerOpenCutWidth
+                        height: barRoot.cornerOpenCutHeight
+                    }
                 }
                 color: "transparent"
 
