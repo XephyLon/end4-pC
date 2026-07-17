@@ -7,6 +7,7 @@ import qs.modules.common.widgets
 ContentPage {
     id: page
     forceWidth: true
+    bottomContentPadding: 15
 
     component IconButton : RippleButton {
         id: iRoot
@@ -491,10 +492,24 @@ ContentPage {
                 placeholderText: Translation.tr("City name")
                 text: Config.options.bar.weather.city
                 wrapMode: TextEdit.Wrap
+
+                Timer {
+                    id: cityDebounceTimer
+                    interval: 1000
+                    running: false
+                    onTriggered: {
+                        Config.options.bar.weather.city = parent.text
+                    }
+                }
+
                 onTextChanged: {
-                    Config.options.bar.weather.city = text;
+                    cityDebounceTimer.restart()
                 }
             }
+        }
+        WorldMap {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 300
         }
     }
 }
