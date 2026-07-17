@@ -7,6 +7,7 @@ import qs.modules.common.widgets
 ContentPage {
     id: page
     forceWidth: true
+    bottomContentPadding: 15
 
     //This was intended to go into the results more deeply but in the end I didn't like it but I left it just in case lol
     function goTo(term) {
@@ -319,10 +320,24 @@ ContentPage {
                 placeholderText: Translation.tr("City name")
                 text: Config.options.bar.weather.city
                 wrapMode: TextEdit.Wrap
+
+                Timer {
+                    id: cityDebounceTimer
+                    interval: 1000
+                    running: false
+                    onTriggered: {
+                        Config.options.bar.weather.city = parent.text
+                    }
+                }
+
                 onTextChanged: {
-                    Config.options.bar.weather.city = text;
+                    cityDebounceTimer.restart()
                 }
             }
+        }
+        WorldMap {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 300
         }
     }
 }
