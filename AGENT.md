@@ -192,6 +192,13 @@ Two non-obvious behaviors have bitten this codebase before and are worth knowing
   child region, sized/positioned to exactly exclude the other surface's hit-zone. See `Bar.qml`'s
   `mask:` property for the pattern (it excludes `ScreenCorners.qml`'s corner-open hit rects when both
   are forced to `Overlay`).
+- **Compositor blur behind a surface depends on that surface's actual alpha clearing a per-namespace
+  threshold**, not just on "blur" being enabled somewhere. The companion Hyprland config
+  (`~/.config/hypr/hyprland/rules.lua`) sets `hl.layer_rule({ match = { namespace = "quickshell:.*" },
+  ignore_alpha = 0.79 })` (plus a `blur = true` rule) - pixels with alpha below that threshold are
+  *not* blurred, they just show plain unblurred transparency. This is why picking the right
+  `Appearance.colors.colLayer*` token matters for a floating popup, not just picking "a" transparent
+  one - see the Design language section below.
 
 ## Design language
 
@@ -206,3 +213,16 @@ Shared building blocks to reach for before writing something from scratch: `Styl
 `MaterialSymbol`, `ResourceCard`, `GroupedList` + `ConfigSwitch`/`ConfigSpinBox`/
 `ConfigSelectionArray` (settings rows), `StyledPopup`, `StyledRectangularShadow`. All in
 `modules/common/widgets/`.
+
+**`colLayer0` vs `colLayer1`/`colLayer2`/...** - these are not interchangeable "just pick one that
+looks transparent enough" tokens:
+- `colLayer0`'s alpha comes from `backgroundTransparency` (gated by
+  `Config.options.appearance.transparency.enable`, ~0.89 opacity by default) - use it for the
+  **outermost** background of a standalone floating surface (a popup/toast/OSD that sits directly on
+  a `PanelWindow { color: "transparent" }` with nothing else behind it). See `MediaControls.qml` and
+  `OsdTextIndicator.qml`.
+- `colLayer1` and above derive from `contentTransparency` (~0.43 default, also gated by the same
+  `enable` toggle) and are meant for **cards nested inside an already-opaque parent surface** (e.g.
+  a list item inside the sidebar, which itself already provides a `colLayer0` backing). Used at the
+  top level of a standalone popup, this token's alpha is low enough to visibly show
+  through-but-unblurred transparency without ever clearing the `ignore_alpha` threshold above.

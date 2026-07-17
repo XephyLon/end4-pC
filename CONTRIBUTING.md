@@ -42,6 +42,15 @@ Two real examples from this project's history that justify the paranoia:
 - A "fix" that made a bar clickable under fullscreen+special-workspace, verified via debug logging
   as "layer and mask both correct," still failed for an unrelated reason (a same-layer stacking
   conflict with a different widget) that only showed up once the user tried it for real.
+- A new toast's background used `Appearance.colors.colLayer1` - a legitimate, correctly
+  transparency-aware design token, chosen by reasonable-looking analogy to other cards in the
+  codebase. It still rendered as flat unblurred transparency in practice, for two compounding
+  reasons invisible from reading the QML alone: `contentTransparency` (which `colLayer1` derives
+  from) wasn't gated on the `transparency.enable` toggle the way `backgroundTransparency` was, and
+  even after fixing that, `colLayer1`'s alpha never cleared the Hyprland companion config's
+  per-namespace `ignore_alpha` blur threshold the way `colLayer0` does. "Uses a real design token"
+  is not the same as "uses the *right* design token for this position in the surface hierarchy" -
+  see AGENT.md's `colLayer0` vs `colLayer1` note.
 
 ## Don't guess at `hyprctl` CLI syntax on this machine
 
