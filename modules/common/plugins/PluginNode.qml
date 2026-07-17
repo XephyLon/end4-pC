@@ -26,6 +26,8 @@ Item {
             case "SystemInfo.ramUsage": return SystemInfo.ramUsage;
             case "Audio.volume": return Audio.volume;
             case "Audio.muted": return Audio.muted;
+            case "Docker.runningCount": return Docker.runningCount;
+            case "Docker.totalCount": return Docker.totalCount;
             default: return undefined;
         }
     }

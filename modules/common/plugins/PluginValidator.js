@@ -10,7 +10,8 @@ const bindingWhitelist = [
     "DateTime.time", "DateTime.date", "DateTime.shortDate",
     "Battery.percentage", "Battery.charging", "Battery.pluggedIn",
     "Network.networkName", "Network.primaryIp", "SystemInfo.cpuUsage",
-    "SystemInfo.ramUsage", "Audio.volume", "Audio.muted"
+    "SystemInfo.ramUsage", "Audio.volume", "Audio.muted",
+    "Docker.runningCount", "Docker.totalCount"
 ];
 
 function validateManifest(manifest) {

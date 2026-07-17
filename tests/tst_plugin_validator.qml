@@ -25,6 +25,29 @@ TestCase {
         verify(result.valid, "Manifest should be valid: " + (result.error ? result.error : ""));
     }
 
+    function test_validDockerManifest() {
+        var manifest = {
+            "id": "my_docker",
+            "name": "My Docker",
+            "desktopWidget": {
+                "type": "Row",
+                "children": [
+                    {
+                        "type": "StyledText",
+                        "bindings": { "text": "Docker.runningCount" }
+                    },
+                    {
+                        "type": "StyledText",
+                        "bindings": { "text": "Docker.totalCount" }
+                    }
+                ]
+            }
+        };
+
+        var result = PluginValidator.validateManifest(manifest);
+        verify(result.valid, "Docker manifest should be valid: " + (result.error ? result.error : ""));
+    }
+
     function test_missingId() {
         var manifest = {
             "name": "My Clock",
