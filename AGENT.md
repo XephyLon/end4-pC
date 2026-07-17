@@ -79,7 +79,9 @@ modules/common/             Shared, feature-agnostic building blocks
                               here rather than hardcoding values.
   Directories.qml            Singleton: XDG paths + shell-specific cache/state paths
   Icons.qml, Images.qml       Icon/image lookup helpers
-  Persistent.qml              Helper for persisting values outside Config's JSON
+  Persistent.qml              Helper for persisting fixed-schema values outside Config's JSON
+  plugins/                    Declarative plugin renderer/validator/manager. PluginState.qml keeps
+                              dynamic per-plugin, per-monitor layout in raw plugin-state.json.
   widgets/                   Shared UI components: StyledText, StyledComboBox, StyledSlider,
                               StyledToolTip(+Content), RippleButton, MaterialSymbol, ResourceCard,
                               PopupToolTip, StyledPopup, GroupedList, ConfigSwitch/ConfigSpinBox/
@@ -259,6 +261,12 @@ arrays, etc.) rather than static declarations - e.g. the plugin system in
   `Binding loop detected for property "implicitWidth"` and gives up re-evaluating it. Leave the
   Loader unanchored so it mirrors the item's natural size instead; set explicit width/height via the
   item's own properties (e.g. manifest `props`) when a fixed size is actually wanted.
+- **Do not put dynamic object maps in a `JsonAdapter`, including through a `property var`.** Plugin
+  ids and monitor names are not known when QML compiles, while `JsonObject` only supports declared
+  properties. Writing undeclared children caused `JsonAdapter::deserializeRec` to segfault on the
+  following config reload; declaring a `property var` map also segfaulted while loading it. Keep
+  dynamic plugin layout in `PluginState.qml`, which parses and writes `plugin-state.json` with a raw
+  `FileView`. Fixed-schema user settings still belong in `Config.qml`.
 
 ## Design language
 

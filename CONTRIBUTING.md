@@ -165,6 +165,12 @@ into every layout variant that repeats the pattern (this codebase often has near
 for e.g. horizontal-bar vs vertical-bar vs "material style" variants of the same widget - grep for
 the sibling property name to find all of them before considering the wiring complete).
 
+Dynamic plugin state is the exception to the fixed `Config.qml` schema. Values keyed by runtime
+plugin ids or monitor names must go through `modules/common/plugins/PluginState.qml`, which stores
+raw JSON in `~/.config/illogical-impulse/plugin-state.json`. Do not add undeclared children or a
+dynamic `property var` object to a `JsonAdapter`; both forms have caused native crashes during
+deserialization.
+
 ## New features and bugfixes need tests
 
 `tests/` (see `tests/README.md`) covers pure-logic code — singletons and functions that don't

@@ -36,8 +36,13 @@ AbstractWidget {
     onReleased: {
         root.targetX = root.x;
         root.targetY = root.y;
-        configEntry.x = root.targetX;
-        configEntry.y = root.targetY;
+        // configEntry is undefined for widgets whose configEntryName isn't a pre-declared
+        // key under Config.options.background.widgets (e.g. plugin widgets, whose dynamic
+        // per-plugin/per-monitor positions are persisted by PluginState.qml instead).
+        if (configEntry) {
+            configEntry.x = root.targetX;
+            configEntry.y = root.targetY;
+        }
     }
 
     property bool needsColText: false
@@ -99,4 +104,3 @@ AbstractWidget {
         }
     }
 }
-

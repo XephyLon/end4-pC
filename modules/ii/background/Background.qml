@@ -517,6 +517,7 @@ Variants {
                         shown: true
                         sourceComponent: PluginWidget {
                             manifest: PluginManager.manifestsMap[modelData] || null
+                            screenName: bgRoot.screen.name
                             screenWidth: bgRoot.screen.width
                             screenHeight: bgRoot.screen.height
                             scaledScreenWidth: bgRoot.screen.width
