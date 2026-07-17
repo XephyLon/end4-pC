@@ -172,6 +172,15 @@ This is purely a manual-testing/CLI concern - IPC events, layer-shell behavior, 
 QML code touches are unaffected by this; only raw `hyprctl dispatch <dispatcher> <args>` calls typed
 by a human/agent need the Lua-call form on this particular machine.
 
+**`hyprctl hyprsunset temperature` (no argument) is not a reliable on/off query.** It always echoes
+back the last explicitly-`temperature`-set numeric value - calling `hyprctl hyprsunset identity`
+(the "off" dispatch) never resets it to any sentinel, so there is no way to distinguish "identity
+mode, last set to N" from "on at N" through this query. `services/Hyprsunset.qml` used to compare
+this query against a hardcoded `6500` to infer active state (also just factually wrong -
+`hyprsunset --help` confirms the real default is `6000`) and got it wrong on essentially every
+restart. Don't rely on querying `hyprsunset`'s live state at all; track on/off intent yourself
+(see how `Hyprsunset.qml` now persists it via `Persistent.qml` instead).
+
 ## Layer-shell (wlr-layer-shell) gotchas
 
 Widgets that are `PanelWindow`s pick a `WlrLayershell.layer` (`Background < Bottom < Top < Overlay`).
