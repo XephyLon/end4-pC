@@ -100,6 +100,20 @@ Two real examples from this project's history that justify the paranoia:
   easy to conflate. The unit tests here didn't catch it either, because they validated the schema
   function in isolation and never loaded the real bundled manifest files - a passing test suite is
   not the same as the real data path working.
+- A brand-new feature (the plugin system: a new singleton, a new settings page, a new shared-widget
+  property) merged cleanly, tests passed, and a disposable throwaway `qs -p <worktree>` instance
+  even rendered it correctly during review - but the user's actual long-running `qs -c end4-pC`
+  process kept showing an empty page, because that process had been running since *before* the
+  merge and a brand-new `pragma Singleton` file needs the process to actually restart to get
+  registered, not just a hot-reload of edited files (see the Runtime model section of `AGENT.md`).
+  Restarting it (`hyprctl dispatch 'hl.dsp.exec_cmd("killall ydotool qs quickshell; qs -c
+  $qsConfig &")'` - see `~/.config/hypr/hyprland/keybinds.lua` for the canonical form) surfaced four
+  more real, previously-invisible bugs in the same feature (a missing import, an async-API misuse, a
+  `Repeater`/`required property` scoping mistake, and the missing widget property above) - all of
+  which "worked" in the earlier disposable-instance test only because that instance was a fresh
+  process to begin with. When verifying against the live shell, prefer restarting the actual running
+  instance over trusting a separate disposable one, especially for anything involving a new
+  singleton.
 
 ## Don't guess at `hyprctl` CLI syntax on this machine
 
@@ -121,6 +135,21 @@ sites, not just the one you were asked about.
 Pull visual values (colors, spacing, font sizes, animation curves) from `Appearance.qml` rather than
 hardcoding. This is a Material 3 / Material 3 Expressive shell — match that language for new UI
 (rounded containers, tonal color roles, expressive motion) rather than introducing a different look.
+
+**Before using a property on a shared widget, grep the widget's actual source for it** rather than
+assuming it exists because the name would make sense (e.g. assuming `ConfigSwitch` has a
+`description` subtitle property because plenty of list-item patterns have one - it didn't, and the
+assignment silently failed with "Cannot assign to non-existent property," not a load-time error).
+This is the same failure shape as trusting a design token by "looks right" analogy (see the
+`colLayer0`/`colLayer1` example above) - check the real property list, don't infer it.
+
+**`ContentPage` (`modules/common/widgets/ContentPage.qml`) is already a `StyledFlickable` with its
+own internal `ColumnLayout`** (its `default property` puts children into that layout automatically).
+A settings page should declare its sections directly as `ContentPage`'s children - wrapping them in
+another `Flickable`/`ColumnLayout` is redundant and causes a real bug: the inner Flickable ends up
+managed by the outer layout, triggering "Detected anchors on an item that is managed by a layout"
+and broken scroll/sizing behavior. Look at `GeneralConfig.qml`/`ServicesConfig.qml` for the plain
+pattern before adding a new settings page.
 
 ## Settings additions are two-sided
 

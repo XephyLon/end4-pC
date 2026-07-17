@@ -220,6 +220,18 @@ arrays, etc.) rather than static declarations - e.g. the plugin system in
   the renderer's list is the wider one) an unvalidated type reaching the renderer. Treat this the
   same as the Config-schema/settings-page two-sidedness described above: a change to one side isn't
   done until the other side matches.
+- **`FileView` (`Quickshell.Io`) loads asynchronously - `.text()` right after calling `.reload()`
+  is not guaranteed to return the new content.** The correct pattern (used throughout this codebase
+  - `MaterialSymbolsSearch.qml`, `Notifications.qml`, `Emojis.qml`, `Profile.qml`) is to read
+  `.text()` from inside the `onLoaded` handler, not immediately after `reload()`. A `PluginManager`
+  rewrite that called `fileView.reload(); const text = fileView.text();` back-to-back silently got
+  an empty string every time, with no error - only a `console.log` inside the failure branch (which
+  never fired, since nothing *failed*, it just wasn't ready yet) would have revealed it.
+- **`Repeater` only auto-binds a model item to a `required property` declared on the delegate's
+  *root* object, not on a descendant.** `required property var modelData` on a widget nested a level
+  or two inside the actual delegate root throws `Required property modelData was not initialized`
+  for every instance. Put the `required property` on the outermost delegate item and forward it down
+  as an ordinary (non-required) property if a nested child needs it.
 
 ## Design language
 
