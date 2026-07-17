@@ -9,32 +9,33 @@ Singleton {
     property var availablePlugins: []
     property var manifestsMap: ({})
 
-    Component.onCompleted: {
-        loadBundledPlugins();
-    }
-
-    function loadBundledPlugins() {
-        let plugins = ["clock", "battery"];
+    function rebuildFromLoadedFiles() {
         let loaded = [];
         let map = {};
-        for (let i = 0; i < plugins.length; i++) {
-            let path = Quickshell.shellPath("modules/common/plugins/bundled/" + plugins[i] + "/manifest.json");
-            let req = new XMLHttpRequest();
-            req.open("GET", "file://" + path, false);
-            req.send(null);
-            if (req.status === 200 || req.status === 0) {
-                try {
-                    let manifest = JSON.parse(req.responseText);
-                    loaded.push(manifest);
-                    map[manifest.id] = manifest;
-                } catch (e) {
-                    console.log("[PluginManager] Error parsing plugin " + plugins[i] + ": " + e);
-                }
-            } else {
-                console.log("[PluginManager] Error reading " + path);
+        [clockManifestFile, batteryManifestFile].forEach(fileView => {
+            if (!fileView.loaded) return;
+            try {
+                const text = fileView.text();
+                if (!text) return;
+                const manifest = JSON.parse(text);
+                loaded.push(manifest);
+                map[manifest.id] = manifest;
+            } catch (e) {
+                console.log("[PluginManager] Error parsing plugin manifest at " + fileView.path + ": " + e);
             }
-        }
+        });
         root.availablePlugins = loaded;
         root.manifestsMap = map;
+    }
+
+    FileView {
+        id: clockManifestFile
+        path: Quickshell.shellPath("modules/common/plugins/bundled/clock/manifest.json")
+        onLoaded: root.rebuildFromLoadedFiles()
+    }
+    FileView {
+        id: batteryManifestFile
+        path: Quickshell.shellPath("modules/common/plugins/bundled/battery/manifest.json")
+        onLoaded: root.rebuildFromLoadedFiles()
     }
 }
