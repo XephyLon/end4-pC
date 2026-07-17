@@ -87,6 +87,13 @@ RowLayout {
 
             Loader {
                 active: !root.revealed
+                // PasswordChars is a Flickable (drag-to-scroll for long input), so left
+                // enabled it would grab mouse presses meant to focus/position the cursor
+                // in the real TextField beneath it - unlike the lockscreen, which
+                // forceActiveFocus()es its password field programmatically and never
+                // depends on a click landing on the field itself, this field only ever
+                // gets focus by the user clicking it. Keep the overlay purely visual.
+                enabled: false
                 anchors {
                     fill: parent
                     leftMargin: inputField.padding
