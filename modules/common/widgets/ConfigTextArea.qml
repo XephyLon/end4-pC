@@ -31,9 +31,9 @@ RowLayout {
     property bool revealButton: password
     property bool revealed: false
 
-    spacing: 10
-    Layout.leftMargin: 8
-    Layout.rightMargin: 8
+    spacing: Appearance.spacing.normal
+    Layout.leftMargin: Appearance.spacing.small
+    Layout.rightMargin: Appearance.spacing.small
 
     OptionalMaterialSymbol {
         icon: root.buttonIcon
@@ -63,7 +63,7 @@ RowLayout {
 
     RowLayout {
         Layout.alignment: Qt.AlignVCenter
-        spacing: 4
+        spacing: Appearance.spacing.verysmall
 
         Rectangle {
             id: fieldBg
@@ -93,8 +93,8 @@ RowLayout {
             TextArea {
                 id: textArea
                 anchors.fill: parent
-                anchors.leftMargin: 12
-                anchors.rightMargin: 12
+                anchors.leftMargin: Appearance.spacing.normal
+                anchors.rightMargin: Appearance.spacing.normal
                 enabled: root.enabled
                 // TextArea has no echoMode (TextEdit-based, unlike TextField) - masking is
                 // done purely by making the glyphs transparent and drawing PasswordChars

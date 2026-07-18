@@ -51,9 +51,9 @@ Rectangle {
         // Header / Subhead
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
-            spacing: 2
+            Layout.leftMargin: Appearance.spacing.normal
+            Layout.rightMargin: Appearance.spacing.normal
+            spacing: Appearance.spacing.unsharpen
 
             StyledText {
                 Layout.fillWidth: true

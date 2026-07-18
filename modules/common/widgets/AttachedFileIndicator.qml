@@ -96,7 +96,7 @@ Rectangle {
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.topMargin: 4
+                Layout.topMargin: Appearance.spacing.verysmall
                 text: root.filePath
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 font.family: Appearance.font.family.monospace

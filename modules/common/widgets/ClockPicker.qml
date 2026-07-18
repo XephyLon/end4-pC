@@ -149,7 +149,7 @@ Item {
     ColumnLayout {
         anchors.centerIn: parent
         visible: root.running
-        spacing: 2
+        spacing: Appearance.spacing.unsharpen
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
