@@ -116,7 +116,7 @@ MouseArea {
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
-            bottomMargin: 20
+            bottomMargin: Appearance.spacing.verylarge
         }
         Behavior on anchors.bottomMargin {
             animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
@@ -127,8 +127,8 @@ MouseArea {
 
         // Fingerprint
         Loader {
-            Layout.leftMargin: 10
-            Layout.rightMargin: 6
+            Layout.leftMargin: Appearance.spacing.normal
+            Layout.rightMargin: Appearance.spacing.small
             Layout.alignment: Qt.AlignVCenter
             active: root.context.fingerprintsConfigured
             visible: active
@@ -249,14 +249,14 @@ MouseArea {
             right: mainIsland.left
             top: mainIsland.top
             bottom: mainIsland.bottom
-            rightMargin: 10
+            rightMargin: Appearance.spacing.normal
         }
         scale: root.toolbarScale
         opacity: root.toolbarOpacity
 
         // Username
         IconAndTextPair {
-            Layout.leftMargin: 8
+            Layout.leftMargin: Appearance.spacing.small
             icon: "account_circle"
             visible: !Config.options.lock.showMedia || MprisController.activePlayer === null
             text: SystemInfo.username
@@ -264,8 +264,8 @@ MouseArea {
 
         // Media player info 
         Loader {
-            Layout.leftMargin: 2
-            Layout.rightMargin: 2
+            Layout.leftMargin: Appearance.spacing.unsharpen
+            Layout.rightMargin: Appearance.spacing.unsharpen
             Layout.alignment: Qt.AlignVCenter
             active: MprisController.activePlayer !== null
             visible: active && Config.options.lock.showMedia
@@ -286,7 +286,7 @@ MouseArea {
                 
                 RowLayout {
                     id: mediaRow
-                    spacing: 8
+                    spacing: Appearance.spacing.small
                     anchors.centerIn: parent
                     
                     Rectangle {
@@ -391,12 +391,12 @@ MouseArea {
 
         // Keyboard layout (Xkb)
         Loader {
-            Layout.rightMargin: 8
+            Layout.rightMargin: Appearance.spacing.small
             Layout.fillHeight: true
             visible: !Config.options.lock.showMedia || MprisController.activePlayer === null
 
             sourceComponent: Row {
-                spacing: 8
+                spacing: Appearance.spacing.small
 
                 MaterialSymbol {
                     id: keyboardIcon
@@ -419,7 +419,7 @@ MouseArea {
 
         // Keyboard layout (Fcitx)
         Bar.SysTray {
-            Layout.rightMargin: 10
+            Layout.rightMargin: Appearance.spacing.normal
             Layout.alignment: Qt.AlignVCenter
             showSeparator: false
             showOverflowMenu: false
@@ -435,7 +435,7 @@ MouseArea {
             left: mainIsland.right
             top: mainIsland.top
             bottom: mainIsland.bottom
-            leftMargin: 10
+            leftMargin: Appearance.spacing.normal
         }
 
         scale: root.toolbarScale
@@ -493,10 +493,10 @@ MouseArea {
         required property string text
         property color color: Appearance.colors.colOnSurfaceVariant
 
-        spacing: 4
+        spacing: Appearance.spacing.verysmall
         Layout.fillHeight: true
-        Layout.leftMargin: 10
-        Layout.rightMargin: 10
+        Layout.leftMargin: Appearance.spacing.normal
+        Layout.rightMargin: Appearance.spacing.normal
         
 
         MaterialSymbol {
