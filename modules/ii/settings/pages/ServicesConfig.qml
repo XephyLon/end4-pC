@@ -306,6 +306,7 @@ ContentPage {
 
             GroupedList {
                 ConfigSwitch {
+                    buttonIcon: "update"
                     text: Translation.tr("Enable update checks")
                     checked: Config.options.updates.enableCheck
                     onCheckedChanged: {
