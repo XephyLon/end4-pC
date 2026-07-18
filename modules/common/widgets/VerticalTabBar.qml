@@ -22,7 +22,7 @@ Item {
         : cardHeight
 
     Behavior on implicitHeight {
-        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
     }
 
     Repeater {
@@ -61,13 +61,13 @@ Item {
             opacity: isCurrent ? 1 : (0.3 + ((totalCount - 1 - visualPosition) / Math.max(totalCount - 1, 1)) * 0.3)
 
             Behavior on y {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
             }
             Behavior on color {
-                ColorAnimation { duration: 200; easing.type: Easing.OutCubic }
+                ColorAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
             }
             Behavior on opacity {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
             }
 
             Rectangle {
@@ -94,7 +94,7 @@ Item {
                     color: parent.parent.isCurrent
                         ? Appearance.colors.colOnLayer1
                         : Appearance.colors.colOnPrimaryContainer
-                    Behavior on color { ColorAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: Appearance.animation.elementMoveFast.duration } }
                 }
 
                 StyledText {
@@ -102,7 +102,7 @@ Item {
                     color: parent.parent.isCurrent
                         ? Appearance.colors.colOnLayer1
                         : Appearance.colors.colOnPrimaryContainer
-                    Behavior on color { ColorAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: Appearance.animation.elementMoveFast.duration } }
                 }
             }
 

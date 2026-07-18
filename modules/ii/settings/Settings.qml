@@ -78,7 +78,7 @@ Scope {
             opacity: GlobalStates.settingsOpen ? 1 : 0
             z: 0
             Behavior on opacity {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
             }
             MouseArea {
                 anchors.fill: parent
@@ -102,10 +102,10 @@ Scope {
             scale: GlobalStates.settingsOpen ? 1 : 0.95
 
             Behavior on opacity {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
             }
             Behavior on scale {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
             }
 
             Keys.onPressed: (event) => {

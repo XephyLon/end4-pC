@@ -125,9 +125,9 @@ ContentSubsection {
                 radius: 2
                 color: Appearance.colors.colPrimary
 
-                Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-                Behavior on y { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-                Behavior on opacity { NumberAnimation { duration: 150 } }
+                Behavior on x { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutCubic } }
+                Behavior on y { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutCubic } }
+                Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration } }
 
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -169,7 +169,7 @@ ContentSubsection {
             animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
         }
         Behavior on opacity {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
         }
 
         Rectangle {

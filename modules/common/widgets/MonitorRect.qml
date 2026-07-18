@@ -53,9 +53,9 @@ Rectangle {
         : Appearance.colors.colLayer0Border
     border.width: (isDragging || isSelected) ? 2 : 1
 
-    Behavior on x { enabled: !isDragging; NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-    Behavior on y { enabled: !isDragging; NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-    Behavior on color { ColorAnimation { duration: 150 } }
+    Behavior on x { enabled: !isDragging; NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutCubic } }
+    Behavior on y { enabled: !isDragging; NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutCubic } }
+    Behavior on color { ColorAnimation { duration: Appearance.animation.elementMoveFaster.duration } }
 
     Rectangle {
         visible: root.isDragging && !root.hasOverlap

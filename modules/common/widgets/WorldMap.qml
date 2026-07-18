@@ -103,8 +103,8 @@ Item {
         width: 14
         height: 14
 
-        Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+        Behavior on x { NumberAnimation { duration: Appearance.animation.elementMoveEnter.duration; easing.type: Easing.OutCubic } }
+        Behavior on y { NumberAnimation { duration: Appearance.animation.elementMoveEnter.duration; easing.type: Easing.OutCubic } }
 
         Rectangle {
             id: ring

@@ -384,7 +384,7 @@ AbstractBackgroundWidget {
             anchors { right: card.right; bottom: card.bottom; margins: 4 }
             opacity: (root.containsMouse || resizeArea.containsMouse || resizeArea.pressed) ? 0.5 : 0
             visible: opacity > 0 && !Config.options.background.widgetsLocked
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration } }
 
             MouseArea {
                 id: resizeArea
@@ -420,7 +420,7 @@ AbstractBackgroundWidget {
             anchors { left: card.left; bottom: card.bottom; margins: 4 }
             opacity: (root.containsMouse || toggleArea.containsMouse) && root.sizeMode !== "1x1" ? 0.5 : 0
             visible: opacity > 0 && !Config.options.background.widgetsLocked
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration } }
 
             MaterialSymbol {
                 anchors.centerIn: parent
