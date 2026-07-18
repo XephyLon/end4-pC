@@ -15,7 +15,7 @@ ColumnLayout {
     id: root
     Layout.fillWidth: true
     width: parent.width
-    spacing: 4
+    spacing: Appearance.spacing.verysmall
 
     function addEntry() {
         let list = []
@@ -92,7 +92,7 @@ ColumnLayout {
             id: headerRightGroup
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 6
+            spacing: Appearance.spacing.small
 
             StyledText {
                 width: 118
@@ -118,7 +118,7 @@ ColumnLayout {
         StyledText {
             anchors.left: parent.left
             anchors.right: headerRightGroup.left
-            anchors.rightMargin: 6
+            anchors.rightMargin: Appearance.spacing.small
             anchors.verticalCenter: parent.verticalCenter
             text: Translation.tr("App or Command")
             color: Appearance.colors.colSubtext
@@ -143,7 +143,7 @@ ColumnLayout {
                 id: rightGroup
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
+                spacing: Appearance.spacing.small
 
                 ConfigSpinBox {
                     width: 118
@@ -198,7 +198,7 @@ ColumnLayout {
                 id: cmdArea
                 anchors.left: parent.left
                 anchors.right: rightGroup.left
-                anchors.rightMargin: 6
+                anchors.rightMargin: Appearance.spacing.small
                 placeholderText: Translation.tr("App (e.g. firefox)")
                 text: entryRow.modelData.cmd ?? ""
                 wrapMode: TextEdit.Wrap
@@ -226,7 +226,7 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.topMargin: 4
+        Layout.topMargin: Appearance.spacing.verysmall
 
         Item { Layout.fillWidth: true }
 

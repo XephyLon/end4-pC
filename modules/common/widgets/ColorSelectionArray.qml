@@ -6,9 +6,9 @@ import qs.modules.common.widgets
 RowLayout {
     id: root
     Layout.fillWidth: true
-    Layout.leftMargin: 8
-    Layout.rightMargin: 8
-    spacing: 10
+    Layout.leftMargin: Appearance.spacing.small
+    Layout.rightMargin: Appearance.spacing.small
+    spacing: Appearance.spacing.normal
 
     property string icon: "palette"
     property string text: "Color"

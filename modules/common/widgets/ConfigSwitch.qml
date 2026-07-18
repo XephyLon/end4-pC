@@ -18,7 +18,7 @@ RippleButton {
     onClicked: checked = !checked
 
     contentItem: RowLayout {
-        spacing: 10
+        spacing: Appearance.spacing.normal
         OptionalMaterialSymbol {
             id: iconWidget
             icon: root.buttonIcon

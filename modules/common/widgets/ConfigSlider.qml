@@ -6,9 +6,9 @@ import qs.services
 
 RowLayout {
     id: root
-    spacing: 10
-    Layout.leftMargin: 8
-    Layout.rightMargin: 8
+    spacing: Appearance.spacing.normal
+    Layout.leftMargin: Appearance.spacing.small
+    Layout.rightMargin: Appearance.spacing.small
 
     property string text: ""
     property string buttonIcon: ""
@@ -23,7 +23,7 @@ RowLayout {
     RowLayout {
         id: row
         visible: root.showLabel
-        spacing: 10
+        spacing: Appearance.spacing.normal
 
         OptionalMaterialSymbol {
             id: iconWidget

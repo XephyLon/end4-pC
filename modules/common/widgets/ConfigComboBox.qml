@@ -20,9 +20,9 @@ RowLayout {
 
     signal selected(var newValue)
 
-    spacing: 10
-    Layout.leftMargin: 8
-    Layout.rightMargin: 8
+    spacing: Appearance.spacing.normal
+    Layout.leftMargin: Appearance.spacing.small
+    Layout.rightMargin: Appearance.spacing.small
 
     OptionalMaterialSymbol {
         icon: root.buttonIcon

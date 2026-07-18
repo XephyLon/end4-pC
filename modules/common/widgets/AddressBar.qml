@@ -15,7 +15,7 @@ Rectangle {
 
     signal navigateToDirectory(string path)
 
-    property real padding: 6
+    property real padding: Appearance.spacing.small
     implicitWidth: mainLayout.implicitWidth + padding * 2
     implicitHeight: mainLayout.implicitHeight + padding * 2
     color: Appearance.colors.colLayer2
@@ -31,7 +31,7 @@ Rectangle {
             fill: parent
             margins: root.padding
         }
-        spacing: 8
+        spacing: Appearance.spacing.small
 
         RippleButton {
             id: parentDirButton
@@ -67,7 +67,7 @@ Rectangle {
                 StyledTextInput {
                     id: addressInput
                     anchors.fill: parent
-                    padding: 10
+                    padding: Appearance.spacing.normal
                     text: root.directory
 
                     Keys.onPressed: event => {

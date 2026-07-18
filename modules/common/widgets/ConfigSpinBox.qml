@@ -11,12 +11,12 @@ RowLayout {
     property alias stepSize: spinBoxWidget.stepSize
     property alias from: spinBoxWidget.from
     property alias to: spinBoxWidget.to
-    spacing: 10
-    Layout.leftMargin: 8
-    Layout.rightMargin: 8
+    spacing: Appearance.spacing.normal
+    Layout.leftMargin: Appearance.spacing.small
+    Layout.rightMargin: Appearance.spacing.small
 
     RowLayout {
-        spacing: 10
+        spacing: Appearance.spacing.normal
         OptionalMaterialSymbol {
             icon: root.icon
             opacity: root.enabled ? 1 : 0.4
