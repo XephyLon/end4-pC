@@ -48,14 +48,14 @@ AbstractBackgroundWidget {
             id: flipAnim
             NumberAnimation {
                 target: flipScale; property: "xScale"
-                to: 0; duration: 150; easing.type: Easing.InQuad
+                to: 0; duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.InQuad
             }
             ScriptAction {
                 script: root.showingSettings = !root.showingSettings
             }
             NumberAnimation {
                 target: flipScale; property: "xScale"
-                to: 1; duration: 150; easing.type: Easing.OutQuad
+                to: 1; duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutQuad
             }
         }
 
@@ -306,7 +306,7 @@ AbstractBackgroundWidget {
                 opacity: (root.containsMouse || toggleArea.containsMouse || toggleArea.pressed) ? 0.5 : 0
                 visible: opacity > 0 && !Config.options.background.widgetsLocked
 
-                Behavior on opacity { NumberAnimation { duration: 150 } }
+                Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration } }
 
                 MaterialSymbol {
                     anchors.centerIn: parent

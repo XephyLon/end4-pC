@@ -61,12 +61,12 @@ Item {
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 150
+                        duration: Appearance.animation.elementMoveFaster.duration
                     }
                 }
                 Behavior on desaturation {
                     NumberAnimation {
-                        duration: 150
+                        duration: Appearance.animation.elementMoveFaster.duration
                     }
                 }
             }

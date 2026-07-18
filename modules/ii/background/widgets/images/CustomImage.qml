@@ -168,7 +168,7 @@ AbstractBackgroundWidget {
             z: 1
 
             Behavior on opacity {
-                NumberAnimation { duration: 150 }
+                NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration }
             }
 
             MouseArea {

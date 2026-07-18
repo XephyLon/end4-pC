@@ -115,8 +115,8 @@ Item {
                     buttonRadius: recordingItem.isRecording ? Appearance.rounding.normal : implicitHeight / 2
                     onClicked: Quickshell.execDetached([Directories.recordScriptPath])
 
-                    Behavior on colBackground { ColorAnimation { duration: 200 } }
-                    Behavior on buttonRadius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                    Behavior on colBackground { ColorAnimation { duration: Appearance.animation.elementMoveFast.duration } }
+                    Behavior on buttonRadius { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
 
                     MaterialSymbol {
                         horizontalAlignment: Qt.AlignHCenter
@@ -124,7 +124,7 @@ Item {
                         text: recordingItem.isRecording ? "stop_circle" : "screen_record"
                         iconSize: Appearance.font.pixelSize.large
                         color: recordingItem.isRecording ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer2
-                        Behavior on color { ColorAnimation { duration: 200 } }
+                        Behavior on color { ColorAnimation { duration: Appearance.animation.elementMoveFast.duration } }
                     }
                 }
 

@@ -411,7 +411,7 @@ AbstractBackgroundWidget {
             visible: opacity > 0 && !Config.options.background.widgetsLocked
 
             Behavior on opacity {
-                NumberAnimation { duration: 150 }
+                NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration }
             }
 
             MouseArea {

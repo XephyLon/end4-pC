@@ -23,9 +23,9 @@ Text {
 
     component Anim: NumberAnimation {
         target: root
-        duration: 300 / 2
+        duration: Appearance.animation.elementMoveFaster.duration
         easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+        easing.bezierCurve: Appearance.animation.elementMoveFaster.bezierCurve
     }
 
     Component.onCompleted: {

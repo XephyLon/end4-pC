@@ -341,9 +341,9 @@ Item {
                             Layout.maximumWidth: 120
                             Behavior on text {
                                 SequentialAnimation {
-                                    NumberAnimation { target: artistText; property: "x"; to: -artistText.width; duration: 150; easing.type: Easing.InQuad }
+                                    NumberAnimation { target: artistText; property: "x"; to: -artistText.width; duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.InQuad }
                                     PropertyAction { target: artistText; property: "text" }
-                                    NumberAnimation { target: artistText; property: "x"; from: artistText.width; to: 0; duration: 150; easing.type: Easing.OutQuad }
+                                    NumberAnimation { target: artistText; property: "x"; from: artistText.width; to: 0; duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutQuad }
                                 }
                             }
                         }
@@ -358,9 +358,9 @@ Item {
                             Layout.maximumWidth: 120
                             Behavior on text {
                                 SequentialAnimation {
-                                    NumberAnimation { target: titleText; property: "x"; to: -artistText.width; duration: 150; easing.type: Easing.InQuad }
+                                    NumberAnimation { target: titleText; property: "x"; to: -artistText.width; duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.InQuad }
                                     PropertyAction { target: titleText; property: "text" }
-                                    NumberAnimation { target: titleText; property: "x"; from: artistText.width; to: 0; duration: 150; easing.type: Easing.OutQuad }
+                                    NumberAnimation { target: titleText; property: "x"; from: artistText.width; to: 0; duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutQuad }
                                 }
                             }
                         }

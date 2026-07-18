@@ -400,7 +400,7 @@ Item {
                             z: 1
 
                             opacity: isBeingDragged ? 0.15 : 1.0
-                            Behavior on opacity { NumberAnimation { duration: 150 } }
+                            Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration } }
                             Behavior on x {
                                 enabled: !isBeingDragged
                                 NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
