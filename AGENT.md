@@ -142,6 +142,14 @@ Consequences for making changes:
   etc. row added manually in the relevant page, bound with `checked: Config.options.x.y` /
   `onCheckedChanged: Config.options.x.y = checked`.
 - Consumers read `Config.options.x.y` directly and reactively - no separate "load config" step.
+- **`Config.readWriteDelay`'s 50ms debounce only covers the disk write - it does nothing to stop
+  every keystroke from firing whatever else reactively reads that option.** A `ConfigTextArea`
+  bound as `onValueChanged: Config.options.x.y = value` re-triggers every consumer of
+  `Config.options.x.y` (e.g. the media widget's player-matching, or a quote re-render) once per
+  keystroke, not once per edit. Where the option feeds something more than a simple display value,
+  add a local `Timer` (600ms is the convention already used, see `BarConfig.qml`'s
+  `mediaDebounceTimer` and `BackgroundConfig.qml`'s `quoteDebounceTimer`) that assigns to
+  `Config.options.x.y` only after typing pauses, instead of assigning directly in `onValueChanged`.
 
 `GlobalStates.qml` is the sibling singleton for state that should **not** persist (is this sidebar
 currently open, is the bar in autoHide-triggered-show state, etc.) - don't add ephemeral UI state to
@@ -294,14 +302,14 @@ arrays, etc.) rather than static declarations - e.g. the plugin system in
   process (see `TempScreenshotProcess.qml`) turns a silent stale-reuse into an honest empty-file
   failure instead.
 - **An overlay `Item` placed on top of an interactive control (e.g. a decorative `Flickable`-based
-  mask drawn over a `TextField`) will silently eat the clicks meant to focus that control**, unless
-  the overlay is `enabled: false`. `ConfigInput`'s `password: true` mode draws `PasswordChars` (a
-  `Flickable`) directly over the real `TextField` to render Material-shape dots in place of the
-  native echo glyphs; without `enabled: false` on that overlay's `Loader`, clicking the field just
-  fed the click to the Flickable instead, so the field never focused and typing appeared to do
-  nothing. This only surfaces where focus is obtained by clicking - `LockSurface.qml`'s password box
-  uses the identical overlay structure but never hit this, since it `forceActiveFocus()`s itself
-  programmatically instead of depending on a click.
+  mask drawn over a `TextField`/`TextArea`) will silently eat the clicks meant to focus that
+  control**, unless the overlay is `enabled: false`. `ConfigTextArea`'s `password: true` mode draws
+  `PasswordChars` (a `Flickable`) directly over the real field to render Material-shape dots in
+  place of the native glyphs; without `enabled: false` on that overlay's `Loader`, clicking the
+  field just fed the click to the Flickable instead, so the field never focused and typing appeared
+  to do nothing. This only surfaces where focus is obtained by clicking - `LockSurface.qml`'s
+  password box uses the identical overlay structure but never hit this, since it
+  `forceActiveFocus()`s itself programmatically instead of depending on a click.
 - **A QML property binding that calls a C++ invokable method (not a property read) will not
   re-evaluate when that method's underlying data changes.** `DesktopEntries.applications` takes a
   few seconds to populate after `qs` starts. `DragApps.qml`'s pinned-app launcher bound
@@ -334,16 +342,20 @@ durations, both for dark/light theme correctness and for consistency with the re
 **Strict UI Guidelines:** See [`docs/M3_GUIDELINES.md`](docs/M3_GUIDELINES.md) for the definitive rules on tokens, rounding, layering, and expressive motion that all new components must follow.
 
 Shared building blocks to reach for before writing something from scratch: `StyledText`,
-`StyledComboBox`, `StyledSlider`, `StyledToolTip`/`StyledToolTipContent`, `RippleButton`,
-`MaterialSymbol`, `ResourceCard`, `GroupedList` + `ConfigSwitch`/`ConfigSpinBox`/
-`ConfigSelectionArray`/`ConfigInput` (settings rows), `StyledPopup`, `StyledRectangularShadow`. All
-in `modules/common/widgets/`.
+`StyledComboBox`/`StyledComboBoxSearch`, `StyledSlider`, `StyledToolTip`/`StyledToolTipContent`,
+`RippleButton`, `MaterialSymbol`, `ResourceCard`, `GroupedList` + `ConfigSwitch`/`ConfigSpinBox`/
+`ConfigSelectionArray`/`ConfigComboBox`/`ConfigTextArea` (settings rows), `StyledPopup`,
+`StyledRectangularShadow`. All in `modules/common/widgets/`.
 
-`ConfigInput` is the text-entry counterpart to `ConfigSwitch` (icon + label/description on the left,
-a lockscreen-style pill `TextField` on the right). Set `password: true` for masked input - this
-draws the lockscreen's `PasswordChars` Material-shape dots over the field instead of the native echo
-glyphs, and shows an optional reveal toggle (`revealButton`, defaults to `password`). There is no
-separate `ConfigPassword`; it was folded into this one flag.
+`ConfigTextArea` is the text-entry counterpart to `ConfigSwitch` (icon + label/description on the
+left, a bordered `TextArea` field on the right) and is the standard single-line settings field -
+prefer it over building a raw `TextField`/`TextArea` row by hand. Set `password: true` for masked
+input - this draws the lockscreen's `PasswordChars` Material-shape dots over the field instead of
+the native glyphs (`TextArea` has no `echoMode`, unlike `TextField`, so masking is done purely by
+making the real glyphs transparent), and shows an optional reveal toggle (`revealButton`, defaults
+to `password`). There used to be a separate pill-shaped `ConfigInput` for this; it was removed and
+folded into `ConfigTextArea` once `ConfigTextArea` became the de facto standard across the settings
+pages - don't reintroduce a second single-line text-entry widget.
 
 `GroupedList` normally separates and subtly rounds each row. Set `cohesive: true` when several
 controls form one continuous semantic unit (for example, the fields and actions for a single custom
