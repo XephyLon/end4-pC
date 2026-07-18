@@ -226,25 +226,39 @@ Item {
                         }
                     }
 
-                    NavigationRailTabArray {
-                        currentIndex: root.currentPage
-                        expanded: navRail.expanded
-                        colToggled: root.showingProfile ? "transparent" : Appearance.colors.colSecondaryContainer
-                        Repeater {
-                            model: root.pages
-                            NavigationRailButton {
-                                required property var index
-                                required property var modelData
-                                toggled: root.currentPage === index && !root.showingProfile
-                                onPressed: {
-                                    root.currentPage = index
-                                    root.showingProfile = false
+                    // Scrolls when the tabs don't fit the window height (many
+                    // plugins/tabs, short screen); shows nothing extra when they do.
+                    StyledFlickable {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.topMargin: 25 // counter-offset to the FAB's -25 bottomMargin, preserving the original gap
+                        Layout.bottomMargin: Appearance.spacing.small
+                        contentHeight: tabArray.implicitHeight
+                        clip: true
+                        expressiveScroll: true
+
+                        NavigationRailTabArray {
+                            id: tabArray
+                            width: parent.width
+                            currentIndex: root.currentPage
+                            expanded: navRail.expanded
+                            colToggled: root.showingProfile ? "transparent" : Appearance.colors.colSecondaryContainer
+                            Repeater {
+                                model: root.pages
+                                NavigationRailButton {
+                                    required property var index
+                                    required property var modelData
+                                    toggled: root.currentPage === index && !root.showingProfile
+                                    onPressed: {
+                                        root.currentPage = index
+                                        root.showingProfile = false
+                                    }
+                                    expanded: navRail.expanded
+                                    buttonIcon: modelData.icon
+                                    buttonIconRotation: modelData.iconRotation || 0
+                                    buttonText: modelData.name
+                                    showToggledHighlight: false
                                 }
-                                expanded: navRail.expanded
-                                buttonIcon: modelData.icon
-                                buttonIconRotation: modelData.iconRotation || 0
-                                buttonText: modelData.name
-                                showToggledHighlight: false
                             }
                         }
                     }
