@@ -73,7 +73,7 @@ Item {
     }
     Rectangle { // Background
         id: overviewBackground
-        property real padding: 10
+        property real padding: Appearance.spacing.normal
         anchors.fill: parent
         anchors.margins: Appearance.sizes.elevationMargin
 
