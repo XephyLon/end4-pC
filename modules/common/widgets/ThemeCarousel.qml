@@ -61,7 +61,7 @@ Item {
             }
 
             height: listView.height
-            radius: 28
+            radius: Appearance.rounding.verylarge
             clip:   true
 
             color: model.name === "Material"

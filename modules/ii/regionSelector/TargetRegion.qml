@@ -23,7 +23,7 @@ Rectangle {
     color: fillColor
     border.color: borderColor
     border.width: targeted ? 4 : 2
-    radius: 4
+    radius: Appearance.rounding.unsharpenslight
 
     Behavior on color {
         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)

@@ -54,7 +54,7 @@ Item {
                 id: artBackground
                 implicitHeight: 150
                 implicitWidth: 150
-                radius: 16
+                radius: Appearance.rounding.normal
                 color: ColorUtils.transparentize(root.blendedColors.colLayer1, 0.5)
 
                 layer.enabled: true

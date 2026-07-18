@@ -56,7 +56,7 @@ ProgressBar {
                 bottom: parent.bottom
             }
             width: root.valueBarWidth
-            radius: 6
+            radius: Appearance.rounding.unsharpenmore
             color: root.trackColor
             
             Rectangle {

@@ -119,7 +119,7 @@ AbstractBackgroundWidget {
         id: toggleHandle
         width: 16
         height: 16
-        radius: 6
+        radius: Appearance.rounding.unsharpenmore
         color: Appearance.colors.colOnPrimaryContainer
         anchors {
             left: parent.right

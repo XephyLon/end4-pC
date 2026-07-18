@@ -122,7 +122,7 @@ ContentSubsection {
                 visible: false
                 width: 3
                 height: 32 
-                radius: 2
+                radius: Appearance.rounding.unsharpen
                 color: Appearance.colors.colPrimary
 
                 Behavior on x { NumberAnimation { duration: Appearance.animation.elementMoveFaster.duration; easing.type: Easing.OutCubic } }
@@ -133,7 +133,7 @@ ContentSubsection {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: -4
-                    width: 8; height: 8; radius: 4
+                    width: 8; height: 8; radius: Appearance.rounding.full
                     color: Appearance.colors.colPrimary
                 }
 
@@ -141,7 +141,7 @@ ContentSubsection {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: -4
-                    width: 8; height: 8; radius: 4
+                    width: 8; height: 8; radius: Appearance.rounding.full
                     color: Appearance.colors.colPrimary
                 }
             }

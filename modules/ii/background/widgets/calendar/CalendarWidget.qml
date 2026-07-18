@@ -102,7 +102,7 @@ AbstractBackgroundWidget {
 
         implicitWidth: 28
         implicitHeight: 28
-        radius: 14
+        radius: Appearance.rounding.full
         color: isToday ? Appearance.colors.colPrimary : "transparent"
 
         StyledText {
@@ -251,7 +251,7 @@ AbstractBackgroundWidget {
                             Rectangle {
                                 anchors.centerIn: parent
                                 width: 28; height: 28
-                                radius: 14
+                                radius: Appearance.rounding.full
                                 color: modelData.isToday ? Appearance.colors.colPrimary : "transparent"
 
                                 StyledText {
@@ -293,7 +293,7 @@ AbstractBackgroundWidget {
                     }
 
                     Rectangle {
-                        implicitWidth: 26; implicitHeight: 26; radius: 13
+                        implicitWidth: 26; implicitHeight: 26; radius: Appearance.rounding.full
                         color: "transparent"
                         border.width: 1
                         border.color: Appearance.colors.colPrimary
@@ -311,7 +311,7 @@ AbstractBackgroundWidget {
                     }
 
                     Rectangle {
-                        implicitWidth: 26; implicitHeight: 26; radius: 13
+                        implicitWidth: 26; implicitHeight: 26; radius: Appearance.rounding.full
                         color: "transparent"
                         border.width: 1
                         border.color: Appearance.colors.colPrimary
@@ -379,7 +379,7 @@ AbstractBackgroundWidget {
 
         Rectangle {
             id: resizeHandle
-            width: 16; height: 16; radius: 4
+            width: 16; height: 16; radius: Appearance.rounding.unsharpenslight
             color: Appearance.colors.colOnPrimaryContainer
             anchors { right: card.right; bottom: card.bottom; margins: 4 }
             opacity: (root.containsMouse || resizeArea.containsMouse || resizeArea.pressed) ? 0.5 : 0
@@ -415,7 +415,7 @@ AbstractBackgroundWidget {
 
         Rectangle {
             id: toggleHandle
-            width: 16; height: 16; radius: 4
+            width: 16; height: 16; radius: Appearance.rounding.unsharpenslight
             color: Appearance.colors.colOnPrimaryContainer
             anchors { left: card.left; bottom: card.bottom; margins: 4 }
             opacity: (root.containsMouse || toggleArea.containsMouse) && root.sizeMode !== "1x1" ? 0.5 : 0
