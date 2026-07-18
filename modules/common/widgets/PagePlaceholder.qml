@@ -27,12 +27,12 @@ Item {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 5
+        spacing: Appearance.spacing.small
 
         MaterialShapeWrappedMaterialSymbol {
             id: shapeWidget
             Layout.alignment: Qt.AlignHCenter
-            padding: 12
+            padding: Appearance.spacing.normal
             iconSize: 56
             rotation: -30 * (1 - root.opacity)
         }

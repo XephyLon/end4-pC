@@ -106,7 +106,7 @@ Item { // Notification item area
         image: notificationObject.image
         anchors.right: background.left
         anchors.top: background.top
-        anchors.rightMargin: 10
+        anchors.rightMargin: Appearance.spacing.normal
     }
 
     Rectangle { // Background of notification item
@@ -140,7 +140,7 @@ Item { // Notification item area
             id: contentColumn
             anchors.fill: parent
             anchors.margins: expanded ? root.padding : 0
-            spacing: 3
+            spacing: Appearance.spacing.verysmall
 
             Behavior on anchors.margins {
                 animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

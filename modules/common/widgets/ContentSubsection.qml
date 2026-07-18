@@ -10,8 +10,8 @@ ColumnLayout {
     default property alias data: sectionContent.data
 
     Layout.fillWidth: true
-    Layout.topMargin: 4
-    spacing: 2
+    Layout.topMargin: Appearance.spacing.verysmall
+    spacing: Appearance.spacing.unsharpen
 
     RowLayout {
         ContentSubsectionLabel {
@@ -41,6 +41,6 @@ ColumnLayout {
     ColumnLayout {
         id: sectionContent
         Layout.fillWidth: true
-        spacing: 2
+        spacing: Appearance.spacing.unsharpen
     }
 }

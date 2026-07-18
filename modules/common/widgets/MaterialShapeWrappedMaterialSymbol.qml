@@ -9,7 +9,7 @@ MaterialShape {
     property alias iconSize: symbol.iconSize
     property alias font: symbol.font
     property alias colSymbol: symbol.color
-    property real padding: 6
+    property real padding: Appearance.spacing.small
     property var wrappedShape: MaterialShape.Shape.Clover4Leaf
 
     color: Appearance.colors.colSecondaryContainer

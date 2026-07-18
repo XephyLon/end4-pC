@@ -190,10 +190,10 @@ Item {
                     }
 
                     RowLayout {
-                        spacing: 3
+                        spacing: Appearance.spacing.verysmall
                         anchors {
                             top: appIcon.bottom
-                            topMargin: 2
+                            topMargin: Appearance.spacing.unsharpen
                             horizontalCenter: parent.horizontalCenter
                         }
                         Repeater {
@@ -339,7 +339,7 @@ Item {
 
             Rectangle {
                 id: popupBackground
-                property real padding: 5
+                property real padding: Appearance.spacing.small
                 opacity: previewPopup.show ? 1 : 0
                 visible: opacity > 0
                 Behavior on opacity {
@@ -386,7 +386,7 @@ Item {
                                     contentWidth: parent.width - anchors.margins * 2
 
                                     StyledText {
-                                        Layout.margins: 5
+                                        Layout.margins: Appearance.spacing.small
                                         Layout.fillWidth: true
                                         font.pixelSize: Appearance.font.pixelSize.small
                                         text: windowButton.modelData?.title

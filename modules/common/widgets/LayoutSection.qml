@@ -18,7 +18,7 @@ ContentSubsection {
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: 2
+        spacing: Appearance.spacing.unsharpen
 
         Item {
             Layout.fillWidth: true
@@ -27,7 +27,7 @@ ContentSubsection {
             Flow {
                 id: itemFlow
                 anchors.fill: parent
-                spacing: 2
+                spacing: Appearance.spacing.unsharpen
 
                 Repeater {
                     id: itemRepeater
@@ -157,7 +157,7 @@ ContentSubsection {
     Item {
         id: dropdown
         Layout.fillWidth: true
-        Layout.topMargin: 5
+        Layout.topMargin: Appearance.spacing.small
         visible: implicitHeight > 0
         implicitHeight: dropdownOpen ? dropdownRect.implicitHeight + 8 : 0
         opacity: dropdownOpen ? 1 : 0
@@ -175,7 +175,7 @@ ContentSubsection {
         Rectangle {
             id: dropdownRect
             anchors.top: parent.top
-            anchors.topMargin: 4
+            anchors.topMargin: Appearance.spacing.verysmall
             width: parent.width
             implicitHeight: dropdownFlow.implicitHeight + 16
             color: Appearance.colors.colLayer1
@@ -185,8 +185,8 @@ ContentSubsection {
 
             Flow {
                 id: dropdownFlow
-                anchors { fill: parent; margins: 8 }
-                spacing: 2
+                anchors { fill: parent; margins: Appearance.spacing.small }
+                spacing: Appearance.spacing.unsharpen
                 Repeater {
                     model: root.availableWidgets
                     delegate: SelectionGroupButton {

@@ -18,7 +18,7 @@ MouseArea { // Notification group area
     property bool multipleNotifications: notificationCount > 1
     property bool expanded: false
     property bool popup: false
-    property real padding: 10
+    property real padding: Appearance.spacing.normal
     implicitHeight: background.implicitHeight
 
     property real dragConfirmThreshold: 70 // Drag further to discard notification
@@ -150,7 +150,7 @@ MouseArea { // Notification group area
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.margins: root.padding
-            spacing: 10
+            spacing: Appearance.spacing.normal
 
             NotificationAppIcon { // Icons
                 Layout.alignment: Qt.AlignTop
@@ -185,7 +185,7 @@ MouseArea { // Notification group area
                         anchors.left: parent.left
                         anchors.right: expandButton.left
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 5
+                        spacing: Appearance.spacing.small
                         StyledText {
                             id: appName
                             elide: Text.ElideRight
@@ -203,7 +203,7 @@ MouseArea { // Notification group area
                         StyledText {
                             id: timeText
                             // Layout.fillWidth: true
-                            Layout.rightMargin: 10
+                            Layout.rightMargin: Appearance.spacing.normal
                             horizontalAlignment: Text.AlignLeft
                             text: NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)
                             font.pixelSize: topRow.fontSize

@@ -8,7 +8,7 @@ Item {
     id: root
 
     property var monitorConfig
-    property real padding: 20
+    property real padding: Appearance.spacing.verylarge
     property int selectedIndex: 0
     property var previewPositions: ({})
     property bool dragHasOverlap: false
