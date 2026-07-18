@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import qs.modules.common
 import qs.modules.common.widgets
 
 ColumnLayout {
