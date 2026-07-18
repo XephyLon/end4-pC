@@ -13,7 +13,7 @@ RippleButton {
     property real faviconSize: 20
     implicitHeight: 30
     leftPadding: (implicitHeight - faviconSize) / 2
-    rightPadding: 10
+    rightPadding: Appearance.spacing.normal
     buttonRadius: Appearance.rounding.full
     colBackground: Appearance.colors.colSurfaceContainerHighest
     colBackgroundHover: Appearance.colors.colSurfaceContainerHighestHover
@@ -34,7 +34,7 @@ RippleButton {
         RowLayout {
             id: rowLayout
             anchors.fill: parent
-            spacing: 5
+            spacing: Appearance.spacing.small
             Favicon {
                 url: root.url
                 size: root.faviconSize

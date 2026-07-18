@@ -44,7 +44,7 @@ ColumnLayout {
             anchors.right: parent.right
             anchors.leftMargin: codeBlockHeaderPadding
             anchors.rightMargin: codeBlockHeaderPadding
-            spacing: 5
+            spacing: Appearance.spacing.small
 
             StyledText {
                 id: codeBlockLanguage
@@ -52,7 +52,7 @@ ColumnLayout {
                 Layout.fillWidth: false
                 Layout.topMargin: 7
                 Layout.bottomMargin: 7
-                Layout.leftMargin: 10
+                Layout.leftMargin: Appearance.spacing.normal
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.DemiBold
                 color: Appearance.colors.colOnLayer2
@@ -137,9 +137,9 @@ ColumnLayout {
                 anchors {
                     left: parent.left
                     right: parent.right
-                    rightMargin: 5
+                    rightMargin: Appearance.spacing.small
                     top: parent.top
-                    topMargin: 6
+                    topMargin: Appearance.spacing.small
                 }
                 spacing: 0
                 
@@ -187,7 +187,7 @@ ColumnLayout {
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        padding: 5
+                        padding: Appearance.spacing.small
                         policy: ScrollBar.AsNeeded
                         opacity: visualSize == 1 ? 0 : 1
                         visible: opacity > 0
@@ -252,7 +252,7 @@ ColumnLayout {
                     active: root.isCommandRequest && root.messageData.functionPending
                     visible: active
                     Layout.fillWidth: true
-                    Layout.margins: 6
+                    Layout.margins: Appearance.spacing.small
                     Layout.topMargin: 0
                     sourceComponent: RowLayout {
                         Item { Layout.fillWidth: true }

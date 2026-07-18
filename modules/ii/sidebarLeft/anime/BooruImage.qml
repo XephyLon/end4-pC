@@ -109,7 +109,7 @@ Button {
             active: root.showActions
             anchors.top: menuButton.bottom
             anchors.right: parent.right
-            anchors.margins: 8
+            anchors.margins: Appearance.spacing.small
 
             sourceComponent: Item {
                 width: contextMenu.width

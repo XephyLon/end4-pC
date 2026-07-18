@@ -246,8 +246,8 @@ Rectangle {
 
             Layout.alignment: Qt.AlignRight
             implicitHeight: 30
-            leftPadding: 10
-            rightPadding: 5
+            leftPadding: Appearance.spacing.normal
+            rightPadding: Appearance.spacing.small
 
             onClicked: {
                 tagInputField.text = `${responseData.tags.join(" ")} ${parseInt(root.responseData.page) + 1}`
