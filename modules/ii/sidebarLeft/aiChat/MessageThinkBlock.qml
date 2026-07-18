@@ -78,13 +78,13 @@ Item {
                 anchors.right: parent.right
                 anchors.leftMargin: thinkBlockHeaderPaddingHorizontal
                 anchors.rightMargin: thinkBlockHeaderPaddingHorizontal
-                spacing: 10
+                spacing: Appearance.spacing.normal
 
                 MaterialSymbol {
                     Layout.fillWidth: false
                     Layout.topMargin: 7
                     Layout.bottomMargin: 7
-                    Layout.leftMargin: 3
+                    Layout.leftMargin: Appearance.spacing.verysmall
                     text: "linked_services"
                 }
                 StyledText {

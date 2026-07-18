@@ -88,7 +88,7 @@ Rectangle {
                 id: headerRowLayout
                 anchors {
                     fill: parent
-                    margins: 4
+                    margins: Appearance.spacing.verysmall
                 }
                 spacing: 18
 
@@ -103,9 +103,9 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        spacing: 12
+                        anchors.leftMargin: Appearance.spacing.normal
+                        anchors.rightMargin: Appearance.spacing.normal
+                        spacing: Appearance.spacing.normal
 
                         Item {
                             Layout.alignment: Qt.AlignVCenter
@@ -175,7 +175,7 @@ Rectangle {
                 }
 
                 ButtonGroup {
-                    spacing: 5
+                    spacing: Appearance.spacing.small
 
                     AiMessageControlButton {
                         id: regenButton
@@ -325,7 +325,7 @@ Rectangle {
 
         Flow { // Annotations
             visible: root.messageData?.annotationSources?.length > 0
-            spacing: 5
+            spacing: Appearance.spacing.small
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft
 
@@ -343,7 +343,7 @@ Rectangle {
 
         Flow { // Search queries
             visible: root.messageData?.searchQueries?.length > 0
-            spacing: 5
+            spacing: Appearance.spacing.small
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft
 

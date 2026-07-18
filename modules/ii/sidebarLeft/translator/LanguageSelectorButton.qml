@@ -28,7 +28,7 @@ RippleButton {
             StyledText {
                 id: languageText
                 Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: 5
+                Layout.leftMargin: Appearance.spacing.small
                 text: root.displayText
                 color: Appearance.colors.colOnLayer2
                 font.pixelSize: Appearance.font.pixelSize.small
