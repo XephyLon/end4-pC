@@ -400,7 +400,7 @@ AbstractBackgroundWidget {
             id: resizeHandle
             width: 16
             height: 16
-            radius: 4
+            radius: Appearance.rounding.unsharpenslight
             color: Appearance.colors.colOnPrimaryContainer
             anchors {
                 right: card.right

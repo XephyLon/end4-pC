@@ -300,7 +300,7 @@ AbstractBackgroundWidget {
 
             Rectangle {
                 id: toggleHandle
-                width: 16; height: 16; radius: 4
+                width: 16; height: 16; radius: Appearance.rounding.unsharpenslight
                 color: Appearance.colors.colOnPrimaryContainer
                 anchors { right: parent.right; bottom: parent.bottom; margins: 4 }
                 opacity: (root.containsMouse || toggleArea.containsMouse || toggleArea.pressed) ? 0.5 : 0

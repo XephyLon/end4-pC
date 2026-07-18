@@ -113,7 +113,7 @@ AbstractQuickPanel {
                 visible: false
                 z: 99
                 width: 3
-                radius: 2
+                radius: Appearance.rounding.unsharpen
                 color: Appearance.colors.colPrimary
 
                 Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
@@ -123,14 +123,14 @@ AbstractQuickPanel {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: -4
-                    width: 8; height: 8; radius: 4
+                    width: 8; height: 8; radius: Appearance.rounding.full
                     color: Appearance.colors.colPrimary
                 }
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: -4
-                    width: 8; height: 8; radius: 4
+                    width: 8; height: 8; radius: Appearance.rounding.full
                     color: Appearance.colors.colPrimary
                 }
             }

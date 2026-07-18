@@ -40,7 +40,7 @@ Item {
                 y: root.centerY + numR * Math.sin(tickDelegate.tickAngle) - height / 2
                 width: 28
                 height: 28
-                radius: 14
+                radius: Appearance.rounding.full
                 color: (root.running && tickDelegate.isSelected)
                     ? Appearance.colors.colPrimary
                     : "transparent"
@@ -119,7 +119,7 @@ Item {
     Rectangle {
         width: 8
         height: 8
-        radius: 4
+        radius: Appearance.rounding.full
         color: Appearance.colors.colPrimary
         anchors.centerIn: parent
         z: 2
@@ -130,7 +130,7 @@ Item {
         id: handTip
         width: 28
         height: 28
-        radius: 14
+        radius: Appearance.rounding.full
         color: Appearance.colors.colPrimary
         z: 2
         visible: !root.running

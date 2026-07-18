@@ -270,7 +270,7 @@ GroupButton {
         z: 10
         width: 20
         height: 20
-        radius: 10
+        radius: Appearance.rounding.full
         color: deleteHover.containsMouse ? Appearance.colors.colError : ColorUtils.transparentize(Appearance.colors.colError, 0.15)
         anchors.top: parent.top
         anchors.left: parent.left
@@ -313,7 +313,7 @@ GroupButton {
         z: 10
         width: 20
         height: 20
-        radius: 4
+        radius: Appearance.rounding.unsharpenslight
         color: resizeHover.containsMouse ? Appearance.colors.colPrimary : ColorUtils.transparentize(Appearance.colors.colPrimary, 0.15)
         anchors.bottom: parent.bottom
         anchors.right: parent.right

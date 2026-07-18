@@ -176,7 +176,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         implicitWidth: 40
                         implicitHeight: 40
-                        radius: 20
+                        radius: Appearance.rounding.full
                         color: "transparent"
                         border.width: 1
                         border.color: Appearance.colors.colOnPrimaryContainer
@@ -196,7 +196,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         implicitWidth: 40
                         implicitHeight: 40
-                        radius: 20
+                        radius: Appearance.rounding.full
                         color: "transparent"
                         border.width: 1
                         border.color: Appearance.colors.colOnPrimaryContainer
