@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import qs.modules.common
 import qs.modules.common.widgets // Para las sombras y estilos
 
 Item {

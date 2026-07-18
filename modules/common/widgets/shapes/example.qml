@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import qs.modules.common
 import "material-shapes.js" as MaterialShapes
 
 Window {
