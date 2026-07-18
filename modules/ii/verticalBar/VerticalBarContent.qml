@@ -129,7 +129,7 @@ Item {
                 ColumnLayout {
                     id: topMaterialCol
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: Appearance.spacing.verysmall
 
                     Repeater {
                         model: root.effectiveLeftLayout
@@ -205,7 +205,7 @@ Item {
                 ColumnLayout {
                     id: centerMaterialCol
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: Appearance.spacing.verysmall
 
                     Repeater {
                         model: root.effectiveMiddleLayout
@@ -282,7 +282,7 @@ Item {
                 ColumnLayout {
                     id: bottomMaterialCol
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: Appearance.spacing.verysmall
 
                     Repeater {
                         model: root.effectiveRightLayout
