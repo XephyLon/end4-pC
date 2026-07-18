@@ -118,7 +118,7 @@ TabButton {
             id: itemText
             anchors {
                 top: itemIconBackground.bottom
-                topMargin: 2
+                topMargin: Appearance.spacing.unsharpen
                 horizontalCenter: itemIconBackground.horizontalCenter
             }
             states: State {

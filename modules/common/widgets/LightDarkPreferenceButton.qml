@@ -12,7 +12,7 @@ RippleButton {
     property color previewBg: dark ? ColorUtils.colorWithHueOf("#3f3838", Appearance.m3colors.m3primary) : 
         ColorUtils.colorWithHueOf("#F7F9FF", Appearance.m3colors.m3primary)
     property color previewFg: dark ? Qt.lighter(previewBg, 2.2) : ColorUtils.mix(previewBg, "#292929", 0.85)
-    padding: 5
+    padding: Appearance.spacing.small
     Layout.fillWidth: true
     colBackground: Appearance.colors.colLayer2
     toggled: Appearance.m3colors.darkmode === dark
@@ -41,8 +41,8 @@ RippleButton {
                 ColumnLayout {
                     id: skeletonColumnLayout
                     anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 10
+                    anchors.margins: Appearance.spacing.normal
+                    spacing: Appearance.spacing.normal
                     RowLayout {
                         Rectangle {
                             radius: Appearance.rounding.full
@@ -51,7 +51,7 @@ RippleButton {
                             implicitHeight: 50
                         }
                         ColumnLayout {
-                            spacing: 4
+                            spacing: Appearance.spacing.verysmall
                             Rectangle {
                                 radius: Appearance.rounding.unsharpenmore
                                 color: lightDarkButtonRoot.previewFg
@@ -68,8 +68,8 @@ RippleButton {
                         }
                     }
                     StyledProgressBar {
-                        Layout.topMargin: 5
-                        Layout.bottomMargin: 5
+                        Layout.topMargin: Appearance.spacing.small
+                        Layout.bottomMargin: Appearance.spacing.small
                         Layout.fillWidth: true
                         value: 0.7
                         wavy: true
@@ -78,7 +78,7 @@ RippleButton {
                         trackColor: ColorUtils.mix(lightDarkButtonRoot.previewBg, lightDarkButtonRoot.previewFg, 0.5)
                     }
                     RowLayout {
-                        spacing: 2
+                        spacing: Appearance.spacing.unsharpen
                         Rectangle {
                             radius: Appearance.rounding.full
                             color: lightDarkButtonRoot.toggled ? Appearance.m3colors.m3primary : lightDarkButtonRoot.previewFg

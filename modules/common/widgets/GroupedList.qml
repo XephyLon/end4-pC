@@ -41,7 +41,7 @@ Item {
 
                 ColumnLayout {
                     id: contentArea
-                    anchors { fill: parent; margins: 8 }
+                    anchors { fill: parent; margins: Appearance.spacing.small }
                     spacing: 0
                 }
             }

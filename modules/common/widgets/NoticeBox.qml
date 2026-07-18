@@ -17,8 +17,8 @@ Rectangle {
     RowLayout {
         id: mainRowLayout
         anchors.fill: parent
-        anchors.margins: 8
-        spacing: 8
+        anchors.margins: Appearance.spacing.small
+        spacing: Appearance.spacing.small
 
         MaterialSymbol {
             id: icon
@@ -31,7 +31,7 @@ Rectangle {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 4
+            spacing: Appearance.spacing.verysmall
 
             StyledText {
                 id: noticeText
