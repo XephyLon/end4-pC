@@ -239,6 +239,22 @@ ContentPage {
         }
 
         ContentSection {
+            icon: "cell_tower"
+            shape: MaterialShape.Shape.PixelCircle
+            title: Translation.tr("Networking")
+
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("User agent (for services that require it)")
+                text: Config.options.networking.userAgent
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.networking.userAgent = text;
+                }
+            }
+        }
+
+        ContentSection {
             icon: "music_cast"
             shape: MaterialShape.Shape.Oval
             title: Translation.tr("Music Recognition")
@@ -270,43 +286,51 @@ ContentPage {
         }
 
         ContentSection {
-            icon: "cell_tower"
-            shape: MaterialShape.Shape.PixelCircle
-            title: Translation.tr("Networking")
-
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("User agent (for services that require it)")
-                text: Config.options.networking.userAgent
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.networking.userAgent = text;
-                }
-            }
-        }
-
-        ContentSection {
             icon: "file_open"
             shape: MaterialShape.Shape.Slanted
             title: Translation.tr("Save paths")
 
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Video Recording Path")
-                text: Config.options.screenRecord.savePath
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.screenRecord.savePath = text;
+            GroupedList {
+                ConfigTextArea {
+                    id: videoRecordPathField
+                    Layout.fillWidth: true
+                    fieldWidth: 250
+                    buttonIcon: "video_file"
+                    text: Translation.tr("Video Recording Path")
+                    value: Config.options.screenRecord.savePath
+                    onValueChanged: {
+                        videoRecordPathDebounceTimer.restart();
+                    }
+
+                    Timer {
+                        id: videoRecordPathDebounceTimer
+                        interval: 600
+                        repeat: false
+                        onTriggered: {
+                            Config.options.screenRecord.savePath = videoRecordPathField.value;
+                        }
+                    }
                 }
-            }
-            
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Screenshot Path (leave empty to just copy)")
-                text: Config.options.screenSnip.savePath
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.screenSnip.savePath = text;
+
+                ConfigTextArea {
+                    id: screenshotPathField
+                    Layout.fillWidth: true
+                    fieldWidth: 250
+                    buttonIcon: "screenshot_monitor"
+                    text: Translation.tr("Screenshot Path (leave empty to just copy)")
+                    value: Config.options.screenSnip.savePath
+                    onValueChanged: {
+                        screenshotPathDebounceTimer.restart();
+                    }
+
+                    Timer {
+                        id: screenshotPathDebounceTimer
+                        interval: 600
+                        repeat: false
+                        onTriggered: {
+                            Config.options.screenSnip.savePath = screenshotPathField.value;
+                        }
+                    }
                 }
             }
         }
@@ -328,107 +352,128 @@ ContentPage {
 
             ContentSubsection {
                 title: Translation.tr("Prefixes")
-                ConfigRow {
-                    uniform: true
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Action")
-                        text: Config.options.search.prefix.action
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.action = text;
-                        }
-                    }
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Clipboard")
-                        text: Config.options.search.prefix.clipboard
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.clipboard = text;
-                        }
-                    }
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Emojis")
-                        text: Config.options.search.prefix.emojis
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.emojis = text;
-                        }
-                    }
-                }
 
-                ConfigRow {
-                    uniform: true
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Icons")
-                        text: Config.options.search.prefix.symbols
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.symbols = text;
+                GroupedList {
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "bolt"
+                            fieldWidth: 100
+                            text: Translation.tr("Action")
+                            value: Config.options.search.prefix.action
+                            onValueChanged: {
+                                Config.options.search.prefix.action = value;
+                            }
+                        }
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "content_paste"
+                            fieldWidth: 100
+                            text: Translation.tr("Clipboard")
+                            value: Config.options.search.prefix.clipboard
+                            onValueChanged: {
+                                Config.options.search.prefix.clipboard = value;
+                            }
                         }
                     }
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Shell command")
-                        text: Config.options.search.prefix.shellCommand
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.shellCommand = text;
+
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "mood"
+                            fieldWidth: 100
+                            text: Translation.tr("Emojis")
+                            value: Config.options.search.prefix.emojis
+                            onValueChanged: {
+                                Config.options.search.prefix.emojis = value;
+                            }
+                        }
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "emoji_symbols"
+                            fieldWidth: 100
+                            text: Translation.tr("Icons")
+                            value: Config.options.search.prefix.symbols
+                            onValueChanged: {
+                                Config.options.search.prefix.symbols = value;
+                            }
                         }
                     }
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Web search")
-                        text: Config.options.search.prefix.webSearch
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.webSearch = text;
+
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "terminal"
+                            fieldWidth: 100
+                            text: Translation.tr("Shell command")
+                            value: Config.options.search.prefix.shellCommand
+                            onValueChanged: {
+                                Config.options.search.prefix.shellCommand = value;
+                            }
+                        }
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            fieldWidth: 100
+                            buttonIcon: "travel_explore"
+                            text: Translation.tr("Web search")
+                            value: Config.options.search.prefix.webSearch
+                            onValueChanged: {
+                                Config.options.search.prefix.webSearch = value;
+                            }
                         }
                     }
-                }
-                ConfigRow {
-                    uniform: true
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Apps")
-                        text: Config.options.search.prefix.app
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.app = text;
+
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "apps"
+                            fieldWidth: 100
+                            text: Translation.tr("Apps")
+                            value: Config.options.search.prefix.app
+                            onValueChanged: {
+                                Config.options.search.prefix.app = value;
+                            }
                         }
-                    }
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Keybinds")
-                        text: Config.options.search.prefix.keybinds
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.keybinds = text;
-                        }
-                    }
-                    MaterialTextArea {
-                        Layout.fillWidth: true
-                        placeholderText: Translation.tr("Math")
-                        text: Config.options.search.prefix.math
-                        wrapMode: TextEdit.Wrap
-                        onTextChanged: {
-                            Config.options.search.prefix.math = text;
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "keyboard_command_key"
+                            fieldWidth: 100
+                            text: Translation.tr("Keybinds")
+                            value: Config.options.search.prefix.keybinds
+                            onValueChanged: {
+                                Config.options.search.prefix.keybinds = value;
+                            }
                         }
                     }
                 }
             }
             ContentSubsection {
                 title: Translation.tr("Web search")
-                MaterialTextArea {
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Base URL")
-                    text: Config.options.search.engineBaseUrl
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.search.engineBaseUrl = text;
+
+                GroupedList {
+                    ConfigTextArea {
+                        id: baseUrlField
+                        Layout.fillWidth: true
+                        fieldWidth: 320
+                        buttonIcon: "travel_explore"
+                        text: Translation.tr("Base URL")
+                        value: Config.options.search.engineBaseUrl
+                        onValueChanged: {
+                            baseUrlDebounceTimer.restart();
+                        }
+
+                        Timer {
+                            id: baseUrlDebounceTimer
+                            interval: 600
+                            repeat: false
+                            onTriggered: {
+                                Config.options.search.engineBaseUrl = baseUrlField.value;
+                            }
+                        }
                     }
                 }
             }
@@ -440,6 +485,7 @@ ContentPage {
 
             GroupedList {
                 ConfigSwitch {
+                    buttonIcon: "update"
                     text: Translation.tr("Enable update checks")
                     checked: Config.options.updates.enableCheck
                     onCheckedChanged: {
@@ -493,24 +539,20 @@ ContentPage {
                         Config.options.bar.weather.fetchInterval = value;
                     }
                 }
-            }
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("City name")
-                text: Config.options.bar.weather.city
-                wrapMode: TextEdit.Wrap
+                ConfigTextArea {
+                    id: cityField
+                    Layout.fillWidth: true
+                    buttonIcon: "location_city"
+                    text: Translation.tr("City name")
+                    value: Config.options.bar.weather.city
+                    onValueChanged: cityDebounceTimer.restart()
 
-                Timer {
-                    id: cityDebounceTimer
-                    interval: 1000
-                    running: false
-                    onTriggered: {
-                        Config.options.bar.weather.city = parent.text
+                    Timer {
+                        id: cityDebounceTimer
+                        interval: 1000
+                        running: false
+                        onTriggered: Config.options.bar.weather.city = cityField.value
                     }
-                }
-
-                onTextChanged: {
-                    cityDebounceTimer.restart()
                 }
             }
         }

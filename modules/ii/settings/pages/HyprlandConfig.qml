@@ -69,7 +69,7 @@ ContentPage {
         Layout.fillHeight: true
         spacing: 20
 
-        // ── Displays ──────────────────────────────────────────────────────────
+        // Displays
         ContentSection {
             icon: "monitor"
             shape: MaterialShape.Shape.ClamShell
@@ -83,33 +83,33 @@ ContentPage {
             }
 
             ContentSubsection {
+                Layout.topMargin: 10
                 title: (monitorConfig.monitors[monitorCanvas.selectedIndex]?.name ?? "")
                     + " · "
                     + (monitorConfig.monitors[monitorCanvas.selectedIndex]?.description ?? "")
 
-                ConfigSwitch {
-                    buttonIcon: "tv_off"
-                    text: Translation.tr("Enabled")
-                    checked: !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)
-                    onCheckedChanged: {
-                        if (checked === !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)) return
-                        monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { disabled: !checked })
-                        monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "tv_off"
+                        text: Translation.tr("Enabled")
+                        checked: !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)
+                        onCheckedChanged: {
+                            if (checked === !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)) return
+                            monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { disabled: !checked })
+                            monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
+                        }
                     }
-                }
 
-                ContentSubsection {
-                    title: Translation.tr("Resolution & Refresh Rate")
-                    StyledComboBoxSearch {
+                    ConfigComboBox {
+                        Layout.fillWidth: true
                         buttonIcon: "aspect_ratio"
+                        text: Translation.tr("Resolution & Refresh Rate")
+                        textRole: "display"
                         model: (monitorConfig.monitors[monitorCanvas.selectedIndex]?.availableModes ?? [])
                             .map(mode => ({ display: mode, value: mode }))
-                        textRole: "display"
-                        currentIndex: (monitorConfig.monitors[monitorCanvas.selectedIndex]?.availableModes ?? [])
-                            .indexOf(monitorConfig.monitors[monitorCanvas.selectedIndex]?.currentMode ?? "")
-                        onActivated: {
-                            const mon = monitorConfig.monitors[monitorCanvas.selectedIndex]
-                            const mode = mon.availableModes[currentIndex]
+                        currentValue: monitorConfig.monitors[monitorCanvas.selectedIndex]?.currentMode ?? ""
+                        onSelected: newValue => {
+                            const mode = newValue
                             const parts = mode.match(/(\d+)x(\d+)@([\d.]+)Hz/)
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, {
                                 currentMode: mode,
@@ -120,11 +120,10 @@ ContentPage {
                             monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
                         }
                     }
-                }
 
-                ContentSubsection {
-                    title: Translation.tr("Orientation")
                     ConfigSelectionArray {
+                        text: Translation.tr("Orientation")
+                        icon: "mobile_rotate"
                         currentValue: monitorConfig.monitors[monitorCanvas.selectedIndex]?.transform ?? 0
                         onSelected: newValue => {
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { transform: newValue })
@@ -137,10 +136,7 @@ ContentPage {
                             { displayName: "270°",                   icon: "rotate_90_degrees_ccw", value: 3 },
                         ]
                     }
-                }
-
-                GroupedList {
-                    Layout.topMargin: 10
+    
                     ConfigSpinBox {
                         icon: "zoom_in"
                         text: Translation.tr("Scale")
@@ -181,15 +177,16 @@ ContentPage {
             }
         }
 
-        // ── Layout ────────────────────────────────────────────────────────────
+        // Layout
         ContentSection {
             icon: "auto_awesome_mosaic"
             shape: MaterialShape.Shape.Gem
             title: Translation.tr("Layout")
 
-            ContentSubsection {
-                title: Translation.tr("Tiling Layout")
+            GroupedList {
                 ConfigSelectionArray {
+                    text: Translation.tr("Tiling Layout")
+                    icon: "responsive_layout"
                     currentValue: Config.options.hyprland.general.layout
                     onSelected: newValue => {
                         Config.options.hyprland.general.layout = newValue
@@ -204,7 +201,7 @@ ContentPage {
             }
         }
 
-        // ── Input ─────────────────────────────────────────────────────────────
+        // Input
         ContentSection {
             icon: "trackpad_input"
             shape: MaterialShape.Shape.Pentagon
@@ -213,27 +210,26 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Keyboard")
 
-                MaterialTextArea {
-                    id: kbLayoutTextArea
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Keyboard layout (e.g., us, es, latam)")
-                    wrapMode: TextEdit.NoWrap
-                    Component.onCompleted: text = Config.options.hyprland.input.kbLayout
-                    Timer {
-                        id: kbLayoutDebounceTimer
-                        interval: 1000
-                        running: false
-                        onTriggered: {
-                            Config.options.hyprland.input.kbLayout = kbLayoutTextArea.text
-                            HyprlandConfig.set("input:kb_layout", kbLayoutTextArea.text)
+                GroupedList {
+                    ConfigTextArea {
+                        id: kbLayoutField
+                        Layout.fillWidth: true
+                        buttonIcon: "keyboard"
+                        text: Translation.tr("Keyboard layout")
+                        placeholderText: Translation.tr("e.g., us, es, latam")
+                        Component.onCompleted: value = Config.options.hyprland.input.kbLayout
+                        onValueChanged: kbLayoutDebounceTimer.restart()
+
+                        Timer {
+                            id: kbLayoutDebounceTimer
+                            interval: 1000
+                            repeat: false
+                            onTriggered: {
+                                Config.options.hyprland.input.kbLayout = kbLayoutField.value
+                                HyprlandConfig.set("input:kb_layout", kbLayoutField.value)
+                            }
                         }
                     }
-                    onTextChanged: kbLayoutDebounceTimer.restart()
-                }
-
-                GroupedList {
-                    Layout.topMargin: 10
-                    Layout.bottomMargin: 10
                     ConfigSwitch {
                         buttonIcon: "numbers"
                         text: Translation.tr("Numlock by default")
@@ -268,20 +264,21 @@ ContentPage {
                             HyprlandConfig.set("input:repeat_rate", value)
                         }
                     }
-                }
-
-                ConfigSelectionArray {
-                    currentValue: Config.options.hyprland.input.followMouse
-                    onSelected: newValue => {
-                        Config.options.hyprland.input.followMouse = newValue
-                        HyprlandConfig.set("input:follow_mouse", newValue)
+                    ConfigSelectionArray {
+                        text: Translation.tr("Follow mouse")
+                        icon: "mouse"
+                        currentValue: Config.options.hyprland.input.followMouse
+                        onSelected: newValue => {
+                            Config.options.hyprland.input.followMouse = newValue
+                            HyprlandConfig.set("input:follow_mouse", newValue)
+                        }
+                        options: [
+                            { displayName: Translation.tr("Disabled"), icon: "mouse",     value: 0 },
+                            { displayName: Translation.tr("Full"),     icon: "open_with",  value: 1 },
+                            { displayName: Translation.tr("Loose"),    icon: "drag_pan",   value: 2 },
+                            { displayName: Translation.tr("Explicit"), icon: "ads_click",  value: 3 },
+                        ]
                     }
-                    options: [
-                        { displayName: Translation.tr("Disabled"), icon: "mouse",     value: 0 },
-                        { displayName: Translation.tr("Full"),     icon: "open_with",  value: 1 },
-                        { displayName: Translation.tr("Loose"),    icon: "drag_pan",   value: 2 },
-                        { displayName: Translation.tr("Explicit"), icon: "ads_click",  value: 3 },
-                    ]
                 }
             }
 
@@ -337,7 +334,7 @@ ContentPage {
             }
         }
 
-        // ── Visual & Aesthetics ───────────────────────────────────────────────
+        // Visual & Aesthetics
         ContentSection {
             icon: "deblur"
             shape: MaterialShape.Shape.PixelCircle
@@ -455,7 +452,7 @@ ContentPage {
             }
         }
 
-        // ── Autostart Apps ────────────────────────────────────────────────────
+        // Autostart Apps
         ContentSection {
             icon: "app_registration"
             shape: MaterialShape.Shape.Sunny
@@ -465,7 +462,7 @@ ContentPage {
             AutostartApps {}
         }
 
-        // ── Animations ────────────────────────────────────────────────────────
+        // Animations
         ContentSection {
             icon: "animation"
             shape: MaterialShape.Shape.Oval
@@ -473,7 +470,7 @@ ContentPage {
             GroupedList {
                 ConfigSwitch {
                     buttonIcon: "check"
-                    text: Translation.tr("Enable Animations")
+                    text: Translation.tr("Enable")
                     checked: Config.options.hyprland.animations.enable
                     onCheckedChanged: {
                         if (checked === Config.options.hyprland.animations.enable) return
@@ -481,12 +478,9 @@ ContentPage {
                         HyprlandConfig.set("animations:enabled", checked ? 1 : 0)
                     }
                 }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Animation Preset")
-
                 ConfigSelectionArray {
+                    text: Translation.tr("Presets")
+                    icon: "present_to_all"
                     currentValue: Config.options.hyprland.animations.animation
                     onSelected: newValue => {
                         Config.options.hyprland.animations.animation = newValue

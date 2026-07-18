@@ -49,112 +49,128 @@ ContentPage {
         spacing: 20
 
         ContentSection {
-            icon: "volume_up"
-            shape: MaterialShape.Shape.Circle
-            title: Translation.tr("Audio")
-            GroupedList {
-                ConfigSwitch {
-                    buttonIcon: "hearing"
-                    text: Translation.tr("Earbang protection")
-                    checked: Config.options.audio.protection.enable
-                    onCheckedChanged: {
-                        Config.options.audio.protection.enable = checked;
-                    }
+            icon: "nest_clock_farsight_analog"
+            shape: MaterialShape.Shape.Bun
+            title: Translation.tr("Time")
+
+            Rectangle {
+                id: previewCard
+                Layout.fillWidth: true
+                implicitHeight: 180
+                radius: Appearance.rounding.normal
+                clip: true
+
+                gradient: Gradient { // I didn't like how it turned out but in case I regret it 
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: Appearance.colors.colLayer1  }
+                    GradientStop { position: 0.6; color: Appearance.colors.colLayer1  }
+                    GradientStop { position: 1.0; color: Appearance.colors.colLayer1  }
                 }
-                ConfigRow {
-                    enabled: Config.options.audio.protection.enable
-                    ConfigSpinBox {
-                        icon: "arrow_warm_up"
-                        text: Translation.tr("Max allowed increase")
-                        value: Config.options.audio.protection.maxAllowedIncrease
-                        from: 0
-                        to: 100
-                        stepSize: 2
-                        onValueChanged: {
-                            Config.options.audio.protection.maxAllowedIncrease = value;
+
+                property date now: new Date()
+
+                Timer {
+                    interval: Config.options.time.secondPrecision ? 1000 : 15000
+                    running: true
+                    repeat: true
+                    triggeredOnStart: true
+                    onTriggered: previewCard.now = new Date()
+                }
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 24
+                    spacing: 16
+
+                    ColumnLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.family: Appearance.font.family.expressive
+                            font.pixelSize: 42
+                            font.letterSpacing: 1
+                            font.features: { "tnum": 1 }
+                            font.weight: Font.Medium
+                            color: Appearance.colors.colPrimary
+                            text: {
+                                const fmt = Config.options.time.format;
+                                if (Config.options.time.secondPrecision) {
+                                    if (fmt === "hh:mm") return Qt.formatTime(previewCard.now, "hh:mm:ss");
+                                    if (fmt === "h:mm ap") return Qt.formatTime(previewCard.now, "h:mm:ss ap");
+                                    if (fmt === "h:mm AP") return Qt.formatTime(previewCard.now, "h:mm:ss AP");
+                                }
+                                return Qt.formatTime(previewCard.now, fmt);
+                            }
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: DateTime.longDate
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 32
+                            font.weight: Font.Normal
+                            opacity: 0.6
+                            color: Appearance.colors.colPrimary
                         }
                     }
-                    ConfigSpinBox {
-                        icon: "vertical_align_top"
-                        text: Translation.tr("Volume limit")
-                        value: Config.options.audio.protection.maxAllowed
-                        from: 0
-                        to: 154 // pavucontrol allows up to 153%
-                        stepSize: 2
-                        onValueChanged: {
-                            Config.options.audio.protection.maxAllowed = value;
-                        }
+
+                    AndroidClock {
+                        Layout.rightMargin: 6
+                        width: 130
+                        height: 130
+                        backgroundColor: Appearance.colors.colPrimaryContainer
+                        handColor:       Appearance.colors.colPrimary
+                        centerDotColor:  Appearance.colors.colPrimary
                     }
                 }
             }
-        }
-
-        ContentSection {
-            icon: "battery_android_full"
-            shape: MaterialShape.Shape.SemiCircle
-            title: Translation.tr("Battery")
-            visible: Battery.available
 
             GroupedList {
-                ConfigRow {
-                    uniform: true
-                    ConfigSpinBox {
-                        icon: "warning"
-                        text: Translation.tr("Low warning")
-                        value: Config.options.battery.low
-                        from: 0
-                        to: 100
-                        stepSize: 5
-                        onValueChanged: {
-                            Config.options.battery.low = value;
+                Layout.topMargin: -2
+                ConfigSelectionArray {
+                    text: Translation.tr("Format")
+                    icon: "schedule"
+                    currentValue: Config.options.time.format
+                    onSelected: newValue => {
+                        if (newValue === "hh:mm") {
+                            Quickshell.execDetached(["bash", "-c", `sed -i 's/\\TIME12\\b/TIME/' '${FileUtils.trimFileProtocol(Directories.config)}/hypr/hyprlock.conf'`]);
+                        } else {
+                            Quickshell.execDetached(["bash", "-c", `sed -i 's/\\TIME\\b/TIME12/' '${FileUtils.trimFileProtocol(Directories.config)}/hypr/hyprlock.conf'`]);
                         }
+                        Config.options.time.format = newValue;
                     }
-                    ConfigSpinBox {
-                        icon: "dangerous"
-                        text: Translation.tr("Critical warning")
-                        value: Config.options.battery.critical
-                        from: 0
-                        to: 100
-                        stepSize: 5
-                        onValueChanged: {
-                            Config.options.battery.critical = value;
-                        }
+                    options: [
+                        { displayName: Translation.tr("24h"), value: "hh:mm" },
+                        { displayName: Translation.tr("12h am/pm"), value: "h:mm ap" },
+                        { displayName: Translation.tr("12h AM/PM"), value: "h:mm AP" }
+                    ]
+                }
+                ConfigSwitch {
+                    buttonIcon: "pace"
+                    text: Translation.tr("Second precision")
+                    checked: Config.options.time.secondPrecision
+                    onCheckedChanged: {
+                        Config.options.time.secondPrecision = checked;
                     }
                 }
-                ConfigRow {
-                    uniform: true
-                    ConfigSwitch {
-                        buttonIcon: "pause"
-                        text: Translation.tr("Automatic suspend")
-                        checked: Config.options.battery.automaticSuspend
-                        onCheckedChanged: {
-                            Config.options.battery.automaticSuspend = checked;
-                        }
-                    }
-                    ConfigSpinBox {
-                        enabled: Config.options.battery.automaticSuspend
-                        text: Translation.tr("at")
-                        value: Config.options.battery.suspend
-                        from: 0
-                        to: 100
-                        stepSize: 5
-                        onValueChanged: {
-                            Config.options.battery.suspend = value;
-                        }
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    buttonIcon: "scoreboard"
+                    text: Translation.tr("Clock String Format")
+                    placeholderText: Translation.tr("Clock String Format")
+                    value: Config.options.time.format
+                    onValueChanged: {
+                        Config.options.time.format = value;
                     }
                 }
-                ConfigRow {
-                    uniform: true
-                    ConfigSpinBox {
-                        icon: "charger"
-                        text: Translation.tr("Full warning")
-                        value: Config.options.battery.full
-                        from: 0
-                        to: 101
-                        stepSize: 5
-                        onValueChanged: {
-                            Config.options.battery.full = value;
-                        }
+                
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    buttonIcon: "calendar_month"
+                    text: Translation.tr("Date String Format")
+                    placeholderText: Translation.tr("Date String Format")
+                    value: Config .options.time.dateFormat
+                    onValueChanged: {
+                        Config.options.time.dateFormat = value;
                     }
                 }
             }
@@ -441,75 +457,182 @@ ContentPage {
             }
 
             ContentSubsection {
-    title: Translation.tr("Corner open")
+                title: Translation.tr("Corner open")
 
-    GroupedList {
-        ConfigSwitch {
-            buttonIcon: "check"
-            text: Translation.tr("Enable")
-            checked: Config.options.sidebar.cornerOpen.enable
-            onCheckedChanged: { Config.options.sidebar.cornerOpen.enable = checked }
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "check"
+                        text: Translation.tr("Enable")
+                        checked: Config.options.sidebar.cornerOpen.enable
+                        onCheckedChanged: { Config.options.sidebar.cornerOpen.enable = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "highlight_mouse_cursor"
+                        text: Translation.tr("Hover to trigger")
+                        checked: Config.options.sidebar.cornerOpen.clickless
+                        onCheckedChanged: { Config.options.sidebar.cornerOpen.clickless = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "vertical_align_bottom"
+                        text: Translation.tr("Place at bottom")
+                        checked: Config.options.sidebar.cornerOpen.bottom
+                        onCheckedChanged: { Config.options.sidebar.cornerOpen.bottom = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "unfold_more_double"
+                        text: Translation.tr("Value scroll")
+                        checked: Config.options.sidebar.cornerOpen.valueScroll
+                        onCheckedChanged: { Config.options.sidebar.cornerOpen.valueScroll = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "visibility"
+                        text: Translation.tr("Visualize region")
+                        checked: Config.options.sidebar.cornerOpen.visualize
+                        onCheckedChanged: { Config.options.sidebar.cornerOpen.visualize = checked }
+                    }
+                    ConfigSwitch {
+                        enabled: Config.options.sidebar.cornerOpen.clickless
+                        buttonIcon: "ads_click"
+                        text: Translation.tr("Force hover at absolute corner")
+                        checked: Config.options.sidebar.cornerOpen.clicklessCornerEnd
+                        onCheckedChanged: { Config.options.sidebar.cornerOpen.clicklessCornerEnd = checked }
+                    }
+                    ConfigSpinBox {
+                        enabled: Config.options.sidebar.cornerOpen.clickless
+                        icon: "arrow_cool_down"
+                        text: Translation.tr("Vertical offset")
+                        value: Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset
+                        from: 0; to: 20; stepSize: 1
+                        onValueChanged: { Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset = value }
+                    }
+                    ConfigSpinBox {
+                        icon: "arrow_range"
+                        text: Translation.tr("Region width")
+                        value: Config.options.sidebar.cornerOpen.cornerRegionWidth
+                        from: 1; to: 300; stepSize: 1
+                        onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionWidth = value }
+                    }
+                    ConfigSpinBox {
+                        icon: "height"
+                        text: Translation.tr("Region height")
+                        value: Config.options.sidebar.cornerOpen.cornerRegionHeight
+                        from: 1; to: 300; stepSize: 1
+                        onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionHeight = value }
+                    }
+                }
+            }
         }
-        ConfigSwitch {
-            buttonIcon: "highlight_mouse_cursor"
-            text: Translation.tr("Hover to trigger")
-            checked: Config.options.sidebar.cornerOpen.clickless
-            onCheckedChanged: { Config.options.sidebar.cornerOpen.clickless = checked }
-        }
-        ConfigSwitch {
-            buttonIcon: "vertical_align_bottom"
-            text: Translation.tr("Place at bottom")
-            checked: Config.options.sidebar.cornerOpen.bottom
-            onCheckedChanged: { Config.options.sidebar.cornerOpen.bottom = checked }
-        }
-        ConfigSwitch {
-            buttonIcon: "unfold_more_double"
-            text: Translation.tr("Value scroll")
-            checked: Config.options.sidebar.cornerOpen.valueScroll
-            onCheckedChanged: { Config.options.sidebar.cornerOpen.valueScroll = checked }
-        }
-        ConfigSwitch {
-            buttonIcon: "visibility"
-            text: Translation.tr("Visualize region")
-            checked: Config.options.sidebar.cornerOpen.visualize
-            onCheckedChanged: { Config.options.sidebar.cornerOpen.visualize = checked }
-        }
-    }
 
-    GroupedList {
-        Layout.topMargin: 8
+        ContentSection {
+            icon: "battery_android_full"
+            shape: MaterialShape.Shape.SemiCircle
+            title: Translation.tr("Battery")
+            visible: Battery.available
 
-        ConfigSwitch {
-            enabled: Config.options.sidebar.cornerOpen.clickless
-            buttonIcon: "ads_click"
-            text: Translation.tr("Force hover at absolute corner")
-            checked: Config.options.sidebar.cornerOpen.clicklessCornerEnd
-            onCheckedChanged: { Config.options.sidebar.cornerOpen.clicklessCornerEnd = checked }
+            GroupedList {
+                ConfigRow {
+                    uniform: true
+                    ConfigSpinBox {
+                        icon: "warning"
+                        text: Translation.tr("Low warning")
+                        value: Config.options.battery.low
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onValueChanged: {
+                            Config.options.battery.low = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "dangerous"
+                        text: Translation.tr("Critical warning")
+                        value: Config.options.battery.critical
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onValueChanged: {
+                            Config.options.battery.critical = value;
+                        }
+                    }
+                }
+                ConfigRow {
+                    uniform: true
+                    ConfigSwitch {
+                        buttonIcon: "pause"
+                        text: Translation.tr("Automatic suspend")
+                        checked: Config.options.battery.automaticSuspend
+                        onCheckedChanged: {
+                            Config.options.battery.automaticSuspend = checked;
+                        }
+                    }
+                    ConfigSpinBox {
+                        enabled: Config.options.battery.automaticSuspend
+                        text: Translation.tr("at")
+                        value: Config.options.battery.suspend
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onValueChanged: {
+                            Config.options.battery.suspend = value;
+                        }
+                    }
+                }
+                ConfigRow {
+                    uniform: true
+                    ConfigSpinBox {
+                        icon: "charger"
+                        text: Translation.tr("Full warning")
+                        value: Config.options.battery.full
+                        from: 0
+                        to: 101
+                        stepSize: 5
+                        onValueChanged: {
+                            Config.options.battery.full = value;
+                        }
+                    }
+                }
+            }
         }
-        ConfigSpinBox {
-            enabled: Config.options.sidebar.cornerOpen.clickless
-            icon: "arrow_cool_down"
-            text: Translation.tr("Vertical offset")
-            value: Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset
-            from: 0; to: 20; stepSize: 1
-            onValueChanged: { Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset = value }
-        }
-        ConfigSpinBox {
-            icon: "arrow_range"
-            text: Translation.tr("Region width")
-            value: Config.options.sidebar.cornerOpen.cornerRegionWidth
-            from: 1; to: 300; stepSize: 1
-            onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionWidth = value }
-        }
-        ConfigSpinBox {
-            icon: "height"
-            text: Translation.tr("Region height")
-            value: Config.options.sidebar.cornerOpen.cornerRegionHeight
-            from: 1; to: 300; stepSize: 1
-            onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionHeight = value }
-        }
-    }
-}
+
+        ContentSection {
+            icon: "volume_up"
+            shape: MaterialShape.Shape.Circle
+            title: Translation.tr("Audio")
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "hearing"
+                    text: Translation.tr("Earbang protection")
+                    checked: Config.options.audio.protection.enable
+                    onCheckedChanged: {
+                        Config.options.audio.protection.enable = checked;
+                    }
+                }
+                ConfigRow {
+                    enabled: Config.options.audio.protection.enable
+                    ConfigSpinBox {
+                        icon: "arrow_warm_up"
+                        text: Translation.tr("Max allowed increase")
+                        value: Config.options.audio.protection.maxAllowedIncrease
+                        from: 0
+                        to: 100
+                        stepSize: 2
+                        onValueChanged: {
+                            Config.options.audio.protection.maxAllowedIncrease = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "vertical_align_top"
+                        text: Translation.tr("Volume limit")
+                        value: Config.options.audio.protection.maxAllowed
+                        from: 0
+                        to: 154 // pavucontrol allows up to 153%
+                        stepSize: 2
+                        onValueChanged: {
+                            Config.options.audio.protection.maxAllowed = value;
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {
@@ -538,129 +661,51 @@ ContentPage {
         }
 
         ContentSection {
-            icon: "nest_clock_farsight_analog"
-            shape: MaterialShape.Shape.Bun
-            title: Translation.tr("Time")
-
-            ConfigRow {
-                uniform: true
-                MaterialTextArea {
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Clock")
-                    text: Config.options.time.format
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.time.format = text;
-                    }
-                }
-                MaterialTextArea {
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Date")
-                    text: Config.options.time.dateFormat
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.time.dateFormat = text;
-                    }
-                }
-            }
-            GroupedList {
-                ConfigSwitch {
-                    buttonIcon: "pace"
-                    text: Translation.tr("Second precision")
-                    checked: Config.options.time.secondPrecision
-                    onCheckedChanged: {
-                        Config.options.time.secondPrecision = checked;
-                    }
-                }
-            }
-
-
-            ContentSubsection {
-                title: Translation.tr("Format")
-                tooltip: ""
-
-                ConfigSelectionArray {
-                    currentValue: Config.options.time.format
-                    onSelected: newValue => {
-                        if (newValue === "hh:mm") {
-                            Quickshell.execDetached(["bash", "-c", `sed -i 's/\\TIME12\\b/TIME/' '${FileUtils.trimFileProtocol(Directories.config)}/hypr/hyprlock.conf'`]);
-                        } else {
-                            Quickshell.execDetached(["bash", "-c", `sed -i 's/\\TIME\\b/TIME12/' '${FileUtils.trimFileProtocol(Directories.config)}/hypr/hyprlock.conf'`]);
-                        }
-
-                        Config.options.time.format = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("24h"),
-                            value: "hh:mm"
-                        },
-                        {
-                            displayName: Translation.tr("12h am/pm"),
-                            value: "h:mm ap"
-                        },
-                        {
-                            displayName: Translation.tr("12h AM/PM"),
-                            value: "h:mm AP"
-                        },
-                    ]
-                }
-            }
-        }
-
-        ContentSection {
-            icon: "language"
+            icon: "language_japanese_kana"
             shape: MaterialShape.Shape.Gem
             title: Translation.tr("Language")
 
-            ContentSubsection {
-                title: Translation.tr("Interface Language")
-
-                StyledComboBoxSearch {
-                    id: languageSelector
+            GroupedList {
+                ConfigComboBox {
+                    Layout.fillWidth: true
                     buttonIcon: "language"
-                    textRole: "displayName"
-
+                    text: Translation.tr("Interface Language")
+                    fieldWidth: 240
                     model: [
-                        {
-                            displayName: Translation.tr("Auto (System)"),
-                            value: "auto"
-                        },
-                        ...Translation.allAvailableLanguages.map(lang => {
-                            return {
-                                displayName: lang,
-                                value: lang
-                            };
-                        })]
-
-                    currentIndex: {
-                        const index = model.findIndex(item => item.value === Config.options.language.ui);
-                        return index !== -1 ? index : 0;
-                    }
-
-                    onActivated: index => {
-                        Config.options.language.ui = model[index].value;
+                        { displayName: Translation.tr("Auto (System)"), value: "auto" },
+                        ...Translation.allAvailableLanguages.map(lang => ({ displayName: lang, value: lang }))
+                    ]
+                    currentValue: Config.options.language.ui
+                    onSelected: newValue => {
+                        Config.options.language.ui = newValue;
                     }
                 }
-            }
-            ContentSubsection {
-                title: Translation.tr("Generate translation with Gemini")
 
-                ConfigRow {
-                    MaterialTextArea {
-                        id: localeInput
+                ColumnLayout {
+                    id: translationCol
+                    anchors { fill: parent; margins: 0 }
+                    spacing: 8
+
+                    ConfigTextArea {
+                        id: localeField
                         Layout.fillWidth: true
-                        placeholderText: Translation.tr("Locale code, e.g. fr_FR, de_DE, zh_CN...")
-                        text: Config.options.language.ui === "auto" ? Qt.locale().name : Config.options.language.ui
+                        buttonIcon: "translate"
+                        text: Translation.tr("Locale code")
+                        placeholderText: Translation.tr("e.g. fr_FR, de_DE, zh_CN...")
+                        value: Config.options.language.ui === "auto" ? Qt.locale().name : Config.options.language.ui
                     }
+
                     RippleButtonWithIcon {
                         id: generateTranslationBtn
-                        Layout.fillHeight: true
-                        nerdIcon: ""
-                        enabled: !translationProc.running || (translationProc.locale !== localeInput.text.trim())
+                        Layout.fillWidth: false
+                        Layout.alignment: Qt.AlignRight
+                        Layout.preferredHeight: 50
+                        Layout.rightMargin: 8
+                        nerdIcon: ""
+                        enabled: !translationProc.running || (translationProc.locale !== localeField.value.trim())
                         mainText: enabled ? Translation.tr("Generate\nTypically takes 2 minutes") : Translation.tr("Generating...\nDon't close this window!")
                         onClicked: {
-                            translationProc.locale = localeInput.text.trim();
+                            translationProc.locale = localeField.value.trim();
                             translationProc.running = false;
                             translationProc.running = true;
                         }

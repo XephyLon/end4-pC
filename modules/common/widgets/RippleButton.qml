@@ -22,6 +22,9 @@ Button {
     property var releaseAction // When left clicking (release)
     property var altAction // When right clicking
     property var middleClickAction // When middle clicking
+    property bool border: false
+    property real borderWidth: 1
+    property color colBorder: Appearance?.colors.colOutlineVariant ?? "#79747E"
 
     property color colBackground: ColorUtils.transparentize(Appearance?.colors.colLayer1Hover, 1) || "transparent"
     property color colBackgroundHover: Appearance?.colors.colLayer1Hover ?? "#E5DFED"
@@ -137,6 +140,8 @@ Button {
         implicitHeight: 30
 
         color: root.buttonColor
+        border.width: root.border ? root.borderWidth : 0
+        border.color: root.colBorder
         Behavior on color {
             animation: Appearance?.animation.elementMoveFast.colorAnimation.createObject(this)
         }

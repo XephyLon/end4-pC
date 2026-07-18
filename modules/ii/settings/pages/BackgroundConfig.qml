@@ -685,14 +685,26 @@ ContentPage {
                             Config.options.background.widgets.clock.quote.followClock = checked;
                         }
                     }
-                }
-                MaterialTextArea {
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Quote")
-                    text: Config.options.background.widgets.clock.quote.text
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.background.widgets.clock.quote.text = text;
+                    ConfigTextArea {
+                        id: quoteField
+                        Layout.fillWidth: true
+                        fieldWidth: 300
+                        buttonIcon: "format_quote"
+                        text: Translation.tr("Quote")
+                        placeholderText: Translation.tr("Quote")
+                        value: Config.options.background.widgets.clock.quote.text
+                        onValueChanged: {
+                            quoteDebounceTimer.restart();
+                        }
+
+                        Timer {
+                            id: quoteDebounceTimer
+                            interval: 600
+                            repeat: false
+                            onTriggered: {
+                                Config.options.background.widgets.clock.quote.text = quoteField.value;
+                            }
+                        }
                     }
                 }
             }

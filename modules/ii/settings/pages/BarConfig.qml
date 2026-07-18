@@ -265,10 +265,9 @@ ContentPage {
             shape: MaterialShape.Shape.SoftBurst
             title: Translation.tr("Utility buttons")
 
-            ConfigRow {
-                uniform: true
-
-                GroupedList {
+            GroupedList {
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "screenshot_region"
                         text: Translation.tr("Screen snip")
@@ -281,6 +280,9 @@ ContentPage {
                         checked: Config.options.bar.utilButtons.showColorPicker
                         onCheckedChanged: { Config.options.bar.utilButtons.showColorPicker = checked }
                     }
+                }
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "keyboard"
                         text: Translation.tr("Keyboard toggle")
@@ -294,8 +296,8 @@ ContentPage {
                         onCheckedChanged: { Config.options.bar.utilButtons.showMicToggle = checked }
                     }
                 }
-
-                GroupedList {
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "dark_mode"
                         text: Translation.tr("Dark/Light toggle")
@@ -308,6 +310,9 @@ ContentPage {
                         checked: Config.options.bar.utilButtons.showPerformanceProfileToggle
                         onCheckedChanged: { Config.options.bar.utilButtons.showPerformanceProfileToggle = checked }
                     }
+                }
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "screen_record"
                         text: Translation.tr("Record Screen")
@@ -376,10 +381,10 @@ ContentPage {
             icon: "empty_dashboard"
             shape: MaterialShape.Shape.Burst
             title: Translation.tr("Resources")
-            ConfigRow {
-                uniform: true
 
-                GroupedList {
+            GroupedList {
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "planner_review"
                         text: Translation.tr("CPU")
@@ -392,6 +397,9 @@ ContentPage {
                         checked: Config.options.bar.resources.alwaysShowCpuTemp
                         onCheckedChanged: { Config.options.bar.resources.alwaysShowCpuTemp = checked }
                     }
+                }
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "memory"
                         text: Translation.tr("RAM")
@@ -405,15 +413,17 @@ ContentPage {
                         onCheckedChanged: { Config.options.bar.resources.alwaysShowGpu = checked }
                     }
                 }
-
-                GroupedList {
-                    Layout.topMargin: -57 // fixme later
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "storage"
                         text: Translation.tr("Disk")
                         checked: Config.options.bar.resources.alwaysShowDisk
                         onCheckedChanged: { Config.options.bar.resources.alwaysShowDisk = checked }
                     }
+                }
+                ConfigRow {
+                    uniform: true
                     ConfigSwitch {
                         buttonIcon: "swap_horiz"
                         text: Translation.tr("Swap")
@@ -433,9 +443,6 @@ ContentPage {
                         onCheckedChanged: { Config.options.bar.resources.alwaysShowVram = checked }
                     }
                 }
-            }
-            GroupedList {
-                Layout.topMargin: 10
                 ConfigSelectionArray {
                     text: Translation.tr("Style")
                     icon: "style"
@@ -463,7 +470,6 @@ ContentPage {
                     }
                 }
             }
-    
         }
 
         ContentSection {
@@ -471,14 +477,15 @@ ContentPage {
             shape: MaterialShape.Shape.Sunny
             title: Translation.tr("Media")
 
-            ConfigRow {
-                MaterialTextArea {
+            GroupedList {
+                ConfigTextArea {
+                    id: preferredPlayerField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Preferred Player (e.g. spotify, firefox)")
-                    text: Config.options.bar.media.preferredPlayer
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.bar.media.preferredPlayer = text;
+                    buttonIcon: "play_circle"
+                    text: Translation.tr("Preferred Player")
+                    placeholderText: Translation.tr("e.g. spotify, firefox")
+                    value: Config.options.bar.media.preferredPlayer
+                    onValueChanged: {
                         mediaDebounceTimer.restart();
                     }
 
@@ -486,20 +493,20 @@ ContentPage {
                         id: mediaDebounceTimer
                         interval: 600
                         repeat: false
-                        onTriggered: {}
+                        onTriggered: {
+                            Config.options.bar.media.preferredPlayer = preferredPlayerField.value;
+                        }
                     }
-                }
-            }
-            GroupedList {
-                ConfigSwitch {
-                    buttonIcon: "titlecase"; text: Translation.tr("Show only title")
-                    checked: Config.options.bar.media.onlyTitle
-                    onCheckedChanged: { Config.options.bar.media.onlyTitle = checked; }
                 }
                 ConfigSwitch {
                     buttonIcon: "keep"; text: Translation.tr("Pin media controls")
                     checked: Config.options.bar.media.alwaysVisible
                     onCheckedChanged: { Config.options.bar.media.alwaysVisible = checked; }
+                }
+                ConfigSwitch {
+                    buttonIcon: "titlecase"; text: Translation.tr("Show only title")
+                    checked: Config.options.bar.media.onlyTitle
+                    onCheckedChanged: { Config.options.bar.media.onlyTitle = checked; }
                 }
                 ConfigSpinBox {
                     icon: "width"

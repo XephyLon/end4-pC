@@ -34,7 +34,7 @@ ContentPage {
     RowLayout {
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: 55
+        Layout.topMargin: 50
         spacing: 16
 
         IconImage {
@@ -92,44 +92,6 @@ ContentPage {
                 }
             }
         }
-
-        Rectangle {
-            height: 110
-            width: 2
-            gradient: Gradient {
-                orientation: Gradient.Vertical
-                GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 0.2; color: Appearance.colors.colOutline }
-                GradientStop { position: 0.8; color: Appearance.colors.colOutline }
-                GradientStop { position: 1.0; color: "transparent" }
-            }
-            opacity: 0.15
-        }
-
-        ColumnLayout {
-            spacing: 8
-            Layout.alignment: Qt.AlignVCenter
-
-            FloatingActionButton {
-                iconText: "circles"
-                buttonText: Translation.tr("Update Dots")
-                expanded: false
-                downAction: () => runUpdateDots()
-                StyledToolTip {
-                    text: Translation.tr("Update Shell to the latest version")
-                }
-            }
-
-            FloatingActionButton {
-                iconText: "deployed_code_update"
-                buttonText: Translation.tr("Update System")
-                expanded: false
-                downAction: () => runSystemUpdate()
-                StyledToolTip {
-                    text: Translation.tr("Update your system packages")
-                }
-            }
-        }
     }
 
     ColumnLayout {
@@ -144,8 +106,6 @@ ContentPage {
                 icon: "planner_review"
                 label: "CPU"
                 value: SystemInfo.cpu || "Loading..."
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.Pentagon
                 Layout.fillWidth: true
             }
 
@@ -153,14 +113,12 @@ ContentPage {
                 icon: "monitor"
                 label: "GPU"
                 value: SystemInfo.gpu || "N/A"
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.ClamShell
                 Layout.fillWidth: true
             }
         }
 
         GridLayout {
-            columns: 3
+            columns: 2
             Layout.fillWidth: true
             rowSpacing: 8
             columnSpacing: 8
@@ -169,8 +127,6 @@ ContentPage {
                 icon: "memory"
                 label: "Memory"
                 value: SystemInfo.memory || "Loading..."
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.Clover4Leaf
                 Layout.fillWidth: true
             }
 
@@ -178,8 +134,6 @@ ContentPage {
                 icon: "storage"
                 label: "Disk"
                 value: SystemInfo.disk || "Loading..."
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.Cookie6Sided
                 Layout.fillWidth: true
             }
 
@@ -187,8 +141,6 @@ ContentPage {
                 icon: "terminal"
                 label: "Shell"
                 value: SystemInfo.shell || "Loading..."
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.Gem
                 Layout.fillWidth: true
             }
 
@@ -196,8 +148,6 @@ ContentPage {
                 icon: "package_2"
                 label: "Packages"
                 value: SystemInfo.packages || "Loading..."
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.Flower
                 Layout.fillWidth: true
             }
 
@@ -205,8 +155,6 @@ ContentPage {
                 icon: "update"
                 label: "Updates"
                 value: Updates.checking ? "Checking..." : (Updates.count === 0 ? "Up to date" : `${Updates.count}`)
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.SoftBurst
                 Layout.fillWidth: true
             }
 
@@ -214,9 +162,45 @@ ContentPage {
                 icon: "timelapse"
                 label: "Uptime"
                 value: DateTime.uptime || "Loading..."
-                iconColor: Appearance.colors.colPrimary
-                iconShape: MaterialShape.Shape.Sunny
                 Layout.fillWidth: true
+            }
+        }
+    }
+
+    RowLayout {
+        spacing: 8
+        Layout.alignment: Qt.AlignRight
+
+        RippleButton {
+            buttonText: Translation.tr("Update System")
+            buttonRadius: Appearance.rounding.full
+            border: true
+            colBackground: "transparent"
+            colBackgroundHover: Appearance.colors.colLayer1Hover
+            Layout.preferredHeight: 44
+            downAction: () => runSystemUpdate()
+
+            contentItem: StyledText {
+                text: parent.buttonText
+                horizontalAlignment: Text.AlignHCenter
+                leftPadding: 10
+                rightPadding: 10
+            }
+        }
+
+        RippleButton {
+            buttonText: Translation.tr("Update Dots")
+            buttonRadius: Appearance.rounding.full
+            colBackground: Appearance.colors.colPrimaryContainer
+            colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+            Layout.preferredHeight: 44
+            downAction: () => runUpdateDots()
+
+            contentItem: StyledText {
+                text: parent.buttonText
+                horizontalAlignment: Text.AlignHCenter
+                leftPadding: 10
+                rightPadding: 10
             }
         }
     }

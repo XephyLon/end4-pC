@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 
 Rectangle {
     id: root
@@ -10,46 +11,80 @@ Rectangle {
     property string icon: ""
     property string label: ""
     property string value: ""
-    property int iconShape: MaterialShape.Shape.Circle
-    property color iconColor: Appearance.colors.colPrimary
 
-    implicitWidth: 100
-    implicitHeight: cardCol.implicitHeight + 24
+    property color avatarColor: Appearance.colors.colPrimary
+    property color avatarOnColor: Appearance.colors.colOnPrimary
+    property color iconPanelColor: ColorUtils.transparentize(Appearance?.colors.colPrimaryContainer, 0.9)
+    property color iconOnColor: Appearance.colors.colOnPrimaryContainer
+
+    implicitWidth: 260
+    implicitHeight: Math.max(64, cardRow.implicitHeight)
     radius: Appearance.rounding.normal
     color: Appearance.colors.colLayer1
     border.width: 1
-    border.color: Appearance.colors.colLayer0Border
+    border.color: "transparent"
+    clip: true
 
-    ColumnLayout {
-        id: cardCol
-        anchors { fill: parent; margins: 12 }
-        spacing: 4
+    RowLayout {
+        id: cardRow
+        anchors.fill: parent
+        spacing: 0
 
-        MaterialShapeWrappedMaterialSymbol {
-            Layout.alignment: Qt.AlignRight
-            shape: root.iconShape
-            text: root.icon
-            iconSize: Appearance.font.pixelSize.large
-            implicitSize: 32
-            color: Qt.alpha(root.iconColor, 0.2)
-            colSymbol: root.iconColor
+        // Letter avatar
+        Rectangle {
+            Layout.leftMargin: 14
+            Layout.alignment: Qt.AlignVCenter
+            implicitWidth: 40
+            implicitHeight: 40
+            radius: width / 2
+            color: root.avatarColor
+
+            StyledText {
+                anchors.centerIn: parent
+                text: root.label.length > 0 ? root.label.charAt(0).toUpperCase() : ""
+                font.pixelSize: Appearance.font.pixelSize.normal
+                font.weight: Font.Medium
+                color: root.avatarOnColor
+            }
         }
 
-        Item { Layout.fillHeight: true }
-
-        StyledText {
+        // Header / Subhead
+        ColumnLayout {
             Layout.fillWidth: true
-            text: root.value
-            font.pixelSize: Appearance.font.pixelSize.normal
-            font.weight: Font.Medium
-            color: Appearance.colors.colOnLayer1
-            elide: Text.ElideRight
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            spacing: 2
+
+            StyledText {
+                Layout.fillWidth: true
+                text: root.value
+                font.pixelSize: Appearance.font.pixelSize.normal
+                font.weight: Font.Medium
+                color: Appearance.colors.colOnLayer1
+                elide: Text.ElideRight
+            }
+            StyledText {
+                Layout.fillWidth: true
+                text: root.label
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colSubtext
+                elide: Text.ElideRight
+            }
         }
 
-        StyledText {
-            text: root.label
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colSubtext
+        Rectangle {
+            Layout.fillHeight: true
+            implicitWidth: 72
+            color: root.iconPanelColor
+            topRightRadius: root.radius
+            bottomRightRadius: root.radius
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: root.icon
+                iconSize: Appearance.font.pixelSize.hugeass
+                color: root.iconOnColor
+            }
         }
     }
 }

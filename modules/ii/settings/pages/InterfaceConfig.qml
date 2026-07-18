@@ -72,12 +72,9 @@ ContentPage {
                         Config.options.overview.scale = value / 100;
                     }
                 }
-
-            }
-            ContentSubsection {
-                title: Translation.tr("Style")
-
                 ConfigSelectionArray {
+                    text: Translation.tr("Style")
+                    icon: "style"
                     currentValue: Config.options.overview.style
                     onSelected: newValue => {
                         Config.options.overview.style = newValue
@@ -96,74 +93,84 @@ ContentPage {
                     ]
                 }
             }
-        
-            GroupedList {
+
+            ContentSubsection {
+                title: Translation.tr("Default Settings")
                 visible: Config.options.overview.style !== "niri"
-                ConfigRow {
-                    uniform: true
+
+                GroupedList {
                     visible: Config.options.overview.style !== "niri"
-                    ConfigSpinBox {
-                        icon: "splitscreen_bottom"
-                        text: Translation.tr("Rows")
-                        value: Config.options.overview.rows
-                        from: 1
-                        to: 20
-                        stepSize: 1
-                        onValueChanged: {
-                            Config.options.overview.rows = value;
+                    ConfigRow {
+                        uniform: true
+                        visible: Config.options.overview.style !== "niri"
+                        ConfigSpinBox {
+                            icon: "splitscreen_bottom"
+                            text: Translation.tr("Rows")
+                            value: Config.options.overview.rows
+                            from: 1
+                            to: 20
+                            stepSize: 1
+                            onValueChanged: {
+                                Config.options.overview.rows = value;
+                            }
+                        }
+                        ConfigSpinBox {
+                            icon: "splitscreen_right"
+                            text: Translation.tr("Columns")
+                            value: Config.options.overview.columns
+                            from: 1
+                            to: 20
+                            stepSize: 1
+                            onValueChanged: {
+                                Config.options.overview.columns = value;
+                            }
                         }
                     }
-                    ConfigSpinBox {
-                        icon: "splitscreen_right"
-                        text: Translation.tr("Columns")
-                        value: Config.options.overview.columns
-                        from: 1
-                        to: 20
-                        stepSize: 1
-                        onValueChanged: {
-                            Config.options.overview.columns = value;
+
+                    ConfigRow {
+                        uniform: true
+                        visible: Config.options.overview.style !== "niri"
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.leftMargin: 24
+                        ConfigSelectionArray {
+                            Layout.alignment: Qt.AlignHCenter
+                            currentValue: Config.options.overview.orderRightLeft
+                            onSelected: newValue => {
+                                Config.options.overview.orderRightLeft = newValue
+                            }
+                            options: [
+                                {
+                                    displayName: Translation.tr("Left to right"),
+                                    icon: "arrow_forward",
+                                    value: 0
+                                },
+                                {
+                                    displayName: Translation.tr("Right to left"),
+                                    icon: "arrow_back",
+                                    value: 1
+                                }
+                            ]
+                        }
+                        ConfigSelectionArray {
+                            Layout.alignment: Qt.AlignHCenter
+                            currentValue: Config.options.overview.orderBottomUp
+                            onSelected: newValue => {
+                                Config.options.overview.orderBottomUp = newValue
+                            }
+                            options: [
+                                {
+                                    displayName: Translation.tr("Top-down"),
+                                    icon: "arrow_downward",
+                                    value: 0
+                                },
+                                {
+                                    displayName: Translation.tr("Bottom-up"),
+                                    icon: "arrow_upward",
+                                    value: 1
+                                }
+                            ]
                         }
                     }
-                }
-            }
-            ConfigRow {
-                uniform: true
-                visible: Config.options.overview.style !== "niri"
-                ConfigSelectionArray {
-                    currentValue: Config.options.overview.orderRightLeft
-                    onSelected: newValue => {
-                        Config.options.overview.orderRightLeft = newValue
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Left to right"),
-                            icon: "arrow_forward",
-                            value: 0
-                        },
-                        {
-                            displayName: Translation.tr("Right to left"),
-                            icon: "arrow_back",
-                            value: 1
-                        }
-                    ]
-                }
-                ConfigSelectionArray {
-                    currentValue: Config.options.overview.orderBottomUp
-                    onSelected: newValue => {
-                        Config.options.overview.orderBottomUp = newValue
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Top-down"),
-                            icon: "arrow_downward",
-                            value: 0
-                        },
-                        {
-                            displayName: Translation.tr("Bottom-up"),
-                            icon: "arrow_upward",
-                            value: 1
-                        }
-                    ]
                 }
             }
         }
@@ -336,7 +343,7 @@ ContentPage {
         ContentSection {
             icon: "select_window"
             shape: MaterialShape.Shape.SoftBurst
-            title: Translation.tr("Overlay: General")
+            title: Translation.tr("Overlay")
 
             GroupedList {
                 ConfigSwitch {
@@ -356,79 +363,93 @@ ContentPage {
                     }
                 }
             }
-        }
 
-        ContentSection {
-            icon: "point_scan"
-            shape: MaterialShape.Shape.Burst
-            title: Translation.tr("Overlay: Crosshair")
+            ContentSubsection {
+                title: Translation.tr("Floating Image")
+                GroupedList {
+                    ConfigTextArea {
+                        id: floatingImageSourceField
+                        Layout.fillWidth: true
+                        fieldWidth: 430
+                        buttonIcon: "imagesmode"
+                        text: Translation.tr("Image source")
+                        value: Config.options.overlay.floatingImage.imageSource
+                        onValueChanged: {
+                            floatingImageSourceDebounceTimer.restart();
+                        }
 
-            MaterialTextArea {
-                id: crosshairCodeTextArea
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Crosshair code (in Valorant's format)")
-                text: Config.options.crosshair.code
-                wrapMode: TextEdit.Wrap
-
-                Timer {
-                    id: crosshairCodeDebounceTimer
-                    interval: 1000
-                    running: false
-                    onTriggered: {
-                        Config.options.crosshair.code = crosshairCodeTextArea.text;
+                        Timer {
+                            id: floatingImageSourceDebounceTimer
+                            interval: 1000
+                            repeat: false
+                            onTriggered: {
+                                Config.options.overlay.floatingImage.imageSource = floatingImageSourceField.value;
+                            }
+                        }
                     }
-                }
-
-                onTextChanged: {
-                    crosshairCodeDebounceTimer.restart();
                 }
             }
 
-            RowLayout {
-                StyledText {
-                    Layout.leftMargin: 10
-                    color: Appearance.colors.colSubtext
-                    font.pixelSize: Appearance.font.pixelSize.smallie
-                    text: Translation.tr("Press Super+G to open the overlay and pin the crosshair")
-                }
-                Item {
+            ContentSubsection {
+                title: Translation.tr("Crosshair")
+
+                Rectangle {
+                    id: crosshairCard
                     Layout.fillWidth: true
-                }
-                RippleButtonWithIcon {
-                    id: editorButton
-                    buttonRadius: Appearance.rounding.full
-                    materialIcon: "open_in_new"
-                    mainText: Translation.tr("Open editor")
-                    onClicked: {
-                        Qt.openUrlExternally(`https://www.vcrdb.net/builder?c=${Config.options.crosshair.code}`);
+                    implicitHeight: crosshairCol.implicitHeight + 28
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+
+                    ColumnLayout {
+                        id: crosshairCol
+                        anchors { fill: parent; margins: 14 }
+                        spacing: 8
+
+                        ConfigTextArea {
+                            id: crosshairCodeField
+                            Layout.fillWidth: true
+                            buttonIcon: "point_scan"
+                            text: Translation.tr("Crosshair code")
+                            placeholderText: Translation.tr("Crosshair code (in Valorant's format)")
+                            value: Config.options.crosshair.code
+                            onValueChanged: {
+                                crosshairCodeDebounceTimer.restart();
+                            }
+
+                            Timer {
+                                id: crosshairCodeDebounceTimer
+                                interval: 1000
+                                repeat: false
+                                onTriggered: {
+                                    Config.options.crosshair.code = crosshairCodeField.value;
+                                }
+                            }
+                        }
+                        
+                        RowLayout {
+                            Layout.fillWidth: true
+                            StyledText {
+                                Layout.leftMargin: 8
+                                Layout.fillWidth: true
+                                text: Translation.tr("Press Super+G to open the overlay and pin the crosshair")
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                color: Appearance.colors.colSubtext
+                                wrapMode: Text.Wrap
+                            }
+                            RippleButtonWithIcon {
+                                id: editorButton
+                                Layout.fillWidth: true
+                                Layout.rightMargin: 6
+                                Layout.preferredHeight: 40
+                                buttonRadius: Appearance.rounding.normal
+                                materialIcon: "open_in_new"
+                                mainText: Translation.tr("Open editor")
+                                onClicked: {
+                                    Qt.openUrlExternally(`https://www.vcrdb.net/builder?c=${Config.options.crosshair.code}`);
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        }
-
-        ContentSection {
-            icon: "point_scan"
-            shape: MaterialShape.Shape.Flower
-            title: Translation.tr("Overlay: Floating Image")
-
-            MaterialTextArea {
-                id: floatingImageSourceTextArea
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Image source")
-                text: Config.options.overlay.floatingImage.imageSource
-                wrapMode: TextEdit.Wrap
-
-                Timer {
-                    id: floatingImageSourceDebounceTimer
-                    interval: 1000 
-                    running: false
-                    onTriggered: {
-                        Config.options.overlay.floatingImage.imageSource = floatingImageSourceTextArea.text;
-                    }
-                }
-
-                onTextChanged: {
-                    floatingImageSourceDebounceTimer.restart();
                 }
             }
         }
@@ -471,15 +492,19 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Google Lens")
                     
-                ConfigSelectionArray {
-                    currentValue: Config.options.search.imageSearch.useCircleSelection ? "circle" : "rectangles"
-                    onSelected: newValue => {
-                        Config.options.search.imageSearch.useCircleSelection = (newValue === "circle");
+                GroupedList {
+                    ConfigSelectionArray {
+                        text: Translation.tr("Selection Type")
+                        icon: "ink_selection"
+                        currentValue: Config.options.search.imageSearch.useCircleSelection ? "circle" : "rectangles"
+                        onSelected: newValue => {
+                            Config.options.search.imageSearch.useCircleSelection = (newValue === "circle");
+                        }
+                        options: [
+                            { icon: "activity_zone", value: "rectangles", displayName: Translation.tr("Rectangular selection") },
+                            { icon: "gesture", value: "circle", displayName: Translation.tr("Circle to Search") }
+                        ]
                     }
-                    options: [
-                        { icon: "activity_zone", value: "rectangles", displayName: Translation.tr("Rectangular selection") },
-                        { icon: "gesture", value: "circle", displayName: Translation.tr("Circle to Search") }
-                    ]
                 }
             }
 
@@ -621,27 +646,28 @@ ContentPage {
                         Config.options.wallpaperSelector.showSearchbar = checked;
                     }
                 }
-            }
+                ConfigTextArea {
+                    id: userPathField
+                    Layout.fillWidth: true
+                    buttonIcon: "folder"
+                    text: Translation.tr("Wallpaper Folder")
+                    placeholderText: Translation.tr("e.g., /home/user/Pictures")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.userPath ?? ""
 
-            MaterialTextArea {
-                id: userPathTextArea
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Custom wallpaper folder path (e.g., /home/user/Pictures)")
-                text: Config.options.wallpaperSelector.userPath ?? ""
-                wrapMode: TextEdit.NoWrap
-
-                Timer {
-                    id: userPathDebounceTimer
-                    interval: 1000
-                    running: false
-                    onTriggered: {
-                        Config.options.wallpaperSelector.userPath = userPathTextArea.text
+                    onValueChanged: {
+                        userPathDebounceTimer.restart()
                     }
-                }
 
-                onTextChanged: {
-                    userPathDebounceTimer.restart()
-                }
+                    Timer {
+                        id: userPathDebounceTimer
+                        interval: 1000
+                        running: false
+                        onTriggered: {
+                            Config.options.wallpaperSelector.userPath = userPathField.value
+                        }
+                    }
+                } 
             }
         }
 
@@ -650,237 +676,204 @@ ContentPage {
             shape: MaterialShape.Shape.Arrow
             title: Translation.tr("Fonts")
 
-            ContentSubsection {
-                title: Translation.tr("Main font")
-
-                MaterialTextArea {
-                    id: mainFontTextArea
+            GroupedList {
+                ConfigTextArea {
+                    id: mainFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name (e.g., Google Sans Flex)")
-                    text: Config.options.appearance.fonts.main
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "font_download"
+                    text: Translation.tr("Font family name (e.g., Google Sans Flex)")
+                    value: Config.options.appearance.fonts.main
+                    onValueChanged: {
+                        mainFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: mainFontDebounceTimer
-                        interval: 1000 
+                        interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.main = mainFontTextArea.text;
+                            Config.options.appearance.fonts.main = mainFontField.value;
                         }
                     }
-
-                    onTextChanged: {
-                        mainFontDebounceTimer.restart();
-                    }
                 }
-            }
 
-            ContentSubsection {
-                title: Translation.tr("Numbers font")
-
-                MaterialTextArea {
-                    id: numbersFontTextArea
+                ConfigTextArea {
+                    id: numbersFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name")
-                    text: Config.options.appearance.fonts.numbers
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "123"
+                    text: Translation.tr("Numbers family name")
+                    value: Config.options.appearance.fonts.numbers
+                    onValueChanged: {
+                        numbersFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: numbersFontDebounceTimer
                         interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.numbers = numbersFontTextArea.text;
+                            Config.options.appearance.fonts.numbers = numbersFontField.value;
                         }
                     }
-
-                    onTextChanged: {
-                        numbersFontDebounceTimer.restart();
-                    }
                 }
-            }
 
-            ContentSubsection {
-                title: Translation.tr("Title font")
-
-                MaterialTextArea {
-                    id: titleFontTextArea
+                ConfigTextArea {
+                    id: titleFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name")
-                    text: Config.options.appearance.fonts.title
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "title"
+                    text: Translation.tr("Title family name")
+                    value: Config.options.appearance.fonts.title
+                    onValueChanged: {
+                        titleFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: titleFontDebounceTimer
                         interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.title = titleFontTextArea.text;
+                            Config.options.appearance.fonts.title = titleFontField.value;
                         }
                     }
-
-                    onTextChanged: {
-                        titleFontDebounceTimer.restart();
-                    }
                 }
-            }
 
-            ContentSubsection {
-                title: Translation.tr("Monospace font")
-
-                MaterialTextArea {
-                    id: monospaceFontTextArea
+                ConfigTextArea {
+                    id: monospaceFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name (e.g., JetBrains Mono NF)")
-                    text: Config.options.appearance.fonts.monospace
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "space_bar"
+                    text: Translation.tr("Monospace font name (e.g., JetBrains Mono NF)")
+                    value: Config.options.appearance.fonts.monospace
+                    onValueChanged: {
+                        monospaceFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: monospaceFontDebounceTimer
                         interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.monospace = monospaceFontTextArea.text;
+                            Config.options.appearance.fonts.monospace = monospaceFontField.value;
                         }
                     }
-
-                    onTextChanged: {
-                        monospaceFontDebounceTimer.restart();
-                    }
                 }
-            }
 
-            ContentSubsection {
-                title: Translation.tr("Nerd font icons")
-
-                MaterialTextArea {
-                    id: iconNerdFontTextArea
+                ConfigTextArea {
+                    id: iconNerdFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name (e.g., JetBrains Mono NF)")
-                    text: Config.options.appearance.fonts.iconNerd
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "emoticon"
+                    text: Translation.tr("Nerd Fonts Icons (e.g., JetBrains Mono NF)")
+                    value: Config.options.appearance.fonts.iconNerd
+                    onValueChanged: {
+                        iconNerdFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: iconNerdFontDebounceTimer
                         interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.iconNerd = iconNerdFontTextArea.text;
+                            Config.options.appearance.fonts.iconNerd = iconNerdFontField.value;
                         }
                     }
-
-                    onTextChanged: {
-                        iconNerdFontDebounceTimer.restart();
-                    }
                 }
-            }
 
-            ContentSubsection {
-                title: Translation.tr("Reading font")
-
-                MaterialTextArea {
-                    id: readingFontTextArea
+                ConfigTextArea {
+                    id: readingFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name (e.g., Readex Pro)")
-                    text: Config.options.appearance.fonts.reading
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "book_ribbon"
+                    text: Translation.tr("Reading font name (e.g., Readex Pro)")
+                    value: Config.options.appearance.fonts.reading
+                    onValueChanged: {
+                        readingFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: readingFontDebounceTimer
                         interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.reading = readingFontTextArea.text;
+                            Config.options.appearance.fonts.reading = readingFontField.value;
                         }
                     }
-
-                    onTextChanged: {
-                        readingFontDebounceTimer.restart();
-                    }
                 }
-            }
 
-            ContentSubsection {
-                title: Translation.tr("Expressive font")
-
-                MaterialTextArea {
-                    id: expressiveFontTextArea
+                ConfigTextArea {
+                    id: expressiveFontField
                     Layout.fillWidth: true
-                    placeholderText: Translation.tr("Font family name (e.g., Space Grotesk)")
-                    text: Config.options.appearance.fonts.expressive
-                    wrapMode: TextEdit.NoWrap
+                    buttonIcon: "mood_heart"
+                    text: Translation.tr("Expressive font name (e.g., Space Grotesk)")
+                    value: Config.options.appearance.fonts.expressive
+                    onValueChanged: {
+                        expressiveFontDebounceTimer.restart();
+                    }
 
                     Timer {
                         id: expressiveFontDebounceTimer
                         interval: 1000
                         running: false
                         onTriggered: {
-                            Config.options.appearance.fonts.expressive = expressiveFontTextArea.text;
+                            Config.options.appearance.fonts.expressive = expressiveFontField.value;
                         }
-                    }
-
-                    onTextChanged: {
-                        expressiveFontDebounceTimer.restart();
                     }
                 }
             }
         }
 
         ContentSection {
-    icon: "colors"
-    title: Translation.tr("Color generation")
-    shape: MaterialShape.Shape.VerySunny
+            icon: "colors"
+            title: Translation.tr("Color generation")
+            shape: MaterialShape.Shape.VerySunny
 
-    GroupedList {
-        ConfigSwitch {
-            buttonIcon: "hardware"
-            text: Translation.tr("Shell & utilities")
-            checked: Config.options.appearance.wallpaperTheming.enableAppsAndShell
-            onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableAppsAndShell = checked }
-        }
-        ConfigSwitch {
-            buttonIcon: "tv_options_input_settings"
-            text: Translation.tr("Qt apps")
-            checked: Config.options.appearance.wallpaperTheming.enableQtApps
-            onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableQtApps = checked }
-        }
-        ConfigSwitch {
-            buttonIcon: "terminal"
-            text: Translation.tr("Terminal")
-            checked: Config.options.appearance.wallpaperTheming.enableTerminal
-            onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableTerminal = checked }
-        }
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "dark_mode"
-                text: Translation.tr("Force dark mode in terminal")
-                checked: Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode
-                onCheckedChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode = checked }
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "hardware"
+                    text: Translation.tr("Shell & utilities")
+                    checked: Config.options.appearance.wallpaperTheming.enableAppsAndShell
+                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableAppsAndShell = checked }
+                }
+                ConfigSwitch {
+                    buttonIcon: "tv_options_input_settings"
+                    text: Translation.tr("Qt apps")
+                    checked: Config.options.appearance.wallpaperTheming.enableQtApps
+                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableQtApps = checked }
+                }
+                ConfigSwitch {
+                    buttonIcon: "terminal"
+                    text: Translation.tr("Terminal")
+                    checked: Config.options.appearance.wallpaperTheming.enableTerminal
+                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableTerminal = checked }
+                }
+                ConfigRow {
+                    uniform: true
+                    ConfigSwitch {
+                        buttonIcon: "dark_mode"
+                        text: Translation.tr("Force dark mode in terminal")
+                        checked: Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode
+                        onCheckedChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode = checked }
+                    }
+                }
+                ConfigSpinBox {
+                    icon: "invert_colors"
+                    text: Translation.tr("Terminal: Harmony (%)")
+                    value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100
+                    from: 0; to: 100; stepSize: 10
+                    onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony = value / 100 }
+                }
+                ConfigSpinBox {
+                    icon: "gradient"
+                    text: Translation.tr("Terminal: Harmonize threshold")
+                    value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold
+                    from: 0; to: 100; stepSize: 10
+                    onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold = value }
+                }
+                ConfigSpinBox {
+                    icon: "format_color_text"
+                    text: Translation.tr("Terminal: Foreground boost (%)")
+                    value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100
+                    from: 0; to: 100; stepSize: 10
+                    onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost = value / 100 }
+                }
             }
         }
-        ConfigSpinBox {
-            icon: "invert_colors"
-            text: Translation.tr("Terminal: Harmony (%)")
-            value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100
-            from: 0; to: 100; stepSize: 10
-            onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony = value / 100 }
-        }
-        ConfigSpinBox {
-            icon: "gradient"
-            text: Translation.tr("Terminal: Harmonize threshold")
-            value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold
-            from: 0; to: 100; stepSize: 10
-            onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold = value }
-        }
-        ConfigSpinBox {
-            icon: "format_color_text"
-            text: Translation.tr("Terminal: Foreground boost (%)")
-            value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100
-            from: 0; to: 100; stepSize: 10
-            onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost = value / 100 }
-        }
-    }
-}
     }
 }
