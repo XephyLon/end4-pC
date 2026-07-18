@@ -122,7 +122,7 @@ ContentPage {
                                     }
                                 }
 
-                                ConfigInput {
+                                ConfigTextArea {
                                     buttonIcon: "badge"
                                     text: Translation.tr("Name")
                                     placeholderText: Translation.tr("Provider Name (e.g. OpenRouter)")
@@ -136,7 +136,7 @@ ContentPage {
                                     }
                                 }
 
-                                ConfigInput {
+                                ConfigTextArea {
                                     buttonIcon: "link"
                                     text: Translation.tr("Base URL")
                                     placeholderText: Translation.tr("e.g. https://openrouter.ai/api/v1")
@@ -151,7 +151,7 @@ ContentPage {
                                     }
                                 }
 
-                                ConfigInput {
+                                ConfigTextArea {
                                     buttonIcon: "key"
                                     text: Translation.tr("API Key")
                                     placeholderText: Translation.tr("Enter API key")
