@@ -82,24 +82,32 @@ Singleton {
         }
     }
 
-    function startHyprsunset() {
-        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset`]);
+    function startHyprsunset(initialArgs = []) {
+        // hyprsunset defaults to `--temperature 6000` (a warm tint, not identity) when
+        // launched bare. If it isn't running yet, pass the target state as launch flags
+        // instead of spawning bare and correcting via a separate hyprctl call right
+        // after - that correction is fire-and-forget (execDetached) and races the
+        // daemon's socket coming up, so on a cold start it can silently fail and leave
+        // hyprsunset sitting at its own 6000K default indefinitely.
+        const initialCmd = initialArgs.length > 0 ? initialArgs.join(" ") : "";
+        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset ${initialCmd}`]);
     }
 
     function load() {
-        root.startHyprsunset();
         if (root.automatic) {
-            root.ensureState();
-        } else {
+            // Recompute shouldBeOn against the actual current time before deciding -
+            // its declared default (false) would otherwise stand until the next
+            // onClockMinuteChanged tick, up to a minute away.
+            root.firstEvaluation = true;
+            root.reEvaluate();
+        } else if (Persistent.states.night.temperatureActive) {
             // Not in automatic mode: there's no reliable way to query hyprsunset's actual
             // on/off state back (hyprctl hyprsunset temperature always reports the last
             // explicitly-set numeric value, identity mode never resets it), so restore
             // whatever we last explicitly set instead of guessing from that query.
-            if (Persistent.states.night.temperatureActive) {
-                root.enableTemperature();
-            } else {
-                root.disableTemperature();
-            }
+            root.enableTemperature();
+        } else {
+            root.disableTemperature();
         }
     }
 
@@ -118,7 +126,7 @@ Singleton {
         Persistent.states.night.temperatureActive = true;
 
         // console.log("[Hyprsunset] Enabling");
-        root.startHyprsunset();
+        root.startHyprsunset(["--temperature", String(root.colorTemperature)]);
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.colorTemperature}`]);
     }
 
@@ -126,6 +134,7 @@ Singleton {
         root.temperatureActive = false;
         Persistent.states.night.temperatureActive = false;
         // console.log("[Hyprsunset] Disabling");
+        root.startHyprsunset(["--identity"]);
         Quickshell.execDetached(["hyprctl", "hyprsunset", "identity"]);
     }
 
@@ -134,7 +143,7 @@ Singleton {
 
         root.gammaChangeAttempt();
 
-        root.startHyprsunset();
+        root.startHyprsunset(root.temperatureActive ? ["--temperature", String(root.colorTemperature)] : ["--identity"]);
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset gamma ${root.gamma}`]);
     }
 
