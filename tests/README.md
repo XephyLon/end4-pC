@@ -14,6 +14,8 @@ We leverage Qt's **`qmltestrunner`** (bundled with Qt6 Declarative Test package)
 2. **Shadowing imports (`tests/imports/qs/`)**: To avoid polluting the workspace source code, we use a directory mapping in `tests/imports` where QML files are symlinked to mirror `import qs.services` or `import qs.modules.common`. Singletons are mapped using local `qmldir` configurations. 
 3. **Mocking Select Singletons**: Singletons that perform disk I/O or run system commands (like `Directories.qml`) are fully mocked in `tests/imports/qs/modules/common/Directories.qml` to prevent unit tests from writing to the user's home directory.
 
+The root `qs` module is also declared in `tests/imports/qs/qmldir`; its lightweight `GlobalStates` mock allows common singletons such as `Appearance` to retain their real runtime imports in headless tests.
+
 This allows us to run tests headlessly, fast, and safely on any system with Qt6 installed.
 
 ---
