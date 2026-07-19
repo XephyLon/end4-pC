@@ -38,7 +38,7 @@ Rectangle {
             Layout.alignment: Qt.AlignVCenter
             wrappedShape: root.iconShape
             text: root.icon
-            iconSize: Appearance.font.pixelSize.large
+            iconSize: Appearance.font.pixelSize.larger + 1
             colSymbol: root.iconColor
             color: root.iconContainerColor
         }
