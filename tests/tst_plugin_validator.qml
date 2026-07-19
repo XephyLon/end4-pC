@@ -30,9 +30,8 @@ TestCase {
             "id": "my_docker",
             "name": "My Docker",
             "permissions": ["process", "settings_read", "settings_write"],
-            "capabilities": ["bar-widget", "desktop-widget"],
-            "barWidget": { "component": "DockerWidget.qml" },
-            "desktopWidget": { "component": "DockerDesktopWidget.qml", "blur": true }
+            "capabilities": ["bar-widget"],
+            "barWidget": { "component": "DockerWidget.qml" }
         };
 
         var result = PluginValidator.validateManifest(manifest);

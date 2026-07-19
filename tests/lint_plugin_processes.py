@@ -2,6 +2,7 @@
 """Guard bundled plugins against unthrottled long-running Process loops."""
 
 from pathlib import Path
+import json
 import re
 import sys
 
@@ -37,6 +38,28 @@ def process_blocks(text: str):
 
 
 failures = []
+
+# Docker's package service must only be instantiated by an explicit bar entry.
+# Loading it automatically as a desktop widget triggered an in-process allocation
+# runaway (multiple gigabytes within minutes) on the live Wayland shell.
+docker_manifest = json.loads(
+    (PLUGIN_ROOT / "docker/manifest.json").read_text(encoding="utf-8"))
+if "desktopWidget" in docker_manifest:
+    failures.append(
+        "docker/manifest.json: Docker must not auto-load as a desktop widget; use its bar entry")
+
+# A package bar entry must have one Loader as its sizing boundary. Nesting the
+# package Loader inside PluginNode made the outer bar Loader, PluginNode, and
+# package root continually negotiate geometry: the widget collapsed to one
+# pixel while Quickshell allocated several gigabytes in minutes.
+bar_host = (ROOT / "modules/ii/bar/PluginBarWidget.qml").read_text(encoding="utf-8")
+if re.search(r"\bPluginNode\s*\{", bar_host):
+    failures.append(
+        "modules/ii/bar/PluginBarWidget.qml: package bar entries must not be wrapped in PluginNode")
+if len(re.findall(r"\bLoader\s*\{", bar_host)) != 1:
+    failures.append(
+        "modules/ii/bar/PluginBarWidget.qml: package bar entries require exactly one Loader")
+
 for path in PLUGIN_ROOT.rglob("*.qml"):
     for block in process_blocks(path.read_text(encoding="utf-8")):
         if STREAMING_COMMANDS.search(block) and re.search(r"\brunning\s*:\s*(?!false\b)", block):

@@ -7,10 +7,10 @@
     "source": "Port of DmsDockerManager",
     "sourceUrl": "https://github.com/LuckShiba/DmsDockerManager",
     "apiVersion": 1,
-    "capabilities": ["bar-widget", "desktop-widget", "settings"],
+    "capabilities": ["bar-widget", "settings"],
     "permissions": ["process", "settings_read", "settings_write"],
-    "defaultWidth": 360,
-    "defaultHeight": 300,
+    "defaultWidth": 0,
+    "defaultHeight": 0,
     "options": [
         {
             "key": "showBarWidget",
@@ -66,9 +66,5 @@
         },
         { "key": "showPorts", "type": "boolean", "label": "Show port mappings", "icon": "lan", "default": true }
     ],
-    "barWidget": { "component": "DockerWidget.qml" },
-    "desktopWidget": {
-        "blur": true,
-        "component": "DockerDesktopWidget.qml"
-    }
+    "barWidget": { "component": "DockerWidget.qml" }
 }

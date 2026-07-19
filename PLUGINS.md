@@ -64,6 +64,16 @@ Prefer bounded polling with a `Timer` and an imperatively started one-shot `Proc
 plugins are checked by `tests/lint_plugin_processes.py`; an intentionally restart-safe stream must
 contain `process-lifecycle: restart-safe` in its `Process` block and document its backoff.
 
+The bundled Docker manager is intentionally bar-only. Its desktop entry point was removed after
+the background-host path repeatedly drove Quickshell into multi-gigabyte anonymous-memory growth.
+Do not restore automatic desktop loading until that interaction has a bounded-memory reproducer.
+
+Package bar components are loaded through a single sizing boundary in `PluginBarWidget.qml`.
+Do not route them through `PluginNode` or add another nested loader: competing implicit and
+layout-assigned geometry previously collapsed the visible widget to a one-pixel line while driving
+Quickshell above 5 GB RSS in roughly two minutes. Preserve the corresponding lint check and use a
+guarded live run with RSS sampling when changing package-host geometry.
+
 Avoid editing many live-loaded QML files in rapid succession. Quickshell reloads the configuration
 for each change, and moving service/module files during those reloads can impose severe session
 load. Stop Quickshell or develop in a worktree, run headless tests, then do one controlled live load.
