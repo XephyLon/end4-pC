@@ -17,6 +17,17 @@ ColumnLayout {
         label: "Blur background",
         icon: "blur_on",
         default: manifest.desktopWidget?.blur === true
+    }, {
+        key: "blurTintOpacity",
+        type: "number",
+        label: "Background opacity",
+        icon: "opacity",
+        default: 0.1,
+        from: 0,
+        to: 1,
+        step: 0.05,
+        usePercentTooltip: true,
+        enabledWhen: "blurEnabled"
     }].concat(manifest.options || [])
 
     Repeater {
@@ -27,6 +38,10 @@ ColumnLayout {
             required property var modelData
             Layout.fillWidth: true
             property var optionData: modelData
+            visible: !optionData.enabledWhen
+                || PluginState.option(root.manifest.id, optionData.enabledWhen, false)
+            enabled: visible
+            Layout.preferredHeight: visible ? implicitHeight : 0
 
             sourceComponent: {
                 switch (optionData.type) {
@@ -72,7 +87,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     text: optionLoader.optionData.label
                     buttonIcon: optionLoader.optionData.icon || "tune"
-                    usePercentTooltip: false
+                    usePercentTooltip: optionLoader.optionData.usePercentTooltip === true
                     from: optionLoader.optionData.from ?? 0
                     to: optionLoader.optionData.to ?? 100
                     value: PluginState.option(root.manifest.id, optionLoader.optionData.key, optionLoader.optionData.default)

@@ -12,6 +12,11 @@ AbstractBackgroundWidget {
     readonly property bool blurEnabled: manifest
         ? PluginState.option(manifest.id, "blurEnabled", manifest.desktopWidget?.blur === true)
         : false
+    readonly property real blurTintOpacity: manifest
+        ? PluginState.option(manifest.id, "blurTintOpacity", 0.1)
+        : 0.1
+    readonly property bool hasBlurSurface: !pluginNode.hasCustomBlurRegions
+        || pluginNode.blurRegions.length > 0
 
     configEntryName: manifest ? "plugin_" + manifest.id : "plugin_unknown"
 
@@ -60,13 +65,30 @@ AbstractBackgroundWidget {
         z: -1
         anchors.fill: parent
         clip: true
-        visible: rootWidget.blurEnabled && Config.options.appearance.transparency.enable
+        visible: rootWidget.blurEnabled && rootWidget.hasBlurSurface
+            && Config.options.appearance.transparency.enable
         layer.enabled: visible
         layer.effect: OpacityMask {
-            maskSource: Rectangle {
+            maskSource: Item {
                 width: blurredBackdrop.width
                 height: blurredBackdrop.height
-                radius: rootWidget.widgetRounding
+
+                Repeater {
+                    model: pluginNode.hasCustomBlurRegions
+                        ? pluginNode.blurRegions
+                        : [{ x: 0, y: 0, width: blurredBackdrop.width,
+                            height: blurredBackdrop.height, radius: rootWidget.widgetRounding }]
+
+                    Rectangle {
+                        required property var modelData
+                        x: Number(modelData.x || 0)
+                        y: Number(modelData.y || 0)
+                        width: Number(modelData.width || 0)
+                        height: Number(modelData.height || 0)
+                        radius: Number(modelData.radius ?? rootWidget.widgetRounding)
+                        color: "white"
+                    }
+                }
             }
         }
 
@@ -87,7 +109,7 @@ AbstractBackgroundWidget {
         Rectangle {
             anchors.fill: parent
             color: Appearance.colors.colScrim
-            opacity: 0.1
+            opacity: pluginNode.managesBlurTint ? 0 : rootWidget.blurTintOpacity
         }
     }
 

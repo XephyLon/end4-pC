@@ -4,6 +4,8 @@ import qs.modules.common.plugins
 import "../../designsystem/widgets" as Expressive
 
 Item {
+    // The original clock has no background surface.
+    readonly property var blurRegions: []
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
     width: implicitWidth

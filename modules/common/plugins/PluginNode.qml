@@ -21,6 +21,13 @@ Item {
 
     implicitWidth: componentLoader.item ? (componentLoader.item.implicitWidth || componentLoader.item.width) : 0
     implicitHeight: componentLoader.item ? (componentLoader.item.implicitHeight || componentLoader.item.height) : 0
+    // Component plugins may expose several local blur surfaces. Coordinates are
+    // relative to this node. An empty list means "blur the complete widget".
+    readonly property bool hasCustomBlurRegions: componentLoader.item
+        ? componentLoader.item.blurRegions !== undefined : false
+    readonly property var blurRegions: hasCustomBlurRegions ? componentLoader.item.blurRegions : []
+    readonly property bool managesBlurTint: componentLoader.item
+        ? componentLoader.item.managesBlurTint === true : false
     width: implicitWidth
     height: implicitHeight
 

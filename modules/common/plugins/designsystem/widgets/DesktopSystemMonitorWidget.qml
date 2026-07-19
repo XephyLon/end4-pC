@@ -12,6 +12,9 @@ Item {
     
     // Read orientation from config
     property bool isVertical: Config.ready ? Config.options.appearance.systemMonitor.vertical : false
+    property bool useBlurBackground: false
+    property real backgroundOpacity: 0.1
+    readonly property bool managesBlurTint: true
 
     // Scale dimensions cleanly based on Choice A (Grid: 132x108, Gap: 12)
     // Horizontal 3x1: 420 x 108
@@ -25,6 +28,15 @@ Item {
     property real cardSpacing: 12 * Appearance.effectiveScale
     property real cardHeight: isVertical ? (108 * Appearance.effectiveScale) : (108 * Appearance.effectiveScale)
     property real cardWidth: isVertical ? (132 * Appearance.effectiveScale) : ((420 * Appearance.effectiveScale - cardSpacing * 2) / 3)
+    readonly property var blurRegions: [
+        { x: cpuCard.x, y: cpuCard.y, width: cpuCard.width, height: cpuCard.height, radius: cpuCard.radius },
+        { x: ramCard.x, y: ramCard.y, width: ramCard.width, height: ramCard.height, radius: ramCard.radius },
+        { x: diskCard.x, y: diskCard.y, width: diskCard.width, height: diskCard.height, radius: diskCard.radius }
+    ]
+
+    function cardColor(color) {
+        return useBlurBackground ? Functions.ColorUtils.applyAlpha(color, backgroundOpacity) : color;
+    }
 
     Grid {
         id: gridLayout
@@ -37,7 +49,7 @@ Item {
             implicitWidth: root.cardWidth
             implicitHeight: root.cardHeight
             radius: Appearance.rounding.large
-            color: Appearance.colors.colPrimaryContainer
+            color: root.cardColor(Appearance.colors.colPrimaryContainer)
 
             // Sisi Atas: Liquid Gem (Centered Top)
             Item {
@@ -126,7 +138,7 @@ Item {
             implicitWidth: root.cardWidth
             implicitHeight: root.cardHeight
             radius: Appearance.rounding.large
-            color: Appearance.colors.colSecondaryContainer
+            color: root.cardColor(Appearance.colors.colSecondaryContainer)
 
             // Sisi Atas: Liquid Cookie4Sided (Centered Top)
             Item {
@@ -215,7 +227,7 @@ Item {
             implicitWidth: root.cardWidth
             implicitHeight: root.cardHeight
             radius: Appearance.rounding.large
-            color: Appearance.colors.colTertiaryContainer
+            color: root.cardColor(Appearance.colors.colTertiaryContainer)
 
             // Sisi Atas: Liquid Cookie12Sided (Centered Top)
             Item {

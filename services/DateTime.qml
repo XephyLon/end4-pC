@@ -23,6 +23,14 @@ Singleton {
     property string date: Qt.locale().toString(clock.date, Config.options?.time.dateWithYearFormat ?? "dd/MM/yyyy")
     property string longDate: Qt.locale().toString(clock.date, Config.options?.time.dateFormat ?? "dddd, dd/MM")
     property string collapsedCalendarFormat: Qt.locale().toString(clock.date, "dddd, MMMM dd")
+    // Compatibility surface used by imported desktop widgets. Keep these derived
+    // from the same SystemClock so adding a widget never creates another timer.
+    readonly property string currentTime: time
+    readonly property string currentDate: longDate
+    readonly property int hours: clock.date.getHours()
+    readonly property int minutes: clock.date.getMinutes()
+    readonly property int seconds: clock.date.getSeconds()
+    readonly property string time12h: Qt.locale().toString(clock.date, "hh:mm ap")
     property string uptime: "0h, 0m"
 
     Timer {

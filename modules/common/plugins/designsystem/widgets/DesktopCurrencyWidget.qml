@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.modules.common.functions as Functions
 import qs.services
 import "../services"
 import QtQuick
@@ -12,6 +13,12 @@ Item {
     property var cfg: Config.ready ? Config.options.appearance.currencyWidget : null
     property string sizeMode: cfg ? cfg.sizeMode : "2x1"
     property bool interactive: true
+    property bool useBlurBackground: false
+    property real backgroundOpacity: 0.1
+    readonly property bool managesBlurTint: true
+    readonly property var blurRegions: [{
+        x: card.x, y: card.y, width: card.width, height: card.height, radius: card.radius
+    }]
     signal baseCurrencyRequested(string value)
     signal quoteCurrencyRequested(int index, string value)
     signal sizeModeRequested(string value)
@@ -79,7 +86,9 @@ Item {
         objectName: "nandoroidCurrencyCard"
         anchors.fill: parent
         radius: 30 * Appearance.effectiveScale
-        color: Appearance.colors.colPrimaryContainer
+        color: root.useBlurBackground
+            ? Functions.ColorUtils.applyAlpha(Appearance.colors.colPrimaryContainer, root.backgroundOpacity)
+            : Appearance.colors.colPrimaryContainer
 
         // --- PAGE 1: View Mode ---
         Item {

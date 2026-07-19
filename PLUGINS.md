@@ -47,6 +47,30 @@ Manifest options support `boolean`, `choice`, `number`, and `text`. Text options
 native `ConfigTextArea`; `placeholder`, `maxLength`, and `uppercase` may be supplied for short values
 such as currency codes.
 
+## Desktop blur surfaces
+
+Every desktop plugin receives a `Blur background` setting. When enabled, a `Background opacity`
+slider controls the tint above the sampled wallpaper; both values are persisted per plugin. A
+package component can optionally expose a `blurRegions` property when its visual consists of
+separate cards rather than one continuous surface:
+
+```qml
+readonly property var blurRegions: [
+    { x: firstCard.x, y: firstCard.y,
+      width: firstCard.width, height: firstCard.height, radius: firstCard.radius },
+    { x: secondCard.x, y: secondCard.y,
+      width: secondCard.width, height: secondCard.height, radius: secondCard.radius }
+]
+```
+
+Coordinates are local to the package component. The host uses all regions as one mask over a
+single blurred wallpaper texture, keeping gaps transparent without multiplying blur effects. An
+absent property retains the full-widget rounded-rectangle fallback; an explicit empty list declares
+that the component has no background surface and disables host blur. Components that own their
+background tint can expose `managesBlurTint: true` and apply the persisted opacity to that internal
+fill, preventing the host from adding a second generic scrim. The nandoroid System Monitor,
+Currency, Media, and Weather widgets are reference implementations.
+
 ## Remote installation
 
 The Plugins settings page accepts an HTTPS manifest URL. A remotely installable manifest adds:

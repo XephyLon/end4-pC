@@ -15,6 +15,12 @@ Item {
     property bool showLyrics: Config.options.appearance.mediaWidget.showLyrics
     property bool useRomaji: Config.options.appearance.lyrics.lyricsUseRomaji
     property bool viewLyrics: false
+    property bool useBlurBackground: false
+    property real backgroundOpacity: 0.1
+    readonly property bool managesBlurTint: true
+    readonly property var blurRegions: [{
+        x: bgCard.x, y: bgCard.y, width: bgCard.width, height: bgCard.height, radius: bgCard.radius
+    }]
 
     onViewLyricsChanged: {
         LyricsService.desktopWidgetLyricsActive = viewLyrics;
@@ -28,7 +34,9 @@ Item {
         id: bgCard
         anchors.fill: parent
         radius: 30 * Appearance.effectiveScale
-        color: Appearance.colors.colOnPrimary // Card bg = play/pause icon color (user request)
+        color: root.useBlurBackground
+            ? Functions.ColorUtils.applyAlpha(Appearance.colors.colOnPrimary, root.backgroundOpacity)
+            : Appearance.colors.colOnPrimary // Card bg = play/pause icon color (user request)
     }
 
     // Toggle button in top right corner (M3 Styled Shape)

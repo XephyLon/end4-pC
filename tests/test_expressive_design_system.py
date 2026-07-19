@@ -65,6 +65,10 @@ class ExpressiveDesignSystemTest(unittest.TestCase):
             self.assertTrue(manifest.get("sourceUrl"))
             self.assertTrue(manifest.get("upstreamRevision"))
             self.assertEqual(manifest["desktopWidget"]["component"], "Widget.qml")
+            # Imported widgets own their exact Material geometry. A fixed host
+            # canvas produces the oversized rectangular blur seen on desktop.
+            self.assertNotIn("defaultWidth", manifest)
+            self.assertNotIn("defaultHeight", manifest)
             self.assertTrue((package / "Widget.qml").exists())
             option_keys = {option["key"] for option in manifest.get("options", [])}
             self.assertEqual(option_keys, EXPECTED_OPTIONS[directory])
@@ -97,6 +101,49 @@ class ExpressiveDesignSystemTest(unittest.TestCase):
         self.assertIn("signal baseCurrencyRequested", currency_widget)
         self.assertIn("signal quoteCurrencyRequested", currency_widget)
         self.assertIn("signal sizeModeRequested", currency_widget)
+
+    def test_imported_service_compatibility_is_explicit(self):
+        date_time = (ROOT / "services" / "DateTime.qml").read_text(encoding="utf-8")
+        for field in ("currentTime", "currentDate", "hours", "minutes", "seconds", "time12h"):
+            self.assertRegex(date_time, rf"property\s+\w+\s+{field}\s*:")
+
+        weather = (DESIGN_SYSTEM / "widgets" / "DesktopWeatherWidget.qml").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("Weather.current", weather)
+        self.assertNotIn("Weather.todayHigh", weather)
+        self.assertNotIn("Weather.todayLow", weather)
+
+    def test_plugin_blur_supports_tint_and_widget_regions(self):
+        options = (ROOT / "modules/common/plugins/PluginOptions.qml").read_text(encoding="utf-8")
+        host = (ROOT / "modules/common/plugins/PluginWidget.qml").read_text(encoding="utf-8")
+        node = (ROOT / "modules/common/plugins/PluginNode.qml").read_text(encoding="utf-8")
+        monitor = (DESIGN_SYSTEM / "widgets" / "DesktopSystemMonitorWidget.qml").read_text(
+            encoding="utf-8"
+        )
+        wrapper = (PLUGIN_ROOT / "nandoroid-system-monitor" / "Widget.qml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('key: "blurTintOpacity"', options)
+        self.assertIn('enabledWhen: "blurEnabled"', options)
+        self.assertIn('PluginState.option(manifest.id, "blurTintOpacity", 0.1)', host)
+        self.assertIn("pluginNode.blurRegions", host)
+        self.assertIn("property bool hasCustomBlurRegions", node)
+        self.assertIn("property bool managesBlurTint", node)
+        self.assertIn("readonly property var blurRegions", monitor)
+        self.assertIn("readonly property var blurRegions: content.blurRegions", wrapper)
+
+        for directory in ("nandoroid-currency", "nandoroid-media", "nandoroid-weather"):
+            wrapper_text = (PLUGIN_ROOT / directory / "Widget.qml").read_text(encoding="utf-8")
+            self.assertIn("readonly property var blurRegions: content.blurRegions", wrapper_text)
+            self.assertIn("readonly property bool managesBlurTint: content.managesBlurTint", wrapper_text)
+            self.assertIn("useBlurBackground: PluginState.option", wrapper_text)
+            self.assertIn("backgroundOpacity: PluginState.option", wrapper_text)
+
+        for directory in ("nandoroid-clock", "nandoroid-at-a-glance"):
+            wrapper_text = (PLUGIN_ROOT / directory / "Widget.qml").read_text(encoding="utf-8")
+            self.assertIn("readonly property var blurRegions: []", wrapper_text)
 
 
 if __name__ == "__main__":

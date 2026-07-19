@@ -13,6 +13,12 @@ Item {
     property var cfg: Config.ready ? Config.options.appearance.weatherWidget : null
     property string sizeMode: cfg ? cfg.sizeMode : "3x1"
     property bool interactive: true
+    property bool useBlurBackground: false
+    property real backgroundOpacity: 0.1
+    readonly property bool managesBlurTint: true
+    readonly property var blurRegions: [{
+        x: card.x, y: card.y, width: card.width, height: card.height, radius: card.radius
+    }]
     
     HoverHandler {
         id: widgetHoverHandler
@@ -42,10 +48,30 @@ Item {
         }
     }
 
-    readonly property string weatherIconsDir: "assets/icons/google-weather"
+    // CustomIcon lives one directory below this imported widget's former location.
+    // Walk back to the shared, preserved upstream icon set at repository /assets.
+    readonly property string weatherIconsDir: "../../../../assets/icons/google-weather"
     readonly property color contentColor: Appearance.m3colors.m3onSurface
     readonly property real midOpacity: 0.8
     readonly property real lowOpacity: 0.6
+    // Adapt end4's OpenWeather service schema to the original nandoroid visual.
+    // The widget remains visually unchanged; only its data source is translated.
+    readonly property var weatherData: Weather.data || ({})
+    readonly property string temperature: (weatherData.temp || "--").replace(/[^0-9+\-.]/g, "")
+    readonly property string feelsLike: (weatherData.tempFeelsLike || "--").replace(/[^0-9+\-.]/g, "")
+    readonly property string condition: weatherData.description || "Unknown"
+    readonly property string humidity: weatherData.humidity || "--"
+    readonly property string wind: weatherData.wind || "--"
+    readonly property string weatherIcon: {
+        const code = Number(weatherData.wCode || 0)
+        if (code === 800) return Icons.isNight() ? "clear_night" : "clear_day"
+        if (code === 801) return Icons.isNight() ? "partly_cloudy_night" : "partly_cloudy_day"
+        if (code >= 200 && code < 300) return "strong_thunderstorms"
+        if (code >= 300 && code < 600) return "heavy_rain"
+        if (code >= 600 && code < 700) return "heavy_snow"
+        if (code >= 700 && code < 800) return "haze_fog_dust_smoke"
+        return "cloudy"
+    }
 
     // Helper logic to convert dragged width into matching size modes
     function getModeForWidth(targetWidth) {
@@ -61,7 +87,9 @@ Item {
         id: card
         anchors.fill: parent
         radius: 30 * Appearance.effectiveScale
-        color: Appearance.colors.colOnPrimary
+        color: root.useBlurBackground
+            ? Functions.ColorUtils.applyAlpha(Appearance.colors.colOnPrimary, root.backgroundOpacity)
+            : Appearance.colors.colOnPrimary
 
         // Mask the entire card contents to ensure split vertical panels and slanted leaves clip perfectly at the rounded corners
         layer.enabled: true
@@ -102,14 +130,14 @@ Item {
                     spacing: 2 * Appearance.effectiveScale
 
                     StyledText {
-                        text: Weather.loading ? "--" : Weather.current.temp + "°"
+                        text: root.temperature + "°"
                         font.pixelSize: Math.round(44 * Appearance.effectiveScale)
                         font.weight: Font.Bold
                         color: Appearance.colors.colPrimary
                     }
 
                     StyledText {
-                        text: Weather.loading ? "Updating..." : (Weather.current.condition || "Unknown")
+                        text: root.condition
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         font.weight: Font.Medium
                         color: root.contentColor
@@ -141,7 +169,7 @@ Item {
 
                     CustomIcon {
                         anchors.centerIn: parent
-                        source: Weather.current.icon
+                        source: root.weatherIcon
                         iconFolder: root.weatherIconsDir
                         width: 28 * Appearance.effectiveScale
                         height: 28 * Appearance.effectiveScale
@@ -175,7 +203,7 @@ Item {
                     }
 
                     StyledText {
-                        text: Weather.loading ? "--" : Weather.current.temp + "°"
+                        text: root.temperature + "°"
                         font.pixelSize: Math.round(44 * Appearance.effectiveScale)
                         font.weight: Font.Bold
                         color: Appearance.colors.colPrimary
@@ -183,7 +211,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: Weather.loading ? "Updating..." : (Weather.current.condition || "Unknown")
+                        text: root.condition
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.DemiBold
                         color: root.contentColor
@@ -192,7 +220,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: `Feels like ${Weather.current.feelsLike}°`
+                        text: `Feels like ${root.feelsLike}°`
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         color: root.contentColor
                         opacity: 0.6
@@ -215,7 +243,7 @@ Item {
 
                     CustomIcon {
                         anchors.centerIn: parent
-                        source: Weather.current.icon
+                        source: root.weatherIcon
                         iconFolder: root.weatherIconsDir
                         width: 36 * Appearance.effectiveScale
                         height: 36 * Appearance.effectiveScale
@@ -243,14 +271,14 @@ Item {
                     spacing: 2 * Appearance.effectiveScale
 
                     StyledText {
-                        text: Weather.loading ? "--" : Weather.current.temp + "°"
+                        text: root.temperature + "°"
                         font.pixelSize: Math.round(48 * Appearance.effectiveScale)
                         font.weight: Font.Bold
                         color: Appearance.colors.colPrimary
                     }
                     
                     StyledText {
-                        text: `High ${Weather.todayHigh}° · Low ${Weather.todayLow}°`
+                        text: `Feels like ${root.feelsLike}°`
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         color: root.contentColor
                         opacity: 0.6
@@ -273,7 +301,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: Weather.loading ? "Updating..." : (Weather.current.condition || "Unknown")
+                        text: root.condition
                         font.pixelSize: Appearance.font.pixelSize.large
                         font.weight: Font.DemiBold
                         color: root.contentColor
@@ -301,7 +329,7 @@ Item {
                                     color: Appearance.colors.colPrimary
                                 }
                                 StyledText {
-                                    text: Weather.loading ? "--" : (Weather.current.humidity + "%")
+                                    text: root.humidity
                                     font.pixelSize: Appearance.font.pixelSize.smallest
                                     font.weight: Font.DemiBold
                                     color: root.contentColor
@@ -326,7 +354,7 @@ Item {
                                     color: Appearance.colors.colPrimary
                                 }
                                 StyledText {
-                                    text: Weather.loading ? "--" : (Weather.current.windSpeed + " km/h")
+                                    text: root.wind
                                     font.pixelSize: Appearance.font.pixelSize.smallest
                                     font.weight: Font.DemiBold
                                     color: root.contentColor
@@ -346,7 +374,7 @@ Item {
 
                     CustomIcon {
                         anchors.centerIn: parent
-                        source: Weather.current.icon
+                        source: root.weatherIcon
                         iconFolder: root.weatherIconsDir
                         width: 42 * Appearance.effectiveScale
                         height: 42 * Appearance.effectiveScale
