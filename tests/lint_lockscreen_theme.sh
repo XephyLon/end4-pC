@@ -40,6 +40,17 @@ if ! grep -q 'interval: Appearance.animation.elementMoveFast.duration' "$THEME_L
     exit 1
 fi
 
+ANIMATED_ROLE_COUNT="$(sed -n '/readonly property var animatedColorRoles:/,/})/p' "$THEME_LOADER" | grep -oE 'm3[A-Za-z]+:' | wc -l)"
+if (( ANIMATED_ROLE_COUNT > 24 )); then
+    echo "Lockscreen theme lint FAILED: palette transition animates $ANIMATED_ROLE_COUNT roles (maximum 24)" >&2
+    exit 1
+fi
+
+if ! grep -q 'colorTransitionDuration: Appearance.animation.elementMoveFast.duration' "$THEME_LOADER"; then
+    echo "Lockscreen theme lint FAILED: palette transition must use the bounded fast duration" >&2
+    exit 1
+fi
+
 if ! grep -q 'exec python3 .*generate_colors_material.py.*"\$@"' "$WRAPPER"; then
     echo "Lockscreen theme lint FAILED: generator wrapper must preserve argument boundaries" >&2
     exit 1

@@ -10,6 +10,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import qs.modules.common
+import "MprisSelection.js" as MprisSelection
 
 /**
  * A service that provides easy access to the active Mpris player.
@@ -18,7 +19,11 @@ Singleton {
 	id: root;
 	property list<MprisPlayer> players: Mpris.players.values.filter(player => isRealPlayer(player));
 	property MprisPlayer trackedPlayer: null;
-	property MprisPlayer activePlayer: trackedPlayer ?? Mpris.players.values[0] ?? null;
+	property MprisPlayer activePlayer: null;
+	readonly property string trackTitle: activePlayer?.trackTitle ?? "";
+	readonly property string trackArtist: activePlayer?.trackArtist ?? "";
+	readonly property real position: activePlayer?.position ?? 0;
+	readonly property real length: activePlayer?.length ?? 0;
 	signal trackChanged(reverse: bool);
 
 	property bool __reverse: false;
@@ -41,6 +46,37 @@ Singleton {
             !(player.dbusName?.endsWith('.mpd') && !player.dbusName.endsWith('MediaPlayer2.mpd')));
     }
 
+	function hasUsableMetadata(player) {
+		return MprisSelection.hasUsableMetadata(player);
+	}
+
+	function preferredPlayer(candidates) {
+		return MprisSelection.preferredPlayer(candidates);
+	}
+
+	function reconcileTrackedPlayer(preferred) {
+		if (preferred && players.includes(preferred) && preferred.isPlaying) {
+			trackedPlayer = preferred;
+			syncActivePlayer();
+			return;
+		}
+		if (!trackedPlayer || !players.includes(trackedPlayer)
+				|| (!trackedPlayer.isPlaying && players.some(player => player.isPlaying))) {
+			trackedPlayer = MprisSelection.preferredPlayer(players);
+		}
+		syncActivePlayer();
+	}
+
+	function syncActivePlayer() {
+		const nextPlayer = trackedPlayer && players.includes(trackedPlayer)
+			? trackedPlayer : MprisSelection.preferredPlayer(players);
+		if (activePlayer !== nextPlayer)
+			activePlayer = nextPlayer;
+	}
+
+	onPlayersChanged: reconcileTrackedPlayer(null)
+	onTrackedPlayerChanged: syncActivePlayer()
+
 	// Original stuff from fox below
 	Instantiator {
 		model: Mpris.players;
@@ -50,28 +86,23 @@ Singleton {
 			target: modelData;
 
 			Component.onCompleted: {
-				if (root.trackedPlayer == null || modelData.isPlaying) {
-					root.trackedPlayer = modelData;
-				}
+				root.reconcileTrackedPlayer(modelData.isPlaying ? modelData : null);
 			}
 
 			Component.onDestruction: {
-				if (root.trackedPlayer == null || !root.trackedPlayer.isPlaying) {
-					for (const player of Mpris.players.values) {
-						if (player.playbackState.isPlaying) {
-							root.trackedPlayer = player;
-							break;
-						}
-					}
-
-					if (trackedPlayer == null && Mpris.players.values.length != 0) {
-						trackedPlayer = Mpris.players.values[0];
-					}
-				}
+				Qt.callLater(() => root.reconcileTrackedPlayer(null));
 			}
 
 			function onPlaybackStateChanged() {
-				if (root.trackedPlayer !== modelData) root.trackedPlayer = modelData;
+				if (modelData.isPlaying)
+					root.reconcileTrackedPlayer(modelData);
+				else if (root.trackedPlayer === modelData)
+					root.reconcileTrackedPlayer(null);
+			}
+
+			function onTrackTitleChanged() {
+				if (modelData.isPlaying)
+					root.reconcileTrackedPlayer(modelData);
 			}
 		}
 	}
@@ -165,10 +196,32 @@ Singleton {
 		}
 
 		this.trackedPlayer = targetPlayer;
+		this.syncActivePlayer();
 	}
 
 	IpcHandler {
 		target: "mpris"
+
+		function debugState(): string {
+			return JSON.stringify({
+				rawCount: Mpris.players.values.length,
+				filteredCount: root.players.length,
+				tracked: root.trackedPlayer?.dbusName ?? "",
+				active: root.activePlayer?.dbusName ?? "",
+				trackTitle: root.trackTitle,
+				trackArtist: root.trackArtist,
+				position: root.position,
+				length: root.length,
+				players: Mpris.players.values.map(player => ({
+					dbusName: player.dbusName ?? "",
+					identity: player.identity ?? "",
+					isPlaying: player.isPlaying ?? false,
+					playbackState: String(player.playbackState ?? ""),
+					title: player.trackTitle ?? "",
+					artist: player.trackArtist ?? ""
+				}))
+			});
+		}
 
 		function pauseAll(): void {
 			for (const player of Mpris.players.values) {

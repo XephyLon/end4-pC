@@ -2,6 +2,7 @@ import qs.modules.common
 import qs.modules.common.functions as Functions
 import qs.services
 import "../services"
+import "../services/CurrencyMath.js" as CurrencyMath
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -79,6 +80,11 @@ Item {
     }
 
     function toggleFlip() { flipAnim.start() }
+
+    function formatRate(value) {
+        return Number(value).toLocaleString(
+            Qt.locale(), "f", CurrencyMath.fractionDigits(value));
+    }
 
     // Main Card Rectangle (Colored using colPrimaryContainer)
     Rectangle {
@@ -212,7 +218,7 @@ Item {
                         StyledText {
                             text: {
                                 let v = CurrencyService.rates[CurrencyService.quote1] || 0.0;
-                                if (v > 0.0) return Math.round(v).toLocaleString(Qt.locale(), 'f', 0);
+                                if (v > 0.0) return root.formatRate(v);
                                 return CurrencyService.errorMessage || "...";
                             }
                             font.pixelSize: Appearance.font.pixelSize.small
@@ -239,7 +245,7 @@ Item {
                         StyledText {
                             text: {
                                 let v = CurrencyService.rates[CurrencyService.quote2] || 0.0;
-                                if (v > 0.0) return Math.round(v).toLocaleString(Qt.locale(), 'f', 0);
+                                if (v > 0.0) return root.formatRate(v);
                                 return CurrencyService.errorMessage || "...";
                             }
                             font.pixelSize: Appearance.font.pixelSize.small
@@ -361,7 +367,7 @@ Item {
                                     text: {
                                         if (CurrencyService.loading) return "...";
                                         if (rateVal === 0.0) return CurrencyService.errorMessage || "...";
-                                        return rateVal.toLocaleString(Qt.locale(), 'f', rateVal < 1000 ? 2 : 0);
+                                        return root.formatRate(rateVal);
                                     }
                                     font.pixelSize: Appearance.font.pixelSize.small
                                     font.weight: Font.Bold

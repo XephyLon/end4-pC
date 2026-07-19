@@ -25,11 +25,13 @@ Item {
         }
     }
 
-    Flow {
+    GridLayout {
         id: flow
         anchors.centerIn: parent
-        flow: root.vertical ? Flow.TopToBottom : Flow.LeftToRight
-        spacing: isMaterial ? Appearance.spacing.space25 : Appearance.spacing.space125
+        columns: root.vertical ? 1 : -1
+        rows: root.vertical ? -1 : 1
+        columnSpacing: isMaterial ? Appearance.spacing.space25 : Appearance.spacing.space125
+        rowSpacing: columnSpacing
 
         Revealer {
             reveal: true
@@ -66,8 +68,6 @@ Item {
             id: notifLoader
             active: Notifications.silent || Notifications.unread > 0
             visible: active
-            width: active ? item?.implicitWidth ?? 0 : 0
-            height: active ? item?.implicitHeight ?? 0 : 0
             source: "NotificationUnreadCount.qml"
         }
     }

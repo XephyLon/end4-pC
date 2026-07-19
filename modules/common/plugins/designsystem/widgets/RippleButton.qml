@@ -94,7 +94,7 @@ Button {
             root.down = true
             if (root.downAction) root.downAction();
             if (!root.rippleEnabled) return;
-            startRipple(event.x, event.y)
+            root.startRipple(event.x, event.y)
         }
         onReleased: (event) => {
             root.down = false;
@@ -129,6 +129,11 @@ Button {
                 to: rippleAnim.radius * 2
             }
         }
+    }
+
+    Component.onDestruction: {
+        rippleAnim.stop();
+        rippleFadeAnim.stop();
     }
 
     // Sibling mask source to ensure high-quality antialiasing on the clipped ripple

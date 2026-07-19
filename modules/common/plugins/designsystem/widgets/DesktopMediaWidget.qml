@@ -24,9 +24,6 @@ Item {
 
     onViewLyricsChanged: {
         LyricsService.desktopWidgetLyricsActive = viewLyrics;
-        if (viewLyrics) {
-            LyricsService.restartLyrics();
-        }
     }
 
     // Main Card Background
@@ -73,11 +70,6 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     viewLyrics = !viewLyrics;
-                    if (viewLyrics) {
-                        if (!Config.options.appearance.lyrics.showFloatingLyrics) {
-                            LyricsService.restartLyrics();
-                        }
-                    }
                 }
             }
         }
@@ -341,6 +333,12 @@ Item {
                         return [mid - 2, mid - 1, mid, mid + 1, mid + 2];
                     }
                     delegate: StyledText {
+                        id: lyricLine
+                        readonly property int distanceFromActive: modelData - LyricsService.before
+                        property real flowOffset: 0
+                        property real flowOpacity: 1
+                        property real flowScale: 1
+
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.WordWrap
@@ -348,8 +346,11 @@ Item {
                             let slotIndex = modelData;
                             if (slotIndex < 0 || slotIndex >= LyricsService.slots.length) return "";
                             let slot = LyricsService.slots[slotIndex];
+                            if (typeof slot === "string") return slot;
                             if (!slot) return "";
-                            return root.useRomaji ? slot.romajiText : slot.originalText;
+                            return root.useRomaji
+                                ? (slot.romajiText || slot.originalText || "")
+                                : (slot.originalText || slot.romajiText || "");
                         }
                         font.pixelSize: modelData === LyricsService.before // Active line is bigger
                             ? Appearance.font.pixelSize.large
@@ -364,6 +365,54 @@ Item {
                         }
                         elide: modelData === LyricsService.before ? Text.ElideNone : Text.ElideRight
                         maximumLineCount: modelData === LyricsService.before ? 2 : 1 // Active line can wrap up to 2 lines for karaoke
+                        opacity: flowOpacity
+                        scale: flowScale
+                        transformOrigin: Item.Center
+                        transform: Translate { y: lyricLine.flowOffset }
+
+                        Connections {
+                            target: LyricsService
+                            function onActiveIndexChanged() {
+                                if (LyricsService.status === "ok") lyricAdvance.restart();
+                            }
+                        }
+
+                        SequentialAnimation {
+                            id: lyricAdvance
+                            PauseAnimation {
+                                duration: Math.abs(lyricLine.distanceFromActive)
+                                    * Appearance.animation.elementMoveFast.duration / 8
+                            }
+                            ParallelAnimation {
+                                NumberAnimation {
+                                    target: lyricLine
+                                    property: "flowOffset"
+                                    from: Appearance.spacing.space100
+                                    to: 0
+                                    duration: Appearance.animation.elementMoveEnter.duration
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
+                                }
+                                NumberAnimation {
+                                    target: lyricLine
+                                    property: "flowOpacity"
+                                    from: 0.35
+                                    to: 1
+                                    duration: Appearance.animation.elementMoveEnter.duration
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Appearance.animationCurves.expressiveEffects
+                                }
+                                NumberAnimation {
+                                    target: lyricLine
+                                    property: "flowScale"
+                                    from: lyricLine.distanceFromActive === 0 ? 0.92 : 0.97
+                                    to: 1
+                                    duration: Appearance.animation.elementMoveEnter.duration
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
+                                }
+                            }
+                        }
                         
                         Behavior on font.pixelSize { NumberAnimation { duration: 200 } }
                         Behavior on color { ColorAnimation { duration: 200 } }
@@ -375,7 +424,11 @@ Item {
                     visible: LyricsService.slots.length === 0
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: LyricsService.status === "loading" ? "Loading lyrics..." : "No lyrics available"
+                    text: LyricsService.status === "loading"
+                        ? "Loading lyrics..."
+                        : LyricsService.status === "no_info"
+                            ? "Track information unavailable"
+                            : "No synchronized lyrics available"
                     color: Functions.ColorUtils.applyAlpha(Appearance.colors.colPrimary, 0.6)
                     font.pixelSize: Appearance.font.pixelSize.normal
                 }

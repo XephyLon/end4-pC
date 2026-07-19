@@ -15,8 +15,9 @@ Singleton {
 
     property var lyricsLines: []
     property int activeIndex: -1
-    property string status: "loading"
-    property var slots: ["", "", "", "", "", "", ""]
+    property string status: "idle"
+    property var slots: []
+    property bool desktopWidgetLyricsActive: false
 
     readonly property int before: 3
     readonly property int after:  3
@@ -87,7 +88,13 @@ Singleton {
         lyricsProc.running = false
         root.lyricsLines = []
         root.activeIndex = -1
-        root.slots = ["", "", "", "", "", "", ""]
+        root.slots = []
+
+        if (!root.desktopWidgetLyricsActive) {
+            root.status = "idle"
+            return
+        }
+
         root.status = "loading"
 
         const title    = root.activePlayer?.trackTitle  ?? ""
@@ -107,7 +114,16 @@ Singleton {
     Connections {
         target: root.activePlayer
         function onTrackTitleChanged() { root.restartLyrics() }
+        function onTrackArtistChanged() { root.restartLyrics() }
     }
 
-    Component.onCompleted: root.restartLyrics()
+    onDesktopWidgetLyricsActiveChanged: {
+        if (root.desktopWidgetLyricsActive) root.restartLyrics()
+        else {
+            lyricsProc.running = false
+            root.lyricsLines = []
+            root.slots = []
+            root.status = "idle"
+        }
+    }
 }

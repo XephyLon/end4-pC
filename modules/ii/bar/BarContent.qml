@@ -161,7 +161,7 @@ Item {
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
                                     if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                                    if (item && item.hasOwnProperty("mirrored"))
+                                    if (item && modelData === "visualizer")
                                         item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
                                 }
                             }
@@ -193,7 +193,7 @@ Item {
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
                                 if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                                if (item && item.hasOwnProperty("mirrored"))
+                                if (item && modelData === "visualizer")
                                     item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
                             }
                         }
@@ -209,7 +209,7 @@ Item {
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
                             if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                            if (item && item.hasOwnProperty("mirrored"))
+                            if (item && modelData === "visualizer")
                                 item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
                         }
                     }
@@ -257,7 +257,7 @@ Item {
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
                                     if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                                    if (item && item.hasOwnProperty("mirrored"))
+                                    if (item && modelData === "visualizer")
                                         item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
                                 }
                             }
@@ -289,7 +289,7 @@ Item {
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
                                 if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                                if (item && item.hasOwnProperty("mirrored"))
+                                if (item && modelData === "visualizer")
                                     item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
                             }
                         }
@@ -304,7 +304,7 @@ Item {
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
                             if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                            if (item && item.hasOwnProperty("mirrored"))
+                            if (item && modelData === "visualizer")
                                 item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
                         }
                     }
@@ -353,7 +353,7 @@ Item {
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
                                     if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                                    if (item && item.hasOwnProperty("mirrored"))
+                                    if (item && modelData === "visualizer")
                                         item.mirrored = root.getMirroredForIndex(root.effectiveRightLayout, index)
                                 }
                             }
@@ -385,7 +385,7 @@ Item {
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
                                 if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                                if (item && item.hasOwnProperty("mirrored"))
+                                if (item && modelData === "visualizer")
                                     item.mirrored = root.getMirroredForIndex(root.effectiveRightLayout, index)
                             }
                         }
@@ -400,7 +400,7 @@ Item {
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
                             if (item && modelData.startsWith("plugin:") && item.hasOwnProperty("pluginId")) item.pluginId = modelData.substring(7)
-                            if (item && item.hasOwnProperty("mirrored"))
+                            if (item && modelData === "visualizer")
                                 item.mirrored = root.getMirroredForIndex(root.effectiveRightLayout, index)
                         }
                     }

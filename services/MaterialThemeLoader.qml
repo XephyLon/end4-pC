@@ -25,6 +25,22 @@ Singleton {
     property bool pendingThemeIsGenerated: false
     property bool pendingThemeForLockedState: false
     property var activeColorAnimations: []
+    // Animating every generated role causes dozens of global bindings to
+    // invalidate every frame while the wallpaper and lock blur are moving.
+    // Keep the visible structural/accent roles fluid and apply secondary roles
+    // atomically; this preserves the perceived theme shift at a bounded cost.
+    readonly property var animatedColorRoles: ({
+        m3background: true, m3onBackground: true, m3surface: true,
+        m3surfaceContainerLow: true, m3surfaceContainer: true,
+        m3surfaceContainerHigh: true, m3onSurface: true,
+        m3onSurfaceVariant: true, m3outline: true, m3outlineVariant: true,
+        m3primary: true, m3onPrimary: true, m3primaryContainer: true,
+        m3onPrimaryContainer: true, m3secondary: true, m3onSecondary: true,
+        m3secondaryContainer: true, m3onSecondaryContainer: true,
+        m3tertiary: true, m3onTertiary: true, m3tertiaryContainer: true,
+        m3onTertiaryContainer: true
+    })
+    readonly property int colorTransitionDuration: Appearance.animation.elementMoveFast.duration
     readonly property bool lockThemeActive: GlobalStates.screenLocked
         && Config.options.background.lockWall !== ""
 
@@ -65,7 +81,8 @@ Singleton {
                 // public Appearance roles. Ignore those instead of attempting to add
                 // dynamic properties to the fixed QtObject.
                 if (Appearance.m3colors[m3Key] === undefined) continue;
-                if (animated) {
+                if (animated && root.animatedColorRoles[m3Key] === true
+                        && Appearance.m3colors[m3Key] !== json[key]) {
                     const animation = colorAnimationComponent.createObject(root, {
                         target: Appearance.m3colors,
                         property: m3Key,
@@ -237,14 +254,14 @@ Singleton {
     Component {
         id: colorAnimationComponent
         ColorAnimation {
-            duration: Appearance.wallpaperTransitionDuration
+            duration: root.colorTransitionDuration
             easing.type: Easing.InOutCubic
         }
     }
 
     Timer {
         id: colorAnimationCleanup
-        interval: Appearance.wallpaperTransitionDuration + 50
+        interval: root.colorTransitionDuration + 50
         onTriggered: {
             for (const animation of root.activeColorAnimations) animation.destroy();
             root.activeColorAnimations = [];

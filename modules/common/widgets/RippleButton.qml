@@ -77,7 +77,7 @@ Button {
             if (root.downAction) root.downAction();
             if (!root.rippleEnabled) return;
             const {x,y} = event
-            startRipple(x, y)
+            root.startRipple(x, y)
         }
         onReleased: (event) => {
             root.down = false
@@ -132,6 +132,11 @@ Button {
                 to: rippleAnim.radius * 2
             }
         }
+    }
+
+    Component.onDestruction: {
+        rippleAnim.stop();
+        rippleFadeAnim.stop();
     }
 
     background: Rectangle {

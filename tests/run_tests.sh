@@ -91,6 +91,36 @@ if ! python3 "$SCRIPT_DIR/test_docker_memory_safety.py"; then
     exit 1
 fi
 
+echo "Running MPRIS controller contract tests..."
+if ! python3 "$SCRIPT_DIR/test_mpris_controller_contract.py"; then
+    echo "MPRIS controller contract tests failed."
+    exit 1
+fi
+
+echo "Running lyrics widget contract tests..."
+if ! python3 "$SCRIPT_DIR/test_lyrics_widget_contract.py"; then
+    echo "Lyrics widget contract tests failed."
+    exit 1
+fi
+
+echo "Running currency service safety tests..."
+if ! python3 "$SCRIPT_DIR/test_currency_service_contract.py"; then
+    echo "Currency service safety tests failed."
+    exit 1
+fi
+
+echo "Running ripple lifecycle safety tests..."
+if ! python3 "$SCRIPT_DIR/test_ripple_lifecycle_contract.py"; then
+    echo "Ripple lifecycle safety tests failed."
+    exit 1
+fi
+
+echo "Running event-loop safety tests..."
+if ! python3 "$SCRIPT_DIR/test_event_loop_safety_contract.py"; then
+    echo "Event-loop safety tests failed."
+    exit 1
+fi
+
 if [[ "${RUN_DOCKER_RUNTIME_MEMORY_TEST:-0}" == "1" ]]; then
     echo "Running capped Docker runtime memory test..."
     bash "$SCRIPT_DIR/run_docker_memory_test.sh"

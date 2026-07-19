@@ -23,12 +23,6 @@ Item {
     Binding { target: ExpressiveServices.CurrencyService; property: "quote2"; value: quoteTwo }
     Binding { target: ExpressiveServices.CurrencyService; property: "quote3"; value: quoteThree }
     Binding { target: ExpressiveServices.CurrencyService; property: "quote4"; value: quoteFour }
-    onBaseCodeChanged: ExpressiveServices.CurrencyService.refresh()
-    onQuoteOneChanged: ExpressiveServices.CurrencyService.refresh()
-    onQuoteTwoChanged: ExpressiveServices.CurrencyService.refresh()
-    onQuoteThreeChanged: ExpressiveServices.CurrencyService.refresh()
-    onQuoteFourChanged: ExpressiveServices.CurrencyService.refresh()
-    Component.onCompleted: ExpressiveServices.CurrencyService.refresh()
     Expressive.DesktopCurrencyWidget {
         id: content
         objectName: "nandoroidCurrencyContent"
