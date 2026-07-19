@@ -67,6 +67,18 @@ if ! python3 "$SCRIPT_DIR/lint_spacing.py"; then
     exit 1
 fi
 
+echo "Running plugin process lifecycle lint..."
+if ! python3 "$SCRIPT_DIR/lint_plugin_processes.py"; then
+    echo "Plugin process lifecycle lint failed."
+    exit 1
+fi
+
+echo "Running plugin installer tests..."
+if ! python3 "$SCRIPT_DIR/test_plugin_installer.py"; then
+    echo "Plugin installer tests failed."
+    exit 1
+fi
+
 # Run the test runner
 "$QMLTESTRUNNER" \
     -import "$PROJECT_ROOT/tests/mocks" \

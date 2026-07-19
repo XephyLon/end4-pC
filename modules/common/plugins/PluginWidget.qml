@@ -95,6 +95,7 @@ AbstractBackgroundWidget {
         manifestNode: rootWidget.manifest ? rootWidget.manifest.desktopWidget : null
         pluginId: rootWidget.manifest?.id ?? ""
         optionDefinitions: rootWidget.manifest?.options ?? []
+        basePath: rootWidget.manifest?._basePath ?? ""
         anchors.centerIn: parent
     }
 }

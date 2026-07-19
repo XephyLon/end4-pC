@@ -20,6 +20,39 @@ ContentPage {
             Layout.fillWidth: true
             spacing: Appearance.spacing.space25
 
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.space100
+
+                MaterialTextField {
+                    id: manifestUrl
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Plugin manifest URL")
+                }
+                RippleButton {
+                    implicitWidth: installLabel.implicitWidth + Appearance.spacing.space300
+                    implicitHeight: 44
+                    enabled: !PluginManager.installing
+                    buttonRadius: Appearance.rounding.full
+                    releaseAction: () => PluginManager.installFromManifest(manifestUrl.text.trim())
+                    contentItem: StyledText {
+                        id: installLabel
+                        anchors.centerIn: parent
+                        text: PluginManager.installing ? Translation.tr("Installing…") : Translation.tr("Install")
+                        color: Appearance.colors.colOnLayer1
+                    }
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                visible: PluginManager.installMessage.length > 0
+                text: PluginManager.installMessage
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colSubtext
+                wrapMode: Text.Wrap
+            }
+
             Repeater {
                 model: PluginManager.availablePlugins
 

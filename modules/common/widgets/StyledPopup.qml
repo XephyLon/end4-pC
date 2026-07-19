@@ -11,7 +11,10 @@ LazyLoader {
     property Item hoverTarget
     default property Item contentItem
     property real popupBackgroundMargin: 0
-    active: hoverTarget && hoverTarget.containsMouse
+    // Interactive popups can remain open after the pointer leaves the bar.
+    // Passive users retain the original hover-only behavior.
+    property bool pinnedOpen: false
+    active: pinnedOpen || (hoverTarget && hoverTarget.containsMouse)
 
     readonly property bool barVertical: Config.options.bar.vertical
     readonly property string barEdge: {

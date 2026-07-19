@@ -10,6 +10,14 @@ Item {
     property var manifestNode
     property string pluginId: ""
     property var optionDefinitions: []
+    property string basePath: ""
+
+    readonly property string effectiveBasePath: manifestNode?._basePath || basePath
+    readonly property string componentPath: manifestNode?.component && effectiveBasePath
+        ? (String(manifestNode.component).startsWith("/")
+            ? String(manifestNode.component)
+            : effectiveBasePath + "/" + String(manifestNode.component).replace(/^\.\//, ""))
+        : ""
 
     implicitWidth: componentLoader.item ? (componentLoader.item.implicitWidth || componentLoader.item.width) : 0
     implicitHeight: componentLoader.item ? (componentLoader.item.implicitHeight || componentLoader.item.height) : 0
@@ -30,8 +38,6 @@ Item {
             case "SystemInfo.ramUsage": return SystemInfo.ramUsage;
             case "Audio.volume": return Audio.volume;
             case "Audio.muted": return Audio.muted;
-            case "Docker.runningCount": return Docker.runningCount;
-            case "Docker.totalCount": return Docker.totalCount;
             default: return undefined;
         }
     }
@@ -43,6 +49,29 @@ Item {
         return null;
     }
 
+    function declarativeComponent() {
+        if (!manifestNode) return null;
+        switch (manifestNode.type) {
+        case "StyledText": return styledTextComponent;
+        case "MaterialSymbol": return materialSymbolComponent;
+        case "ResourceCard": return resourceCardComponent;
+        case "StyledImage": return styledImageComponent;
+        case "MaterialShape": return materialShapeComponent;
+        case "Row": return rowComponent;
+        case "Column": return columnComponent;
+        case "Item": return itemComponent;
+        case "Rectangle": return rectangleComponent;
+        case "RippleButton": return rippleButtonComponent;
+        case "StyledRectangularShadow": return styledRectangularShadowComponent;
+        case "GroupedList": return groupedListComponent;
+        case "ConfigSwitch": return configSwitchComponent;
+        case "NoticeBox": return noticeBoxComponent;
+        case "StyledPopup": return styledPopupComponent;
+        case "AtAGlance": return atAGlanceComponent;
+        default: return null;
+        }
+    }
+
     Loader {
         id: componentLoader
         // No anchors.fill here: rootNode's own size is *derived from* this
@@ -52,31 +81,12 @@ Item {
         // detected for property implicitWidth"). Let the Loader mirror the
         // item's natural size instead; explicit width/height come from the
         // manifest's own props (assigned directly onto the item in onLoaded).
-        sourceComponent: {
-            if (!manifestNode) return null;
-            switch(manifestNode.type) {
-                case "StyledText": return styledTextComponent;
-                case "MaterialSymbol": return materialSymbolComponent;
-                case "ResourceCard": return resourceCardComponent;
-                case "StyledImage": return styledImageComponent;
-                case "MaterialShape": return materialShapeComponent;
-                case "Row": return rowComponent;
-                case "Column": return columnComponent;
-                case "Item": return itemComponent;
-                case "Rectangle": return rectangleComponent;
-                case "RippleButton": return rippleButtonComponent;
-                case "StyledRectangularShadow": return styledRectangularShadowComponent;
-                case "GroupedList": return groupedListComponent;
-                case "ConfigSwitch": return configSwitchComponent;
-                case "NoticeBox": return noticeBoxComponent;
-                case "StyledPopup": return styledPopupComponent;
-                case "AtAGlance": return atAGlanceComponent;
-                default: return null;
-            }
-        }
+        source: rootNode.componentPath
+        sourceComponent: rootNode.componentPath ? null : rootNode.declarativeComponent()
 
         onLoaded: {
             if (!item) return;
+            if (rootNode.componentPath) return;
             if (manifestNode.props) {
                 for (let prop in manifestNode.props) {
                     let val = manifestNode.props[prop];
@@ -136,7 +146,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -146,7 +156,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -156,7 +166,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -166,7 +176,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -176,7 +186,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -186,7 +196,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -196,7 +206,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -206,7 +216,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}
@@ -218,7 +228,7 @@ Item {
             model: manifestNode.children || []
             Loader {
                 source: "PluginNode.qml"
-                onLoaded: { if (item) item.manifestNode = modelData }
+                onLoaded: { if (item) { item.manifestNode = modelData; item.pluginId = rootNode.pluginId; item.optionDefinitions = rootNode.optionDefinitions; item.basePath = rootNode.basePath } }
             }
         }
     }}

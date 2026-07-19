@@ -33,6 +33,11 @@ file under this directory changes on disk, **the entire shell hot-reloads** (you
 two singletons happen to log on every full reload, which makes them a convenient reload marker even
 though the message text doesn't literally describe what changed).
 
+Do not perform a long series of edits or file moves against this checkout while its live
+Quickshell instance is running. Each write can trigger a full reload; repeated reloads during an
+inconsistent module move have coincided with shell and whole-session starvation. Stop Quickshell
+or use a worktree, validate headlessly, then perform one controlled live load.
+
 - Entry point: `shell.qml` → loads a **panel family** (currently only `"ii"`, from
   `panelFamilies/IllogicalImpulseFamily.qml`) which is a flat list of `PanelLoader { component: X {} }`
   entries, one per top-level feature module.
@@ -80,8 +85,9 @@ modules/common/             Shared, feature-agnostic building blocks
   Directories.qml            Singleton: XDG paths + shell-specific cache/state paths
   Icons.qml, Images.qml       Icon/image lookup helpers
   Persistent.qml              Helper for persisting fixed-schema values outside Config's JSON
-  plugins/                    Declarative plugin renderer/validator/manager. PluginState.qml keeps
-                              dynamic per-plugin, per-monitor layout in raw plugin-state.json.
+  plugins/                    Declarative + package-QML plugin renderer/validator/manager. It scans
+                              bundled and user-installed manifests; PluginState.qml keeps dynamic
+                              per-plugin, per-monitor layout in raw plugin-state.json.
   widgets/                   Shared UI components: StyledText, StyledComboBox, StyledSlider,
                               StyledToolTip(+Content), RippleButton, MaterialSymbol, ResourceCard,
                               PopupToolTip, StyledPopup, GroupedList, ConfigSwitch/ConfigSpinBox/

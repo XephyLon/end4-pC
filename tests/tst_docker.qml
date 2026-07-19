@@ -1,12 +1,12 @@
 import QtQuick
 import QtTest
-import qs.services
+import "../modules/common/plugins/bundled/docker" as DockerPlugin
 
 TestCase {
     name: "DockerServiceTest"
 
     function test_parseDockerPs() {
-        var docker = Docker;
+        var docker = DockerPlugin.DockerService;
         verify(docker !== null);
 
         // docker ps -a --format '{{json .}}' sample output
@@ -29,5 +29,31 @@ TestCase {
         compare(parsedInvalid.totalCount, 1);
         compare(parsedInvalid.runningCount, 0);
         compare(parsedInvalid.containerNames.length, 0);
+    }
+
+    function test_parseInspectAndComposeProjects() {
+        var payload = JSON.stringify([{
+            Id: "abc123",
+            Name: "/web",
+            Config: {
+                Image: "nginx:latest",
+                Labels: {
+                    "com.docker.compose.project": "website",
+                    "com.docker.compose.service": "web",
+                    "com.docker.compose.project.working_dir": "/tmp/website",
+                    "com.docker.compose.project.config_files": "compose.yml"
+                }
+            },
+            State: { Status: "running", Running: true, Paused: false, StartedAt: "2026-01-01T00:00:00Z" },
+            NetworkSettings: { Ports: { "80/tcp": [{ HostIp: "127.0.0.1", HostPort: "8080" }] } }
+        }]);
+
+        var parsed = DockerPlugin.DockerService.parseInspect(payload);
+        compare(parsed.containers.length, 1);
+        compare(parsed.containers[0].name, "web");
+        compare(parsed.containers[0].ports[0], "127.0.0.1:8080 → 80/tcp");
+        compare(parsed.composeProjects.length, 1);
+        compare(parsed.composeProjects[0].name, "website");
+        compare(parsed.composeProjects[0].runningCount, 1);
     }
 }

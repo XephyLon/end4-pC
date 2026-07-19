@@ -37,6 +37,7 @@ Item {
 
     function getWidgetUrl(name) {
         if (!name) return "";
+        if (name.startsWith("plugin:")) return Qt.resolvedUrl("./PluginBarWidget.qml");
         let formattedName = name.charAt(0).toUpperCase() + name.slice(1);
         return Qt.resolvedUrl("./" + formattedName + ".qml");
     }
@@ -153,6 +154,7 @@ Item {
                                 Layout.fillHeight: true
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
+                                    if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                                     if (item && item.hasOwnProperty("mirrored"))
                                         item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
                                 }
@@ -184,6 +186,7 @@ Item {
                             Layout.fillHeight: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
+                                if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                                 if (item && item.hasOwnProperty("mirrored"))
                                     item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
                             }
@@ -199,6 +202,7 @@ Item {
                         Layout.alignment: Qt.AlignVCenter
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
+                            if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                             if (item && item.hasOwnProperty("mirrored"))
                                 item.mirrored = root.getMirroredForIndex(root.effectiveLeftLayout, index)
                         }
@@ -246,6 +250,7 @@ Item {
                                 Layout.fillHeight: true
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
+                                    if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                                     if (item && item.hasOwnProperty("mirrored"))
                                         item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
                                 }
@@ -277,6 +282,7 @@ Item {
                             Layout.fillHeight: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
+                                if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                                 if (item && item.hasOwnProperty("mirrored"))
                                     item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
                             }
@@ -291,6 +297,7 @@ Item {
                         Layout.topMargin: Config.options.bar.bottom ? -Appearance.spacing.space50 : Appearance.spacing.space50
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
+                            if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                             if (item && item.hasOwnProperty("mirrored"))
                                 item.mirrored = root.getMirroredForIndex(root.effectiveMiddleLayout, index)
                         }
@@ -339,6 +346,7 @@ Item {
                                 Layout.fillHeight: true
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
+                                    if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                                     if (item && item.hasOwnProperty("mirrored"))
                                         item.mirrored = root.getMirroredForIndex(root.effectiveRightLayout, index)
                                 }
@@ -370,6 +378,7 @@ Item {
                             Layout.fillHeight: true
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
+                                if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                                 if (item && item.hasOwnProperty("mirrored"))
                                     item.mirrored = root.getMirroredForIndex(root.effectiveRightLayout, index)
                             }
@@ -384,6 +393,7 @@ Item {
                         Layout.topMargin: Config.options.bar.bottom ? -Appearance.spacing.space50 : Appearance.spacing.space50
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
+                            if (item && modelData.startsWith("plugin:")) item.pluginId = modelData.substring(7)
                             if (item && item.hasOwnProperty("mirrored"))
                                 item.mirrored = root.getMirroredForIndex(root.effectiveRightLayout, index)
                         }

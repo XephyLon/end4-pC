@@ -29,23 +29,36 @@ TestCase {
         var manifest = {
             "id": "my_docker",
             "name": "My Docker",
-            "desktopWidget": {
-                "type": "Row",
-                "children": [
-                    {
-                        "type": "StyledText",
-                        "bindings": { "text": "Docker.runningCount" }
-                    },
-                    {
-                        "type": "StyledText",
-                        "bindings": { "text": "Docker.totalCount" }
-                    }
-                ]
-            }
+            "permissions": ["process", "settings_read", "settings_write"],
+            "capabilities": ["bar-widget", "desktop-widget"],
+            "barWidget": { "component": "DockerWidget.qml" },
+            "desktopWidget": { "component": "DockerDesktopWidget.qml", "blur": true }
         };
 
         var result = PluginValidator.validateManifest(manifest);
         verify(result.valid, "Docker manifest should be valid: " + (result.error ? result.error : ""));
+    }
+
+    function test_rejectsEscapingPackageComponent() {
+        var result = PluginValidator.validateManifest({
+            "id": "escape",
+            "name": "Escape",
+            "desktopWidget": { "component": "../Outside.qml" }
+        });
+        verify(!result.valid);
+        compare(result.error,
+            "Invalid desktopWidget: Component must be a relative path inside the plugin package");
+    }
+
+    function test_rejectsUnknownPermission() {
+        var result = PluginValidator.validateManifest({
+            "id": "unsafe",
+            "name": "Unsafe",
+            "permissions": ["root"],
+            "desktopWidget": { "type": "Item" }
+        });
+        verify(!result.valid);
+        compare(result.error, "Unsupported plugin permission 'root'");
     }
 
     function test_validAtAGlanceManifest() {

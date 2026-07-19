@@ -86,6 +86,11 @@ hl.bind("SUPER + escape", hl.dsp.global("quickshell:settingsToggle"), {descripti
 
 > **Note:** Settings is an overlay panel, not a regular window — `Super + Q` won't close it. Use the same keybind to toggle it or press `Escape`.
 
+## 🧩 Plugins
+
+The shell supports declarative manifests and installable QML plugin packages. See
+[PLUGINS.md](PLUGINS.md) for entry points, remote installation, permissions, and lifecycle safety.
+
 ## 🙏 Credits
 
 Huge thanks to the people who made this possible:

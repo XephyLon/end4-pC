@@ -171,6 +171,15 @@ raw JSON in `~/.config/illogical-impulse/plugin-state.json`. Do not add undeclar
 dynamic `property var` object to a `JsonAdapter`; both forms have caused native crashes during
 deserialization.
 
+Plugin package structure, manifest entry points, installation, and permissions are documented in
+`PLUGINS.md`. Keep the host generic: do not add plugin-id branches to `PluginWidget`, `PluginNode`,
+or settings when a manifest component entry point can express the same behavior.
+
+Never keep a streaming `Process` alive with a persistent `running` binding unless it implements
+delayed backoff and a retry ceiling. An instant-exit command can otherwise become a tight respawn
+loop and starve Quickshell. Prefer bounded polling; the bundled-plugin lifecycle lint enforces this
+for known streaming commands.
+
 ## New features and bugfixes need tests
 
 `tests/` (see `tests/README.md`) covers pure-logic code — singletons and functions that don't

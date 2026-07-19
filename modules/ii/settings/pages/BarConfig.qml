@@ -4,6 +4,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.plugins
 import Quickshell.Hyprland
 
 ContentPage {
@@ -35,13 +36,20 @@ ContentPage {
         }
     }
 
+    readonly property var pluginWidgets: PluginManager.availablePlugins
+        .filter(plugin => plugin.barWidget !== undefined)
+        .map(plugin => ({
+            id: "plugin:" + plugin.id,
+            name: plugin.name,
+            icon: plugin.icon || "extension"
+        }))
+
     property var allWidgets: [
         { id: "leftSidebarButton", name: Translation.tr("Left Sidebar Button"),  icon: "left_panel_open" },
         { id: "workspaces",        name: Translation.tr("Workspaces"),           icon: "steppers" },
         { id: "weatherBar",        name: Translation.tr("Weather"),              icon: "flare" },
         { id: "media",             name: Translation.tr("Media"),                icon: "music_note" },
         { id: "resources",         name: Translation.tr("Resources"),            icon: "empty_dashboard" },
-        { id: "dockerPlugin",      name: Translation.tr("Docker"),               icon: "deployed_code" },
         { id: "systemIcons",       name: Translation.tr("System Icons"),         icon: "info" },
         { id: "clockWidget",       name: Translation.tr("Clock"),                icon: "schedule" },
         { id: "utilButtons",       name: Translation.tr("Util Buttons"),         icon: "toggle_on" },
@@ -54,7 +62,7 @@ ContentPage {
         { id: "visualizer",        name: Translation.tr("Visualizer"),           icon: "graphic_eq" },
         { id: "hyprlandXkbIndicator",   name: Translation.tr("Keyboard Layout"), icon: "keyboard" },
         { id: "divisor",            name: Translation.tr("Divider"),             icon: "horizontal_distribute" },
-    ]
+    ].concat(pluginWidgets)
 
     function availableFor() {
         let used = [

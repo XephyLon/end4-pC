@@ -10,8 +10,7 @@ const bindingWhitelist = [
     "DateTime.time", "DateTime.date", "DateTime.shortDate",
     "Battery.percentage", "Battery.charging", "Battery.pluggedIn",
     "Network.networkName", "Network.primaryIp", "SystemInfo.cpuUsage",
-    "SystemInfo.ramUsage", "Audio.volume", "Audio.muted",
-    "Docker.runningCount", "Docker.totalCount"
+    "SystemInfo.ramUsage", "Audio.volume", "Audio.muted"
 ];
 
 function validateManifest(manifest) {
@@ -24,6 +23,17 @@ function validateManifest(manifest) {
     if (!manifest.name || typeof manifest.name !== 'string') {
         return { valid: false, error: "Manifest must have a string 'name'" };
     }
+    if (manifest.permissions !== undefined) {
+        if (!Array.isArray(manifest.permissions))
+            return { valid: false, error: "Manifest 'permissions' must be an array" };
+        const supportedPermissions = ["process", "network", "filesystem_read", "filesystem_write", "settings_read", "settings_write"];
+        for (const permission of manifest.permissions) {
+            if (!supportedPermissions.includes(permission))
+                return { valid: false, error: "Unsupported plugin permission '" + permission + "'" };
+        }
+    }
+    if (manifest.capabilities !== undefined && !Array.isArray(manifest.capabilities))
+        return { valid: false, error: "Manifest 'capabilities' must be an array" };
     const entryPoints = ["desktopWidget", "barWidget", "controlCenterWidget", "launcherProvider", "panel", "settingsUi"];
     let hasEntryPoint = false;
 
@@ -77,6 +87,15 @@ function validateManifest(manifest) {
 }
 
 function validateNode(node) {
+    if (node.component !== undefined) {
+        if (typeof node.component !== 'string' || !node.component || node.component.startsWith("/")
+                || node.component.includes("..")) {
+            return { valid: false, error: "Component must be a relative path inside the plugin package" };
+        }
+        if (node.type !== undefined)
+            return { valid: false, error: "Entry point cannot define both 'type' and 'component'" };
+        return { valid: true };
+    }
     if (!node.type || typeof node.type !== 'string') {
         return { valid: false, error: "Node must have a string 'type'" };
     }

@@ -1,9 +1,16 @@
 {
     "id": "docker_plugin",
-    "name": "Docker Status Plugin",
-    "description": "A declarative docker status indicator",
-    "defaultWidth": 200,
-    "defaultHeight": 100,
+    "name": "Docker Manager",
+    "description": "Monitor and manage Docker or Podman containers and Compose projects",
+    "version": "1.3.1-port1",
+    "author": "LuckShiba; ported for end4-pC",
+    "source": "Port of DmsDockerManager",
+    "sourceUrl": "https://github.com/LuckShiba/DmsDockerManager",
+    "apiVersion": 1,
+    "capabilities": ["bar-widget", "desktop-widget", "settings"],
+    "permissions": ["process", "settings_read", "settings_write"],
+    "defaultWidth": 360,
+    "defaultHeight": 300,
     "options": [
         {
             "key": "showBarWidget",
@@ -11,111 +18,57 @@
             "label": "Show bar widget",
             "icon": "view_day",
             "default": true
-        }
-    ],
-    "barWidget": {
-        "type": "Row",
-        "props": {
-            "spacing": 6
         },
-        "children": [
-            {
-                "type": "MaterialSymbol",
-                "props": {
-                    "text": "deployed_code",
-                    "font.pixelSize": 18,
-                    "color": "Appearance.colors.colOnLayer1"
-                }
-            },
-            {
-                "type": "StyledText",
-                "props": {
-                    "font.pixelSize": 14,
-                    "font.weight": 600,
-                    "color": "Appearance.colors.colOnLayer1"
-                },
-                "bindings": {
-                    "text": "Docker.runningCount"
-                }
-            },
-            {
-                "type": "StyledText",
-                "props": {
-                    "text": "/",
-                    "font.pixelSize": 14,
-                    "color": "Appearance.colors.colOnLayer1"
-                }
-            },
-            {
-                "type": "StyledText",
-                "props": {
-                    "font.pixelSize": 14,
-                    "color": "Appearance.colors.colOnLayer1"
-                },
-                "bindings": {
-                    "text": "Docker.totalCount"
-                }
-            }
-        ]
-    },
+        {
+            "key": "dockerBinary",
+            "type": "choice",
+            "label": "Container runtime",
+            "icon": "deployed_code",
+            "default": "docker",
+            "choices": [
+                { "displayName": "Docker", "value": "docker" },
+                { "displayName": "Podman", "value": "podman" }
+            ]
+        },
+        {
+            "key": "terminalApp",
+            "type": "choice",
+            "label": "Terminal application",
+            "icon": "terminal",
+            "default": "kitty",
+            "choices": [
+                { "displayName": "Kitty", "value": "kitty" },
+                { "displayName": "Foot", "value": "foot" },
+                { "displayName": "Alacritty", "value": "alacritty" }
+            ]
+        },
+        {
+            "key": "shellPath",
+            "type": "choice",
+            "label": "Container shell",
+            "icon": "code",
+            "default": "/bin/sh",
+            "choices": [
+                { "displayName": "/bin/sh", "value": "/bin/sh" },
+                { "displayName": "/bin/bash", "value": "/bin/bash" },
+                { "displayName": "/bin/ash", "value": "/bin/ash" }
+            ]
+        },
+        {
+            "key": "pollingInterval",
+            "type": "number",
+            "label": "Fallback polling interval",
+            "icon": "sync",
+            "default": 15000,
+            "from": 0,
+            "to": 120000,
+            "step": 5000
+        },
+        { "key": "showPorts", "type": "boolean", "label": "Show port mappings", "icon": "lan", "default": true }
+    ],
+    "barWidget": { "component": "DockerWidget.qml" },
     "desktopWidget": {
         "blur": true,
-        "type": "Rectangle",
-        "props": {
-            "radius": "Appearance.rounding.large",
-            "color": "Appearance.colors.colLayer0",
-            "width": 200,
-            "height": 100
-        },
-        "children": [
-            {
-                "type": "Row",
-                "props": {
-                    "anchors.centerIn": "parent",
-                    "spacing": 8
-                },
-                "children": [
-                    {
-                        "type": "MaterialSymbol",
-                        "props": {
-                            "text": "deployed_code",
-                            "font.pixelSize": 36,
-                            "color": "Appearance.colors.colOnLayer0"
-                        }
-                    },
-                    {
-                        "type": "StyledText",
-                        "props": {
-                            "font.pixelSize": 24,
-                            "font.weight": 600,
-                            "color": "Appearance.colors.colOnLayer0"
-                        },
-                        "bindings": {
-                            "text": "Docker.runningCount"
-                        }
-                    },
-                    {
-                        "type": "StyledText",
-                        "props": {
-                            "text": "/",
-                            "font.pixelSize": 24,
-                            "font.weight": 400,
-                            "color": "Appearance.colors.colOnLayer0"
-                        }
-                    },
-                    {
-                        "type": "StyledText",
-                        "props": {
-                            "font.pixelSize": 24,
-                            "font.weight": 400,
-                            "color": "Appearance.colors.colOnLayer0"
-                        },
-                        "bindings": {
-                            "text": "Docker.totalCount"
-                        }
-                    }
-                ]
-            }
-        ]
+        "component": "DockerDesktopWidget.qml"
     }
 }
