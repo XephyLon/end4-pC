@@ -218,16 +218,38 @@ Singleton {
     }
 
     spacing: QtObject {
-        // Fine control for small elements at the bottom (1, 2), then a
-        // multiple-of-4 rhythm from 4 up: 1, 2, 4, 8, 12, 16, 20, 24.
-        property int hairline: 1
-        property int unsharpen: 2
-        property int verysmall: 4
-        property int small: 8
-        property int normal: 12
-        property int large: 16
-        property int verylarge: 20
-        property int huge: 24
+        // Material 3 system spacing tokens. space100 (8dp) is the base unit;
+        // the primary rhythm uses multiples of 8dp, with recommended nested
+        // values between them. Keep the numbered names aligned with M3.
+        property int space0: 0
+        property int space25: 2
+        property int space50: 4
+        property int space75: 6
+        property int space100: 8
+        property int space125: 10
+        property int space150: 12
+        property int space175: 14
+        property int space200: 16
+        property int space250: 20
+        property int space300: 24
+        property int space400: 32
+        property int space450: 36
+        property int space500: 40
+        property int space600: 48
+        property int space700: 56
+        property int space800: 64
+        property int space900: 72
+
+        // Compatibility aliases used throughout the shell. New code should
+        // prefer the canonical spaceNNN token when the intended value is known.
+        property int hairline: space25
+        property int unsharpen: space25
+        property int verysmall: space50
+        property int small: space100
+        property int normal: space150
+        property int large: space200
+        property int verylarge: space250
+        property int huge: space300
     }
 
     borderWidth: QtObject {

@@ -354,6 +354,14 @@ evaluation/allocation loop. Correlate the last `WARN scene` entries with reactiv
 verify that every locally-called helper exists in that component or comes from an explicitly
 imported singleton/module.
 
+**Do not bind an image source directly to `SystemTrayItem.icon`.** Tray properties are backed by a
+third-party StatusNotifierItem over D-Bus. A broken Electron tray provider repeatedly failed its
+`IconName` getter; the direct `IconImage.source: item.icon` binding then drove the GUI thread to
+100% CPU while anonymous memory grew by gigabytes. `modules/ii/bar/SysTrayItem.qml` deliberately
+debounces icon change signals into `stableIconSource`, retains the last non-empty URL, and uses a
+fallback glyph for missing/error states. Keep that mediation in place; `tests/lint_systray_icon_binding.sh`
+guards the critical source binding.
+
 ## Design language
 
 The shell follows **Material 3 / Material 3 Expressive**. `Appearance.qml` is the single source of
@@ -362,10 +370,12 @@ design tokens - color roles (`Appearance.colors.col*`, `Appearance.m3colors.m3*`
 (`Appearance.spacing.*`), border widths (`Appearance.borderWidth.*`), animation curves/durations
 (`Appearance.animation.*`). New UI should pull from these rather than hardcoding colors/sizes/
 durations, both for dark/light theme correctness and for consistency with the rest of the shell.
-`Appearance.spacing.*` is a fixed scale (`1, 2, 4, 8, 12, 16, 20, 24` - fine control at the bottom,
-then multiples of 4); `Appearance.borderWidth.*` is `1/2/4`. Snap any raw spacing/padding/margin to
-the nearest token - `tests/lint_spacing.py` (run by `tests/run_tests.sh`) fails on raw literals in
-that range.
+`Appearance.spacing.*` follows Material 3's system scale (`0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24,
+32, 36, 40, 48, 56, 64, 72`), named `space0` through `space900`; `space100` (8px) is the base unit.
+Prefer multiples of 8 for the main rhythm and the recommended intermediate tokens for nested
+spacing. Legacy semantic names remain compatibility aliases. `Appearance.borderWidth.*` is
+`1/2/4`. Snap raw spacing/padding/margin to the nearest spacing token - `tests/lint_spacing.py`
+(run by `tests/run_tests.sh`) enforces that range.
 
 **Any `.qml` that references `Appearance` (or any other `qs.modules.common` singleton) as a bareword
 must `import qs.modules.common`.** That import is *not* transitive - a file that only has

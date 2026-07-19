@@ -41,6 +41,12 @@ if ! "$SCRIPT_DIR/lint_qml_imports.sh"; then
     exit 1
 fi
 
+echo "Running system tray icon lint..."
+if ! bash "$SCRIPT_DIR/lint_systray_icon_binding.sh"; then
+    echo "System tray icon lint failed."
+    exit 1
+fi
+
 # Static lint: spacing/padding/margin must use Appearance.spacing tokens, not
 # raw pixel literals in the token range.
 echo "Running spacing token lint..."

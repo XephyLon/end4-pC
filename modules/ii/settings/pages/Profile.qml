@@ -241,7 +241,7 @@ ContentPage {
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                        Layout.topMargin: Appearance.spacing.space500
                 visible: presetsFolderModel.count === 0
                 horizontalAlignment: Text.AlignHCenter
                 text: Translation.tr("No presets yet")

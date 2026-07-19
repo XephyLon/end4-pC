@@ -62,7 +62,7 @@ RippleButton {
                                 radius: Appearance.rounding.unsharpenmore
                                 color: lightDarkButtonRoot.previewFg
                                 Layout.fillWidth: true
-                                Layout.rightMargin: 45
+            Layout.rightMargin: Appearance.spacing.space600
                                 implicitHeight: 18
                             }
                         }

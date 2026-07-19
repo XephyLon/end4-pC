@@ -23,7 +23,7 @@ StyledFlickable {
             horizontalCenter: parent.horizontalCenter
             margins: Appearance.spacing.verylarge
         }
-        spacing: 30
+    spacing: Appearance.spacing.space400
     }
 
 }

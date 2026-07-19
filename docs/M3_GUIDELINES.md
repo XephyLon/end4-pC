@@ -61,12 +61,14 @@ a violation of this rule - keep the computed expression rather than snapping it 
 ### Spacing
 
 Always use predefined values from `Appearance.spacing` for `spacing`, `padding`, and margin
-properties. Never hardcode pixel gaps (e.g., `spacing: 12`). The scale gives fine control for small
-elements at the bottom (1, 2), then a strict **multiple-of-4** rhythm: `1, 2, 4, 8, 12, 16, 20, 24`.
-Snap any raw spacing/padding/margin value to the nearest token.
+properties. Never hardcode pixel gaps (e.g., `spacing: 12`). The canonical Material 3 system scale
+is `0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 32, 36, 40, 48, 56, 64, 72`, exposed as `space0`,
+`space25`, `space50`, `space75`, `space100`, `space125`, `space150`, `space175`, `space200`,
+`space250`, `space300`, `space400`, `space450`, `space500`, `space600`, `space700`, `space800`, and
+`space900`. `space100` (8px) is the base unit. Prefer multiples of 8 for the main layout rhythm and
+the intervening tokens for nested spacing. Snap raw spacing/padding/margin values to this scale.
 
-- `hairline` (1px): 1px alignment nudges.
-- `unsharpen` (2px): Hairline gaps, icon-to-text kerning.
+- `hairline` / `unsharpen` (2px, alias of `space25`): Hairline gaps and icon-to-text kerning.
 - `verysmall` (4px): Tightest padding, chip internal insets.
 - `small` (8px): Standard tight spacing.
 - `normal` (12px): Default row/item spacing.
@@ -74,8 +76,9 @@ Snap any raw spacing/padding/margin value to the nearest token.
 - `verylarge` (20px): Outer container padding, generous gaps.
 - `huge` (24px): Largest step, prominent section separation.
 
-Only genuine large one-off *dimensions* outside the 1-24 range (a specific carousel height, a 35px
-offset) stay literals. Negative offsets use the negated token (`-Appearance.spacing.verysmall`).
+The semantic names above are compatibility aliases; new code should prefer `spaceNNN` names. Only
+genuine large one-off *dimensions* outside the 0-72 range stay literals. Negative offsets use the
+negated token (for example, `-Appearance.spacing.space50`).
 `tests/lint_spacing.py` (run by `tests/run_tests.sh` / CI) fails on any raw spacing literal in the
 token range.
 

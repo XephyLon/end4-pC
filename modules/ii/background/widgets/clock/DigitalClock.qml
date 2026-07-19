@@ -31,7 +31,7 @@ ColumnLayout {
     }
 
     Loader {
-        Layout.topMargin: -40
+        Layout.topMargin: -Appearance.spacing.space500
         Layout.fillWidth: true
         active: clockColumn.isVertical
         visible: active

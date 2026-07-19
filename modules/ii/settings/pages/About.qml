@@ -36,7 +36,7 @@ ContentPage {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 156 
-        Layout.topMargin: 35
+        Layout.topMargin: Appearance.spacing.space450
         Layout.leftMargin: Appearance.spacing.large
         Layout.rightMargin: Appearance.spacing.large
 

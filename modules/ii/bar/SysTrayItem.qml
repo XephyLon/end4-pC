@@ -13,6 +13,7 @@ MouseArea {
     id: root
     required property SystemTrayItem item
     property bool targetMenuOpen: false
+    property string stableIconSource: ""
 
     signal menuOpened(qsWindow: var)
     signal menuClosed()
@@ -38,6 +39,32 @@ MouseArea {
     }
     onEntered: {
         tooltip.text = TrayService.getTooltipForItem(root.item);
+    }
+
+    function scheduleIconUpdate() {
+        iconUpdateTimer.restart()
+    }
+
+    Component.onCompleted: scheduleIconUpdate()
+    onItemChanged: scheduleIconUpdate()
+
+    Connections {
+        target: root.item
+
+        function onIconChanged() {
+            root.scheduleIconUpdate()
+        }
+    }
+
+    Timer {
+        id: iconUpdateTimer
+        interval: 500
+
+        onTriggered: {
+            const candidate = root.item?.icon ?? ""
+            if (candidate.length > 0 && candidate !== root.stableIconSource)
+                root.stableIconSource = candidate
+        }
     }
 
     Loader {
@@ -70,11 +97,20 @@ MouseArea {
 
     IconImage {
         id: trayIcon
-        visible: !Config.options.tray.monochromeIcons
-        source: root.item.icon
+        visible: !Config.options.tray.monochromeIcons && status === Image.Ready
+        source: root.stableIconSource
+        asynchronous: true
         anchors.centerIn: parent
         width: parent.width
         height: parent.height
+    }
+
+    MaterialSymbol {
+        visible: root.stableIconSource.length === 0 || trayIcon.status === Image.Error
+        anchors.centerIn: parent
+        text: "extension"
+        iconSize: Math.min(root.width, root.height)
+        color: Appearance.colors.colOnLayer0
     }
 
     Loader {

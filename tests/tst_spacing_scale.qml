@@ -5,29 +5,33 @@ import qs.modules.common
 TestCase {
     name: "SpacingScaleTest"
 
-    // Guards the spacing token scale: fine control at the bottom (1, 2), then a
-    // strict multiple-of-4 rhythm (4, 8, 12, 16, 20, 24). Changing a value here
-    // shifts spacing shell-wide, so it should be a deliberate, tested edit.
+    // Guards Material 3's system spacing scale. space100 (8dp) is the base
+    // unit; the other names are percentages of that base.
     function test_scaleValues() {
-        compare(Appearance.spacing.hairline, 1, "hairline");
-        compare(Appearance.spacing.unsharpen, 2, "unsharpen");
-        compare(Appearance.spacing.verysmall, 4, "verysmall");
-        compare(Appearance.spacing.small, 8, "small");
-        compare(Appearance.spacing.normal, 12, "normal");
-        compare(Appearance.spacing.large, 16, "large");
-        compare(Appearance.spacing.verylarge, 20, "verylarge");
-        compare(Appearance.spacing.huge, 24, "huge");
+        const actual = [Appearance.spacing.space0, Appearance.spacing.space25,
+                        Appearance.spacing.space50, Appearance.spacing.space75,
+                        Appearance.spacing.space100, Appearance.spacing.space125,
+                        Appearance.spacing.space150, Appearance.spacing.space175,
+                        Appearance.spacing.space200, Appearance.spacing.space250,
+                        Appearance.spacing.space300, Appearance.spacing.space400,
+                        Appearance.spacing.space450, Appearance.spacing.space500,
+                        Appearance.spacing.space600, Appearance.spacing.space700,
+                        Appearance.spacing.space800, Appearance.spacing.space900];
+        const expected = [0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 32, 36, 40, 48, 56, 64, 72];
+        compare(actual.length, expected.length);
+        for (let i = 0; i < expected.length; ++i)
+            compare(actual[i], expected[i], "space token at index " + i);
     }
 
-    function test_multipleOfFourFromVerysmallUp() {
-        const steps = [Appearance.spacing.verysmall, Appearance.spacing.small,
-                       Appearance.spacing.normal, Appearance.spacing.large,
-                       Appearance.spacing.verylarge, Appearance.spacing.huge];
-        for (let i = 0; i < steps.length; i++)
-            verify(steps[i] % 4 === 0, "step " + steps[i] + " is a multiple of 4");
-        // strictly ascending
-        for (let i = 1; i < steps.length; i++)
-            verify(steps[i] > steps[i - 1], "ascending at " + i);
+    function test_compatibilityAliases() {
+        compare(Appearance.spacing.hairline, Appearance.spacing.space25, "hairline");
+        compare(Appearance.spacing.unsharpen, Appearance.spacing.space25, "unsharpen");
+        compare(Appearance.spacing.verysmall, Appearance.spacing.space50, "verysmall");
+        compare(Appearance.spacing.small, Appearance.spacing.space100, "small");
+        compare(Appearance.spacing.normal, Appearance.spacing.space150, "normal");
+        compare(Appearance.spacing.large, Appearance.spacing.space200, "large");
+        compare(Appearance.spacing.verylarge, Appearance.spacing.space250, "verylarge");
+        compare(Appearance.spacing.huge, Appearance.spacing.space300, "huge");
     }
 
     function test_borderWidthTokens() {
