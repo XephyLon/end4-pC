@@ -148,6 +148,37 @@ Singleton {
                     property string type: "auto" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
                     property string accentColor: ""
                 }
+                // Shared defaults for Material 3 Expressive plugin widgets.
+                property JsonObject clockFonts: JsonObject {
+                    property string desktopTimeFont: "Google Sans Flex"
+                    property string lockscreenTimeFont: "Google Sans Flex"
+                }
+                property JsonObject clock: JsonObject {
+                    property string style: "digital"
+                    property string styleLocked: "digital"
+                    property bool showOnDesktop: true
+                    property bool showDesktopDate: true
+                    property bool showLockscreenDate: true
+                    property bool useSameStyle: true
+                    property int offsetX: 0
+                    property int offsetY: -50
+                    property JsonObject digital: JsonObject { property bool isVertical: false; property string colorStyle: "primary"; property int fontSize: 84; property int dateFontSize: 24; property int dateGap: 4; property bool hideAmPm: false; property string alignment: "center" }
+                    property JsonObject digitalLocked: JsonObject { property bool isVertical: false; property string colorStyle: "primary"; property int fontSize: 84; property int dateFontSize: 24; property int dateGap: 4; property bool hideAmPm: false; property string alignment: "center" }
+                    property JsonObject analog: JsonObject { property bool constantlyRotate: false; property string backgroundStyle: "shape"; property int sides: 12; property string backgroundShape: "Circle"; property string shape: "Circle"; property bool showMarks: true; property bool hourMarks: false; property bool timeIndicators: false; property string dateStyle: "bubble"; property string handStyle: "modern"; property string hourHandStyle: "fill"; property string minuteHandStyle: "bold"; property string secondHandStyle: "dot"; property string dialStyle: "dots"; property int size: 240 }
+                    property JsonObject analogLocked: JsonObject { property bool constantlyRotate: false; property string backgroundStyle: "shape"; property int sides: 12; property string backgroundShape: "Circle"; property string shape: "Circle"; property bool showMarks: true; property bool hourMarks: false; property bool timeIndicators: false; property string dateStyle: "bubble"; property string handStyle: "modern"; property string hourHandStyle: "fill"; property string minuteHandStyle: "bold"; property string secondHandStyle: "dot"; property string dialStyle: "dots"; property int size: 240 }
+                    property JsonObject code: JsonObject { property string valueColorStyle: "primary"; property string keywordColorStyle: "tertiary"; property string blockColorStyle: "primary"; property int fontSize: 18; property string blockType: "js"; property string fontFamily: "JetBrains Mono NF" }
+                    property JsonObject codeLocked: JsonObject { property string valueColorStyle: "primary"; property string keywordColorStyle: "tertiary"; property string blockColorStyle: "primary"; property int fontSize: 18; property string blockType: "js"; property string fontFamily: "JetBrains Mono NF" }
+                    property JsonObject text: JsonObject { property int fontSize: 42; property int dateFontSize: 18; property string alignment: "center"; property string timeColorStyle: "onSurface"; property string dateColorStyle: "primary" }
+                    property JsonObject textLocked: JsonObject { property int fontSize: 42; property int dateFontSize: 18; property string alignment: "center"; property string timeColorStyle: "onSurface"; property string dateColorStyle: "primary" }
+                    property JsonObject pill: JsonObject { property int size: 120; property bool isVertical: false; property bool showBackground: true; property string timeColorStyle: "onLayer0"; property string dateColorStyle: "primary"; property string pillColorStyle: "surfaceContainerHigh" }
+                    property JsonObject pillLocked: JsonObject { property int size: 120; property bool isVertical: false; property bool showBackground: true; property string timeColorStyle: "onLayer0"; property string dateColorStyle: "primary"; property string pillColorStyle: "surfaceContainerHigh" }
+                }
+                property JsonObject atAGlance: JsonObject { property bool showGreeting: true; property bool showDate: true; property bool showEvents: true; property bool showQuote: true; property real customWidth: 0; property string alignment: "left"; property string fontFamily: ""; property int fontSize: 24; property string greetingColorStyle: "primary"; property string dateColorStyle: "onLayer1"; property string quoteColorStyle: "onLayer1"; property bool locked: false }
+                property JsonObject mediaWidget: JsonObject { property bool locked: false; property bool showLyrics: false }
+                property JsonObject systemMonitor: JsonObject { property bool locked: false; property bool vertical: false; property int updateInterval: 3000 }
+                property JsonObject weatherWidget: JsonObject { property bool locked: false; property string sizeMode: "3x1" }
+                property JsonObject currencyWidget: JsonObject { property bool locked: false; property string sizeMode: "2x1"; property string baseCurrency: "USD"; property string quote1: "EUR"; property string quote2: "GBP"; property string quote3: "JPY"; property string quote4: "CAD" }
+                property JsonObject lyrics: JsonObject { property bool showFloatingLyrics: false; property bool lyricsUseRomaji: false }
             }
 
             property JsonObject audio: JsonObject {

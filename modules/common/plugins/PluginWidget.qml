@@ -57,6 +57,7 @@ AbstractBackgroundWidget {
 
     Item {
         id: blurredBackdrop
+        z: -1
         anchors.fill: parent
         clip: true
         visible: rootWidget.blurEnabled && Config.options.appearance.transparency.enable
@@ -92,10 +93,17 @@ AbstractBackgroundWidget {
 
     PluginNode {
         id: pluginNode
+        z: 1
+        // Package widgets render above the wallpaper-sampling backdrop on a bounded
+        // texture. This avoids the background layer swallowing package content on
+        // some Wayland scene-graph paths while keeping the texture widget-sized.
+        layer.enabled: width > 0 && height > 0
+        layer.smooth: true
         manifestNode: rootWidget.manifest ? rootWidget.manifest.desktopWidget : null
         pluginId: rootWidget.manifest?.id ?? ""
         optionDefinitions: rootWidget.manifest?.options ?? []
         basePath: rootWidget.manifest?._basePath ?? ""
         anchors.centerIn: parent
     }
+
 }

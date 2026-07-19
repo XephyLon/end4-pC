@@ -73,6 +73,7 @@ TestCase {
                     "choices": [{ "displayName": "Left", "value": "left" }]
                 },
                 { "key": "fontSize", "type": "number", "default": 24, "from": 14, "to": 48 }
+                , { "key": "currency", "type": "text", "default": "USD" }
             ],
             "desktopWidget": {
                 "type": "AtAGlance",

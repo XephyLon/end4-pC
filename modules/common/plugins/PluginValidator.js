@@ -70,7 +70,7 @@ function validateManifest(manifest) {
                 return { valid: false, error: "Duplicate plugin option key '" + option.key + "'" };
             }
             optionKeys.add(option.key);
-            if (!["boolean", "choice", "number"].includes(option.type)) {
+            if (!["boolean", "choice", "number", "text"].includes(option.type)) {
                 return { valid: false, error: "Unsupported plugin option type '" + option.type + "'" };
             }
             if (option.type === "choice" && (!Array.isArray(option.choices) || option.choices.length === 0)) {
@@ -79,6 +79,9 @@ function validateManifest(manifest) {
             if (option.type === "number"
                     && (typeof option.from !== "number" || typeof option.to !== "number" || option.from > option.to)) {
                 return { valid: false, error: "Number option '" + option.key + "' must have a valid range" };
+            }
+            if (option.type === "text" && typeof option.default !== "string") {
+                return { valid: false, error: "Text option '" + option.key + "' must have a string default" };
             }
         }
     }

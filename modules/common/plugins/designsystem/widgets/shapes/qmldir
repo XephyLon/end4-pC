@@ -1,0 +1,4 @@
+module qs.modules.common.plugins.designsystem.widgets.shapes
+ShapeCanvas ShapeCanvas.qml
+MaterialCookie MaterialCookie.qml
+SineCookie SineCookie.qml

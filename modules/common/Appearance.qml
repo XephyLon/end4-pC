@@ -7,6 +7,9 @@ pragma ComponentBehavior: Bound
 
 Singleton {
     id: root
+    // Compatibility scale used by nandoroid's expressive widget library. end4-pC
+    // already applies compositor/output scaling, so the logical-pixel multiplier is 1.
+    readonly property real effectiveScale: 1.0
     property QtObject m3colors
     property QtObject animation
     property QtObject animationCurves
@@ -259,6 +262,10 @@ Singleton {
             property string monospace: Config.options.appearance.fonts.monospace
             property string reading: Config.options.appearance.fonts.reading
             property string expressive: Config.options.appearance.fonts.expressive
+            property string desktopTimeFont: Config.options.appearance.clockFonts.desktopTimeFont
+            property string lockscreenTimeFont: Config.options.appearance.clockFonts.lockscreenTimeFont
+            property string desktopDateFont: Config.options.appearance.fonts.main
+            property string lockscreenDateFont: Config.options.appearance.fonts.main
         }
         property QtObject variableAxes: QtObject {
             property var main: ({
@@ -271,6 +278,7 @@ Singleton {
             property var title: ({ // Slightly bold weight for title
                 "wght": 550, // Weight (Lowered to compensate for increased grade)
             })
+            property var expressive: main
         }
         property QtObject pixelSize: QtObject {
             property int smallest: 10

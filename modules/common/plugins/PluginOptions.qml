@@ -33,6 +33,7 @@ ColumnLayout {
                 case "boolean": return booleanOption;
                 case "choice": return choiceOption;
                 case "number": return numberOption;
+                case "text": return textOption;
                 default: return null;
                 }
             }
@@ -80,6 +81,29 @@ ColumnLayout {
                         const rounded = Math.round(value / step) * step;
                         if (rounded !== PluginState.option(root.manifest.id, optionLoader.optionData.key, optionLoader.optionData.default))
                             PluginState.setOption(root.manifest.id, optionLoader.optionData.key, rounded);
+                    }
+                }
+            }
+
+            Component {
+                id: textOption
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    buttonIcon: optionLoader.optionData.icon || "text_fields"
+                    text: optionLoader.optionData.label
+                    placeholderText: optionLoader.optionData.placeholder || ""
+                    fieldWidth: 160
+                    value: String(PluginState.option(root.manifest.id,
+                        optionLoader.optionData.key, optionLoader.optionData.default))
+                    onValueChanged: {
+                        const trimmed = value.trim();
+                        if (trimmed.length === 0) return;
+                        const transformed = optionLoader.optionData.uppercase === true
+                            ? trimmed.toUpperCase() : trimmed;
+                        const normalized = transformed.slice(0, optionLoader.optionData.maxLength ?? 64);
+                        if (normalized !== PluginState.option(root.manifest.id,
+                                optionLoader.optionData.key, optionLoader.optionData.default))
+                            PluginState.setOption(root.manifest.id, optionLoader.optionData.key, normalized);
                     }
                 }
             }

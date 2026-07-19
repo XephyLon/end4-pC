@@ -76,7 +76,13 @@ ContentPage {
 
                             property var modelData: pluginGroup.modelData
                             text: modelData.name
-                            description: modelData.description || ""
+                            description: {
+                                const summary = modelData.description || "";
+                                const creator = modelData.author || Translation.tr("Unknown creator");
+                                return summary.length > 0
+                                    ? `${summary}\n${Translation.tr("By")} ${creator}`
+                                    : `${Translation.tr("By")} ${creator}`;
+                            }
 
                             property bool isEnabled: Config.options.plugins.enabled.includes(modelData.id)
                             checked: isEnabled

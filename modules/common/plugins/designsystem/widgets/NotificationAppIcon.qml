@@ -1,0 +1,123 @@
+import qs.modules.common
+import qs.modules.common.functions
+import Qt5Compat.GraphicalEffects
+import QtQuick
+import Quickshell
+import Quickshell.Widgets
+import Quickshell.Wayland
+import Quickshell.Services.Notifications
+
+/**
+ * App icon component for notifications.
+ * 100% Adapted from the 'ii' source port.
+ */
+MaterialShape { // App icon
+    id: root
+    property var appIcon: ""
+    property var summary: ""
+    property var urgency: NotificationUrgency.Normal
+    property bool isUrgent: urgency === NotificationUrgency.Critical
+    property bool isRestart: false
+    property var image: ""
+    property real materialIconScale: 0.57
+    property real appIconScale: 0.8
+    property real smallAppIconScale: 0.49
+    property real materialIconSize: implicitSize * materialIconScale
+    property real appIconSize: implicitSize * appIconScale
+    property real smallAppIconSize: implicitSize * smallAppIconScale
+
+    implicitSize: 38 * Appearance.effectiveScale
+    property list<var> urgentShapes: [
+        MaterialShape.Shape.VerySunny,
+        MaterialShape.Shape.SoftBurst,
+    ]
+    
+    shape: isRestart ? MaterialShape.Shape.Squircle : (isUrgent ? urgentShapes[Math.floor(Math.random() * urgentShapes.length)] : MaterialShape.Shape.Circle)
+
+    color: isRestart ? Appearance.colors.colWarning : (isUrgent ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSecondaryContainer)
+    
+    Loader {
+        id: materialSymbolLoader
+        active: root.appIcon == "" || root.isRestart
+        anchors.fill: parent
+        z: 10
+        sourceComponent: MaterialSymbol {
+            text: {
+                if (root.isRestart) return "restart_alt";
+                const defaultIcon = NotificationUtils.findSuitableMaterialSymbol("")
+                const guessedIcon = NotificationUtils.findSuitableMaterialSymbol(root.summary)
+                return (root.urgency == NotificationUrgency.Critical && guessedIcon === defaultIcon) ?
+                    "priority_high" : guessedIcon
+            }
+            anchors.fill: parent
+            color: isRestart ? Appearance.colors.colOnWarning : (isUrgent ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer)
+            iconSize: root.materialIconSize
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+    }
+    
+    Loader {
+        id: appIconLoader
+        active: !root.isRestart && root.image == "" && root.appIcon != ""
+        anchors.centerIn: parent
+        sourceComponent: IconImage {
+            id: appIconImage
+            implicitSize: root.appIconSize
+            asynchronous: true
+            source: root.appIcon !== "" ? Quickshell.iconPath(root.appIcon, "image-missing") : ""
+        }
+    }
+    
+    Loader {
+        id: notifImageLoader
+        active: root.image != ""
+        anchors.fill: parent
+        sourceComponent: Item {
+            anchors.fill: parent
+            Image {
+                id: notifImage
+                anchors.fill: parent
+                readonly property int size: parent.width
+
+                source: root.image
+                fillMode: Image.PreserveAspectCrop
+                cache: false
+                antialiasing: true
+                asynchronous: true
+                visible: false
+
+                width: size
+                height: size
+                sourceSize.width: size
+                sourceSize.height: size
+            }
+
+            Rectangle {
+                id: maskItem
+                width: notifImage.size
+                height: notifImage.size
+                radius: Appearance.rounding.full
+                visible: false
+            }
+
+            OpacityMask {
+                anchors.fill: parent
+                source: notifImage
+                maskSource: maskItem
+            }
+
+            Loader {
+                id: notifImageAppIconLoader
+                active: root.appIcon != ""
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                sourceComponent: IconImage {
+                    implicitSize: root.smallAppIconSize
+                    asynchronous: true
+                    source: root.appIcon !== "" ? Quickshell.iconPath(root.appIcon, "image-missing") : ""
+                }
+            }
+        }
+    }
+}

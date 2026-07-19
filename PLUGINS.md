@@ -1,5 +1,8 @@
 # Plugin packages
 
+For the shared plugin-author component library and the independently packaged nandoroid widgets,
+see [PLUGIN_DESIGN_SYSTEM.md](PLUGIN_DESIGN_SYSTEM.md).
+
 end4-pC supports two complementary plugin formats:
 
 - **Declarative plugins** describe a tree of approved shell components in `manifest.json`.
@@ -35,6 +38,14 @@ Package manifests should declare `apiVersion`, `capabilities`, and permissions. 
 permissions are `process`, `network`, `filesystem_read`, `filesystem_write`, `settings_read`, and
 `settings_write`. These declarations aid review and future enforcement; QML is code, so only
 install package plugins from sources you trust.
+
+Every plugin should declare an `author` naming its creator or maintainers. The plugin catalog shows
+this attribution below the description; legacy manifests without it are labeled “Unknown creator”.
+Ports should also retain `sourceUrl`, license information, and upstream revision where practical.
+
+Manifest options support `boolean`, `choice`, `number`, and `text`. Text options use the shell's
+native `ConfigTextArea`; `placeholder`, `maxLength`, and `uppercase` may be supplied for short values
+such as currency codes.
 
 ## Remote installation
 
@@ -86,3 +97,9 @@ cycle and eventually froze the shell. The process-lifecycle lint guards this res
 Avoid editing many live-loaded QML files in rapid succession. Quickshell reloads the configuration
 for each change, and moving service/module files during those reloads can impose severe session
 load. Stop Quickshell or develop in a worktree, run headless tests, then do one controlled live load.
+
+On HDR/10-bit outputs, verify `grim` independently before debugging the region selector. A compositor
+screencopy regression can return a successful but fully transparent or black frame even when
+`misc:screencopy_force_8b` is enabled. The selector cannot recover pixels the compositor did not
+provide; changing monitor color mode during capture is intentionally not automated because it can
+blank or flicker the display.

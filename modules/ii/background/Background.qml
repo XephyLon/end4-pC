@@ -522,6 +522,7 @@ Variants {
 
                         required property var modelData
                         shown: modelData.desktopWidget !== undefined
+                            && modelData.startupSafe !== false
                             && Config.options.plugins.enabled.includes(modelData.id)
                         property real presentationScale: shown ? 1 : 0.92
 

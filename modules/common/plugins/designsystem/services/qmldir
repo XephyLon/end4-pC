@@ -1,0 +1,8 @@
+module qs.modules.common.plugins.designsystem.services
+singleton CavaService 1.0 CavaService.qml
+singleton CurrencyService 1.0 CurrencyService.qml
+singleton ScheduleService 1.0 ScheduleService.qml
+singleton ScreenRecord 1.0 ScreenRecord.qml
+singleton SearchRegistry 1.0 SearchRegistry.qml
+singleton SystemData 1.0 SystemData.qml
+singleton WallpaperEngineService 1.0 WallpaperEngineService.qml

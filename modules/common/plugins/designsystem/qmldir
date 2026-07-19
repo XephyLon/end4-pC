@@ -1,0 +1,3 @@
+module qs.modules.common.plugins.designsystem
+singleton ExpressiveTokens 1.0 ExpressiveTokens.qml
+singleton ComponentRegistry 1.0 ComponentRegistry.qml

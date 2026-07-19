@@ -16,6 +16,10 @@ Singleton {
     property bool installing: false
     property string installMessage: ""
 
+    function scheduleRebuild() {
+        rebuildTimer.restart();
+    }
+
     function parseManifest(text, basePath, origin) {
         const manifest = JSON.parse(text);
         const validation = PluginValidator.validateManifest(manifest);
@@ -40,7 +44,7 @@ Singleton {
             const next = Object.assign({}, root.installedManifests);
             next[path] = manifest;
             root.installedManifests = next;
-            root.rebuildFromLoadedFiles();
+            root.scheduleRebuild();
         } catch (error) {
             console.warn(`[PluginManager] Rejecting installed manifest ${path}: ${error}`);
         }
@@ -49,7 +53,10 @@ Singleton {
     function rebuildFromLoadedFiles() {
         let loaded = [];
         let map = {};
-        [clockManifestFile, batteryManifestFile, dockerManifestFile, atAGlanceManifestFile].forEach(fileView => {
+        [clockManifestFile, batteryManifestFile, dockerManifestFile, atAGlanceManifestFile,
+                nandoroidClockManifestFile, nandoroidAtAGlanceManifestFile,
+                nandoroidMediaManifestFile, nandoroidSystemMonitorManifestFile,
+                nandoroidWeatherManifestFile, nandoroidCurrencyManifestFile].forEach(fileView => {
             if (!fileView.loaded) return;
             try {
                 const text = fileView.text();
@@ -110,6 +117,16 @@ Singleton {
         }
     }
 
+    // FileView completion arrives once per manifest. Publishing the model for every
+    // individual completion repeatedly destroys and recreates every enabled desktop
+    // widget during startup, which is especially expensive for canvas/effect widgets.
+    Timer {
+        id: rebuildTimer
+        interval: 50
+        repeat: false
+        onTriggered: root.rebuildFromLoadedFiles()
+    }
+
     Process {
         id: manifestScanner
         stdout: StdioCollector {
@@ -134,25 +151,61 @@ Singleton {
         id: clockManifestFile
         property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/clock")
         path: Quickshell.shellPath("modules/common/plugins/bundled/clock/manifest.json")
-        onLoaded: root.rebuildFromLoadedFiles()
+        onLoaded: root.scheduleRebuild()
     }
     FileView {
         id: batteryManifestFile
         property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/battery")
         path: Quickshell.shellPath("modules/common/plugins/bundled/battery/manifest.json")
-        onLoaded: root.rebuildFromLoadedFiles()
+        onLoaded: root.scheduleRebuild()
     }
     FileView {
         id: dockerManifestFile
         property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/docker")
         path: Quickshell.shellPath("modules/common/plugins/bundled/docker/manifest.json")
-        onLoaded: root.rebuildFromLoadedFiles()
+        onLoaded: root.scheduleRebuild()
     }
     FileView {
         id: atAGlanceManifestFile
         property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/atAGlance")
         path: Quickshell.shellPath("modules/common/plugins/bundled/atAGlance/manifest.json")
-        onLoaded: root.rebuildFromLoadedFiles()
+        onLoaded: root.scheduleRebuild()
+    }
+    FileView {
+        id: nandoroidClockManifestFile
+        property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/nandoroid-clock")
+        path: pluginBase + "/manifest.json"
+        onLoaded: root.scheduleRebuild()
+    }
+    FileView {
+        id: nandoroidAtAGlanceManifestFile
+        property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/nandoroid-at-a-glance")
+        path: pluginBase + "/manifest.json"
+        onLoaded: root.scheduleRebuild()
+    }
+    FileView {
+        id: nandoroidMediaManifestFile
+        property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/nandoroid-media")
+        path: pluginBase + "/manifest.json"
+        onLoaded: root.scheduleRebuild()
+    }
+    FileView {
+        id: nandoroidSystemMonitorManifestFile
+        property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/nandoroid-system-monitor")
+        path: pluginBase + "/manifest.json"
+        onLoaded: root.scheduleRebuild()
+    }
+    FileView {
+        id: nandoroidWeatherManifestFile
+        property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/nandoroid-weather")
+        path: pluginBase + "/manifest.json"
+        onLoaded: root.scheduleRebuild()
+    }
+    FileView {
+        id: nandoroidCurrencyManifestFile
+        property string pluginBase: Quickshell.shellPath("modules/common/plugins/bundled/nandoroid-currency")
+        path: pluginBase + "/manifest.json"
+        onLoaded: root.scheduleRebuild()
     }
 
     Component.onCompleted: root.scanInstalledPlugins()
