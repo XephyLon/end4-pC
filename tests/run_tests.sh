@@ -47,6 +47,18 @@ if ! bash "$SCRIPT_DIR/lint_systray_icon_binding.sh"; then
     exit 1
 fi
 
+echo "Running lockscreen theme lint..."
+if ! bash "$SCRIPT_DIR/lint_lockscreen_theme.sh"; then
+    echo "Lockscreen theme lint failed."
+    exit 1
+fi
+
+echo "Running region selector capture lint..."
+if ! bash "$SCRIPT_DIR/lint_region_selector_capture.sh"; then
+    echo "Region selector capture lint failed."
+    exit 1
+fi
+
 # Static lint: spacing/padding/margin must use Appearance.spacing tokens, not
 # raw pixel literals in the token range.
 echo "Running spacing token lint..."

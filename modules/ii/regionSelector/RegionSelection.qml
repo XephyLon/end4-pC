@@ -69,6 +69,8 @@ PanelWindow {
     readonly property real monitorOffsetY: hyprlandMonitor.y
     property int activeWorkspaceId: hyprlandMonitor.activeWorkspace?.id ?? 0
     property string screenshotPath: `${root.screenshotDir}/image-${screen.name}`
+    property url screenshotSource: ""
+    property bool screenshotReady: false
     property real dragStartX: 0
     property real dragStartY: 0
     property real draggingX: 0
@@ -198,8 +200,10 @@ PanelWindow {
                 root.dismiss();
                 return;
             }
-            if (root.enableContentRegions) imageDetectionProcess.running = true;
-            root.preparationDone = !checkRecordingProc.running;
+            // Preview the exact file that later gets cropped. ScreencopyView's
+            // independent frozen frame can come from an older compositor buffer.
+            root.screenshotSource = Qt.resolvedUrl(root.screenshotPath)
+                + `?capture=${Date.now()}`;
         }
     }
     property bool isRecording: root.action === RegionSelection.SnipAction.Record || root.action === RegionSelection.SnipAction.RecordWithSound
@@ -209,11 +213,15 @@ PanelWindow {
         running: isRecording
         command: ["pidof", "wf-recorder"]
         onExited: (exitCode, exitStatus) => {
-            root.preparationDone = !screenshotProc.running
             root.recordingShouldStop = (exitCode === 0);
+            root.finishPreparationIfReady();
         }
     }
     property bool preparationDone: false
+    function finishPreparationIfReady() {
+        if (!root.screenshotReady || checkRecordingProc.running) return;
+        root.preparationDone = true;
+    }
     onPreparationDoneChanged: {
         if (!preparationDone) return;
         if (root.isRecording && root.recordingShouldStop) {
@@ -311,11 +319,26 @@ PanelWindow {
         }
     }
 
-    ScreencopyView { // For freezing
+    Image {
+        id: screenshotImage
         anchors.fill: parent
-        live: false
-        captureSource: root.screen
+        source: root.screenshotSource
+        cache: false
+        asynchronous: false
+        fillMode: Image.Stretch
         visible: root.phase === RegionSelection.Phase.Select
+
+        onStatusChanged: {
+            if (status === Image.Ready) {
+                root.screenshotReady = true;
+                if (root.enableContentRegions) imageDetectionProcess.running = true;
+                root.finishPreparationIfReady();
+            } else if (status === Image.Error) {
+                console.warn(`[Region Selector] failed to decode fresh capture: ${source}`);
+                Quickshell.execDetached(["notify-send", "Screenshot failed", "Could not load the fresh frame. Please try again.", "-a", "Quickshell"]);
+                root.dismiss();
+            }
+        }
 
         focus: root.visible
         Keys.onPressed: (event) => { // Esc to close

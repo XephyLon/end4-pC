@@ -15,6 +15,15 @@ Singleton {
     id: root
     property string filePath: Directories.generatedMaterialThemePath
     property string requestedLockWallpaper: ""
+    property string requestedLockMode: ""
+    property string requestedLockScheme: ""
+    property string cachedLockWallpaper: ""
+    property string cachedLockMode: ""
+    property string cachedLockScheme: ""
+    property string cachedLockColors: ""
+    property string pendingThemeColors: ""
+    property bool pendingThemeIsGenerated: false
+    property bool pendingThemeForLockedState: false
     property var activeColorAnimations: []
     readonly property bool lockThemeActive: GlobalStates.screenLocked
         && Config.options.background.lockWall !== ""
@@ -90,27 +99,79 @@ Singleton {
         root.applyColors(JSON.stringify(colors), true);
     }
 
-    function generateLockTheme() {
+    function currentMode() {
+        return Appearance.m3colors.darkmode ? "dark" : "light";
+    }
+
+    function currentScheme() {
+        const configuredScheme = Config.options.appearance.palette.type;
+        return configuredScheme === "auto" ? "scheme-tonal-spot" : configuredScheme;
+    }
+
+    function cachedLockThemeMatches(wallpaper, mode, scheme) {
+        return cachedLockColors !== ""
+            && cachedLockWallpaper === wallpaper
+            && cachedLockMode === mode
+            && cachedLockScheme === scheme;
+    }
+
+    function scheduleTheme(colors, generated, forLockedState) {
+        pendingThemeColors = colors;
+        pendingThemeIsGenerated = generated;
+        pendingThemeForLockedState = forLockedState;
+        themeTransitionDelay.restart();
+    }
+
+    function prepareLockTheme() {
         const wallpaper = Config.options.background.lockWall;
-        if (!GlobalStates.screenLocked || wallpaper === "") {
+        if (!Config.ready || wallpaper === "") {
             requestedLockWallpaper = "";
-            lockThemeProc.running = false;
-            root.restoreNormalTheme();
+            cachedLockWallpaper = "";
+            cachedLockColors = "";
             return;
         }
 
+        const mode = root.currentMode();
+        const scheme = root.currentScheme();
+        if (root.cachedLockThemeMatches(wallpaper, mode, scheme)) return;
+        if (lockThemeProc.running
+                && requestedLockWallpaper === wallpaper
+                && requestedLockMode === mode
+                && requestedLockScheme === scheme) return;
+
         requestedLockWallpaper = wallpaper;
-        const configuredScheme = Config.options.appearance.palette.type;
-        const scheme = configuredScheme === "auto" ? "scheme-tonal-spot" : configuredScheme;
+        requestedLockMode = mode;
+        requestedLockScheme = scheme;
         lockThemeProc.command = [
-            Quickshell.shellPath("scripts/colors/generate_colors_material.py"),
+            Quickshell.shellPath("scripts/colors/generate-colors-venv.sh"),
             "--path", wallpaper,
-            "--mode", Appearance.m3colors.darkmode ? "dark" : "light",
+            "--mode", mode,
             "--scheme", scheme,
             "--smart"
         ];
         lockThemeProc.running = false;
         lockThemeProc.running = true;
+    }
+
+    function handleLockStateChange() {
+        const wallpaper = Config.options.background.lockWall;
+        if (!GlobalStates.screenLocked || wallpaper === "") {
+            const normalColors = themeFileView.text();
+            if (normalColors && normalColors.trim() !== "")
+                root.scheduleTheme(normalColors, false, false);
+            else
+                root.reapplyTheme();
+            root.prepareLockTheme();
+            return;
+        }
+
+        const mode = root.currentMode();
+        const scheme = root.currentScheme();
+        if (root.cachedLockThemeMatches(wallpaper, mode, scheme)) {
+            root.scheduleTheme(cachedLockColors, true, true);
+        } else {
+            root.prepareLockTheme();
+        }
     }
 
     function resetFilePathNextTime() {
@@ -146,10 +207,30 @@ Singleton {
                 console.warn("[MaterialThemeLoader] Failed to generate lockscreen colors:", exitCode, exitStatus);
                 return;
             }
-            if (root.lockThemeActive
-                    && root.requestedLockWallpaper === Config.options.background.lockWall) {
-                root.applyGeneratedColors(lockThemeOutput.text);
+            if (root.requestedLockWallpaper === Config.options.background.lockWall
+                    && root.requestedLockMode === root.currentMode()
+                    && root.requestedLockScheme === root.currentScheme()) {
+                root.cachedLockWallpaper = root.requestedLockWallpaper;
+                root.cachedLockMode = root.requestedLockMode;
+                root.cachedLockScheme = root.requestedLockScheme;
+                root.cachedLockColors = lockThemeOutput.text;
+                if (root.lockThemeActive)
+                    root.applyGeneratedColors(root.cachedLockColors);
             }
+        }
+    }
+
+    Timer {
+        id: themeTransitionDelay
+        interval: Appearance.animation.elementMoveFast.duration
+        onTriggered: {
+            if (root.pendingThemeColors === ""
+                    || root.pendingThemeForLockedState !== GlobalStates.screenLocked) return;
+            if (root.pendingThemeIsGenerated)
+                root.applyGeneratedColors(root.pendingThemeColors);
+            else
+                root.applyColors(root.pendingThemeColors, true);
+            root.pendingThemeColors = "";
         }
     }
 
@@ -173,15 +254,25 @@ Singleton {
 
     Connections {
         target: GlobalStates
-        function onScreenLockedChanged() { root.generateLockTheme(); }
+        function onScreenLockedChanged() { root.handleLockStateChange(); }
     }
 
     Connections {
         target: Config.options.background
         function onLockWallChanged() {
-            if (GlobalStates.screenLocked) root.generateLockTheme();
+            root.cachedLockColors = "";
+            root.prepareLockTheme();
         }
     }
+
+    Connections {
+        target: Config
+        function onReadyChanged() {
+            if (Config.ready) root.prepareLockTheme();
+        }
+    }
+
+    Component.onCompleted: root.prepareLockTheme()
 
 	FileView { 
         id: themeFileView
