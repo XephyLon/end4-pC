@@ -73,7 +73,7 @@ StyledPopup {
                         anchors {
                             horizontalCenter: parent.horizontalCenter
                             top: parent.top
-                            topMargin: Appearance.spacing.space100
+                            topMargin: Appearance.spacing.space75
                         }
                         text: Qt.locale().toString(parent.date, "ddd").slice(0, 2)
                         font.pixelSize: Appearance.font.pixelSize.smaller
@@ -87,7 +87,7 @@ StyledPopup {
                         anchors {
                             horizontalCenter: parent.horizontalCenter
                             bottom: parent.bottom
-                            bottomMargin: Appearance.spacing.space100
+                            bottomMargin: Appearance.spacing.space75
                         }
                         text: parent.date.getDate()
                         font.pixelSize: parent.isToday

@@ -2,8 +2,7 @@
 #
 # Regression guard: spacing/padding/margin properties must use Appearance.spacing
 # tokens, not raw pixel literals. The Material 3 system scale is
-# 0,2,4,8,12,16,20,24,32,36,40,48,56,64,72 - the two fine values, then
-# multiples of 4. Any raw spacing value in
+# 0,2,4,6,8,10,12,14,16,20,24,32,36,40,48,56,64,72. Any raw spacing value in
 # that range should be snapped to the nearest token.
 #
 # It flags property assignments and spacing-like local property declarations
@@ -36,12 +35,7 @@ BARE_LITERAL = re.compile(r'^\s*(-?\d+)\s*$')
 BRANCH_LITERAL = re.compile(r'(?:\?|:)\s*(-?\d+)(?=\s*(?:[:,)]|$))')
 
 LEGACY_ALIAS = re.compile(
-    r'Appearance\.spacing\.('
-    r'hairline|unsharpen|verysmall|small|normal|large|verylarge|huge'
-    # Retired: the scale keeps 2 and 4, then multiples of 4 only. 6, 10 and 14
-    # round up to space100, space150 and space200.
-    r'|space75|space125|space175'
-    r')\b'
+    r'Appearance\.spacing\.(hairline|unsharpen|verysmall|small|normal|large|verylarge|huge)\b'
 )
 
 violations = []
@@ -70,7 +64,7 @@ for f in glob.glob(ROOT + "/**/*.qml", recursive=True):
 
 if violations:
     print("Spacing lint FAILED: raw pixel values must use Appearance.spacing tokens "
-          "(scale 0,2,4,8,12,16,20,24,32,36,40,48,56,64,72 - snap to nearest):", file=sys.stderr)
+          "(M3 scale 0,2,4,6,8,10,12,14,16,20,24,32,36,40,48,56,64,72 - snap to nearest):", file=sys.stderr)
     for rel, ln, prop, n in violations:
         print(f"  modules/{rel}:{ln}  {prop}: {n}", file=sys.stderr)
     sys.exit(1)
