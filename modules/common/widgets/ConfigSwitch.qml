@@ -11,6 +11,7 @@ RippleButton {
     colBackgroundHover: "transparent"
 
     Layout.fillWidth: true
+    Layout.bottomMargin: 6
     implicitHeight: contentItem.implicitHeight + 8 
     font.pixelSize: Appearance.font.pixelSize.small
     
