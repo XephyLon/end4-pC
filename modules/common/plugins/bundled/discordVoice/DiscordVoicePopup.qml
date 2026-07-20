@@ -9,6 +9,11 @@ import qs.modules.common.widgets
 StyledPopup {
     id: root
 
+    function beginAuthorization() {
+        root.pinnedOpen = false;
+        DiscordVoice.authorizeAfterFocusRelease();
+    }
+
     onActiveChanged: if (active) {
         panel.opacity = 0;
         panel.scale = 0.94;
@@ -110,7 +115,7 @@ StyledPopup {
                 buttonRadius: Appearance.rounding.full
                 colBackground: Appearance.colors.colPrimary
                 colBackgroundHover: Appearance.colors.colPrimaryHover
-                onClicked: DiscordVoice.authorize()
+                onClicked: root.beginAuthorization()
                 StyledText {
                     anchors.centerIn: parent
                     text: DiscordVoice.status === "authorizing" ? "Waiting for Discord…" : "Authorize Discord"

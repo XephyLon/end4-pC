@@ -1,9 +1,13 @@
 import importlib.util
+import asyncio
+import contextlib
+import io
 import json
 import os
 import stat
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,10 +50,36 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
                 else:
                     os.environ["XDG_CACHE_HOME"] = old_cache
 
-    def test_authorization_uses_non_intrusive_streamkit_prompt(self):
-        source = BRIDGE_PATH.read_text()
-        self.assertIn('"prompt": "none"', source)
-        self.assertIn('emit("authorizing")', source)
+    def test_authorization_timeout_cancels_nonce_and_rejects_socket(self):
+        class Writer:
+            closed = False
+            def close(self):
+                self.closed = True
+
+        bridge = bridge_module.Bridge()
+        writer = Writer()
+        bridge.writer = writer
+        bridge.current_path = "/run/user/1000/discord-ipc-0"
+        bridge.pending["7"] = "AUTHORIZE"
+
+        async def no_fallback():
+            return False
+        bridge.connect = no_fallback
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            asyncio.run(bridge.handle_authorization_timeout("7", bridge.current_path))
+
+        self.assertNotIn("7", bridge.pending)
+        self.assertTrue(writer.closed)
+        self.assertIn("/run/user/1000/discord-ipc-0", bridge.authorization_failed_paths)
+        self.assertIn("does not support voice authorization", output.getvalue())
+
+    def test_candidate_paths_include_all_discord_socket_slots(self):
+        with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": "/runtime"}):
+            paths = bridge_module.Bridge.candidate_paths()
+        self.assertIn("/runtime/discord-ipc-0", paths)
+        self.assertIn("/runtime/discord-ipc-9", paths)
+        self.assertIn("/runtime/app/com.discordapp.Discord/discord-ipc-0", paths)
 
 
 class DiscordVoicePluginSafetyTests(unittest.TestCase):
@@ -69,6 +99,8 @@ class DiscordVoicePluginSafetyTests(unittest.TestCase):
         self.assertIn("process-lifecycle: restart-safe", service)
         self.assertNotIn("running: true", service)
         self.assertIn("Math.min(30000", service)
+        self.assertIn("pendingMessages = pendingMessages.concat([message])", service)
+        self.assertIn("onStarted: root.flushPendingMessages()", service)
 
     def test_native_bar_route_is_click_only_and_closes_on_focus_loss(self):
         host = (ROOT / "modules/ii/bar/BarContent.qml").read_text()
@@ -77,6 +109,9 @@ class DiscordVoicePluginSafetyTests(unittest.TestCase):
         self.assertIn("hoverEnabled: false", adapter)
         self.assertIn("cursorShape: Qt.PointingHandCursor", adapter)
         self.assertIn("HyprlandFocusGrab", adapter)
+        popup = (PLUGIN / "DiscordVoicePopup.qml").read_text()
+        self.assertIn("root.pinnedOpen = false", popup)
+        self.assertIn("DiscordVoice.authorizeAfterFocusRelease()", popup)
 
     def test_bundled_manifest_is_registered_in_plugin_manager(self):
         manager = (ROOT / "modules/common/plugins/PluginManager.qml").read_text()

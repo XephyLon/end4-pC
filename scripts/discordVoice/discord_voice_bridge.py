@@ -19,6 +19,7 @@ from typing import Any
 CLIENT_ID = "207646673902501888"  # Discord StreamKit public client
 SCOPES = ["rpc", "rpc.voice.read", "rpc.voice.write"]
 TOKEN_URL = "https://streamkit.discord.com/overlay/token"
+AUTHORIZATION_TIMEOUT = 12.0
 OP_HANDSHAKE, OP_FRAME, OP_CLOSE, OP_PING, OP_PONG = range(5)
 
 
@@ -35,6 +36,9 @@ class Bridge:
         self.users: dict[str, dict[str, Any]] = {}
         self.channel: dict[str, Any] | None = None
         self.settings = {"mute": False, "deaf": False}
+        self.current_path = ""
+        self.authorization_failed_paths: set[str] = set()
+        self.authorization_tasks: dict[str, asyncio.Task[None]] = {}
         cache = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
         self.token_path = cache / "end4-pC" / "discord-voice-token.json"
 
@@ -84,32 +88,35 @@ class Bridge:
             payload["args"] = {"channel_id": channel_id}
         await self.send(payload)
 
+    @staticmethod
+    def candidate_paths() -> list[str]:
+        runtime = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
+        roots = [runtime, f"{runtime}/app/com.discordapp.Discord", "/tmp"]
+        return [f"{root}/discord-ipc-{index}" for root in roots for index in range(10)]
+
     async def connect(self) -> bool:
         if self.writer and not self.writer.is_closing():
             return True
-        runtime = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
-        roots = [runtime, f"{runtime}/app/com.discordapp.Discord", "/tmp"]
-        for root in roots:
-            for index in range(10):
-                path = f"{root}/discord-ipc-{index}"
-                if not os.path.exists(path):
-                    continue
-                try:
-                    self.reader, self.writer = await asyncio.open_unix_connection(path)
-                    await self.send({"v": 1, "client_id": CLIENT_ID}, OP_HANDSHAKE)
-                    opcode, ready = await self.receive()
-                    if opcode == OP_CLOSE or ready.get("evt") != "READY":
-                        raise ConnectionError("Discord rejected RPC handshake")
-                    emit("connected")
-                    asyncio.create_task(self.read_loop())
-                    token = self.token()
-                    if token:
-                        await self.authenticate(token)
-                    else:
-                        emit("auth_required")
-                    return True
-                except (OSError, ConnectionError, asyncio.IncompleteReadError):
-                    self.close()
+        for path in self.candidate_paths():
+            if path in self.authorization_failed_paths or not os.path.exists(path):
+                continue
+            try:
+                reader, writer = await asyncio.open_unix_connection(path)
+                self.reader, self.writer, self.current_path = reader, writer, path
+                await self.send({"v": 1, "client_id": CLIENT_ID}, OP_HANDSHAKE)
+                opcode, ready = await self.receive(reader)
+                if opcode == OP_CLOSE or ready.get("evt") != "READY":
+                    raise ConnectionError("Discord rejected RPC handshake")
+                emit("connected", socket=path)
+                asyncio.create_task(self.read_loop(reader, writer))
+                token = self.token()
+                if token:
+                    await self.authenticate(token)
+                else:
+                    emit("auth_required")
+                return True
+            except (OSError, ConnectionError, asyncio.IncompleteReadError):
+                self.close()
         emit("unavailable", message="Discord is not running or RPC is unavailable")
         return False
 
@@ -118,12 +125,14 @@ class Bridge:
             self.writer.close()
         self.reader = None
         self.writer = None
+        self.current_path = ""
 
-    async def receive(self) -> tuple[int, dict[str, Any]]:
-        assert self.reader
-        header = await self.reader.readexactly(8)
+    async def receive(self, reader: asyncio.StreamReader | None = None) -> tuple[int, dict[str, Any]]:
+        source = reader or self.reader
+        assert source
+        header = await source.readexactly(8)
         opcode, length = struct.unpack("<II", header)
-        body = await self.reader.readexactly(length)
+        body = await source.readexactly(length)
         return opcode, json.loads(body.decode())
 
     async def authenticate(self, token: str) -> None:
@@ -140,6 +149,33 @@ class Bridge:
         await self.send({"cmd": "AUTHORIZE", "args": {
             "client_id": CLIENT_ID, "scopes": SCOPES, "prompt": "none"
         }, "nonce": nonce})
+        self.authorization_tasks[nonce] = asyncio.create_task(
+            self.authorization_timeout(nonce, self.current_path))
+
+    def cancel_authorization_timeout(self, nonce: str) -> None:
+        task = self.authorization_tasks.pop(nonce, None)
+        if task and task is not asyncio.current_task():
+            task.cancel()
+
+    async def authorization_timeout(self, nonce: str, path: str) -> None:
+        await asyncio.sleep(AUTHORIZATION_TIMEOUT)
+        await self.handle_authorization_timeout(nonce, path)
+
+    async def handle_authorization_timeout(self, nonce: str, path: str) -> None:
+        if self.pending.pop(nonce, None) != "AUTHORIZE":
+            return
+        self.authorization_tasks.pop(nonce, None)
+        self.authorization_failed_paths.add(path)
+        # Some RPC-compatible clients only implement Rich Presence and silently
+        # ignore voice authorization. Move on to another Discord socket instead
+        # of leaving the connection and nonce wedged forever.
+        self.close()
+        if await self.connect():
+            await self.authorize()
+        else:
+            emit("error", message=(
+                "The connected Discord client does not support voice authorization. "
+                "Vesktop/arRPC users need a full Discord RPC implementation."))
 
     @staticmethod
     def exchange(code: str) -> str:
@@ -150,10 +186,10 @@ class Bridge:
         with urllib.request.urlopen(request, timeout=10) as response:
             return json.loads(response.read().decode())["access_token"]
 
-    async def read_loop(self) -> None:
+    async def read_loop(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         try:
-            while self.writer:
-                opcode, payload = await self.receive()
+            while not writer.is_closing():
+                opcode, payload = await self.receive(reader)
                 if opcode == OP_PING:
                     await self.send(payload, OP_PONG)
                 elif opcode == OP_CLOSE:
@@ -162,16 +198,18 @@ class Bridge:
                     await self.handle(payload)
         except (OSError, asyncio.IncompleteReadError, json.JSONDecodeError):
             pass
-        self.close()
-        self.users.clear()
-        self.channel = None
-        emit("disconnected")
+        if self.writer is writer:
+            self.close()
+            self.users.clear()
+            self.channel = None
+            emit("disconnected")
 
     async def handle(self, payload: dict[str, Any]) -> None:
         nonce = payload.get("nonce", "")
         event = payload.get("evt", "")
         if event == "ERROR":
             command = self.pending.pop(nonce, "")
+            self.cancel_authorization_timeout(nonce)
             if command == "AUTHENTICATE":
                 self.clear_token()
                 emit("auth_required")
@@ -179,6 +217,7 @@ class Bridge:
                 emit("error", message=payload.get("data", {}).get("message", "Discord RPC error"))
             return
         if nonce in self.pending:
+            self.cancel_authorization_timeout(nonce)
             await self.response(self.pending.pop(nonce), payload.get("data", {}))
             return
         if payload.get("cmd") == "DISPATCH":

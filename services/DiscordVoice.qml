@@ -17,6 +17,7 @@ Singleton {
     property bool muted: false
     property bool deafened: false
     property int restartAttempts: 0
+    property var pendingMessages: []
     readonly property bool authenticated: status === "authenticated" || channel !== null
     readonly property bool inVoice: channel !== null
     readonly property int maxRestartAttempts: 5
@@ -28,6 +29,7 @@ Singleton {
 
     function send(message) {
         if (!bridge.running) {
+            pendingMessages = pendingMessages.concat([message]);
             start(true);
             return;
         }
@@ -51,6 +53,13 @@ Singleton {
         bridge.running = true;
     }
 
+    function flushPendingMessages() {
+        const queued = pendingMessages;
+        pendingMessages = [];
+        for (const message of queued)
+            bridge.write(JSON.stringify(message) + "\n");
+    }
+
     function handleLine(line) {
         let message;
         try { message = JSON.parse(line); } catch (error) { return; }
@@ -60,10 +69,8 @@ Singleton {
         case "auth_required": status = "auth_required"; break;
         case "authorizing":
             status = "authorizing";
-            authorizationTimeout.restart();
             break;
         case "authenticated":
-            authorizationTimeout.stop();
             status = "authenticated";
             currentUser = message.user || {};
             restartAttempts = 0;
@@ -80,7 +87,6 @@ Singleton {
         case "unavailable": status = "unavailable"; errorMessage = message.message || ""; break;
         case "disconnected": status = "disconnected"; channel = null; participants = []; break;
         case "error":
-            authorizationTimeout.stop();
             status = "auth_required";
             errorMessage = message.message || "Discord RPC error";
             break;
@@ -95,15 +101,6 @@ Singleton {
     }
 
     Timer {
-        id: authorizationTimeout
-        interval: 30000
-        onTriggered: {
-            root.status = "auth_required";
-            root.errorMessage = "Discord did not complete authorization";
-        }
-    }
-
-    Timer {
         id: focusReleaseDelay
         interval: 220
         onTriggered: root.authorize()
@@ -113,6 +110,7 @@ Singleton {
         id: bridge
         command: ["python3", `${Directories.scriptPath}/discordVoice/discord_voice_bridge.py`]
         stdinEnabled: true
+        onStarted: root.flushPendingMessages()
         // process-lifecycle: restart-safe -- capped exponential backoff; no running binding.
         stdout: SplitParser { onRead: data => root.handleLine(data) }
         stderr: SplitParser { onRead: data => console.warn("[DiscordVoice]", data) }
