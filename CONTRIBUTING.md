@@ -193,6 +193,13 @@ bug in anything that qualifies:
 - **Run `./tests/run_tests.sh` before committing** and confirm it's green. A change that breaks an
   existing test is a regression, full stop - fix the change, don't loosen or delete the test to
   make it pass, unless the test itself was wrong (and if so, say so explicitly in the commit).
+- **A new Python check must actually run.** `run_tests.sh` invokes each one as `python3 <file>`, so
+  a module of bare `test_*` functions exits zero without executing anything. Either subclass
+  `unittest.TestCase` with `unittest.main()`, or end the file with the `contract_runner` block
+  documented in `tests/README.md`. Confirm the new check fails when you break the thing it guards -
+  three modules shipped as silent no-ops precisely because nobody checked that.
+- **Prove a new static check can fail.** These checks match source text; a pattern with baked-in
+  indentation passes vacuously after any reformat.
 - If the code you're touching depends on live compositor/audio state and genuinely can't be unit
   tested with the current harness (most `modules/ii/*` UI), that's fine - fall back to this file's
   "Verify against the live shell" workflow instead, but say so rather than silently skipping tests.
