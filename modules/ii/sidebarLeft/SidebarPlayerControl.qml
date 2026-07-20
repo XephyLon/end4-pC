@@ -227,7 +227,9 @@ Item {
                     color: blendedColors.colSubtext
                     font.letterSpacing: -0.4
                     font.features: { "tnum": 1 }
-                    text: StringUtils.friendlyTimeForSeconds(root.player?.position ?? 0)
+                    // root itself can be null while this component is still
+                    // incubating or being torn down, so guard the root deref too.
+                    text: StringUtils.friendlyTimeForSeconds(root?.player?.position ?? 0)
                 }
 
                 Item {
@@ -243,7 +245,7 @@ Item {
                             highlightColor: blendedColors.colPrimary
                             trackColor: blendedColors.colSecondaryContainer
                             handleColor: blendedColors.colPrimary
-                            value: (root.player?.position ?? 0) / (root.player?.length ?? 1)
+                            value: (root?.player?.position ?? 0) / (root?.player?.length ?? 1)
                             onMoved: {root.player.position = value * root.player.length
                                 lyricsComp.restartLyrics()
                             }
