@@ -16,7 +16,7 @@ ColumnLayout {
         type: "boolean",
         label: "Blur background",
         icon: "blur_on",
-        default: manifest.desktopWidget?.blur === true
+        default: manifest.blur?.default ?? (manifest.desktopWidget?.blur === true)
     }, {
         key: "blurTintOpacity",
         type: "number",
@@ -86,6 +86,7 @@ ColumnLayout {
                 ConfigSlider {
                     Layout.fillWidth: true
                     text: optionLoader.optionData.label
+                    textWidth: optionLoader.optionData.labelWidth ?? 176
                     buttonIcon: optionLoader.optionData.icon || "tune"
                     usePercentTooltip: optionLoader.optionData.usePercentTooltip === true
                     from: optionLoader.optionData.from ?? 0

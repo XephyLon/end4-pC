@@ -33,12 +33,17 @@ RowLayout {
         StyledText {
             id: labelWidget
             Layout.preferredWidth: root.textWidth
+            Layout.minimumWidth: root.textWidth
             text: root.text
+            elide: Text.ElideRight
+            clip: true
             color: Appearance.colors.colOnSecondaryContainer
         }
     }
     StyledSlider {
         id: slider
+        Layout.fillWidth: true
+        Layout.minimumWidth: 96
         configuration: StyledSlider.Configuration.XS
         usePercentTooltip: root.usePercentTooltip
         value: root.value
