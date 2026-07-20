@@ -21,6 +21,12 @@ CLIENT_ID = "207646673902501888"  # Discord StreamKit public client
 SCOPES = ["rpc", "rpc.voice.read", "rpc.voice.write"]
 TOKEN_URL = "https://streamkit.discord.com/overlay/token"
 AUTHORIZATION_TIMEOUT = 12.0
+# A wedged companion must not be able to stall the bridge's stdin loop.
+COMPANION_WRITE_TIMEOUT = 2.0
+# One state frame per publish. 99 participants with nicknames and avatar hashes
+# land near 25 KiB, so this leaves headroom without letting a runaway peer grow
+# the read buffer without bound.
+COMPANION_READ_LIMIT = 512 * 1024
 OP_HANDSHAKE, OP_FRAME, OP_CLOSE, OP_PING, OP_PONG = range(5)
 
 
@@ -49,6 +55,7 @@ class Bridge:
         self.vencord_socket_path = Path(runtime) / "end4-discord-voice-vencord.sock" if runtime else None
         self.vencord_server: asyncio.Server | None = None
         self.vencord_writer: asyncio.StreamWriter | None = None
+        self.vencord_socket_inode: int | None = None
         self.vencord_active = False
         self.vencord_signature = ""
 
@@ -139,14 +146,25 @@ class Bridge:
         try:
             existing = self.vencord_socket_path.lstat()
             if not stat.S_ISSOCK(existing.st_mode) or existing.st_uid != os.getuid():
-                emit("error", message="Refusing unsafe Vesktop companion socket path")
+                # Not an auth problem: the Discord RPC backend stays usable, so
+                # this reports the companion as unavailable rather than pushing
+                # the UI into its "authorize Discord" state.
+                emit("companion_error",
+                     message="Refusing unsafe Vesktop companion socket path")
                 return
             self.vencord_socket_path.unlink()
         except FileNotFoundError:
             pass
-        self.vencord_server = await asyncio.start_unix_server(
-            self.handle_vencord_client, path=self.vencord_socket_path)
-        os.chmod(self.vencord_socket_path, 0o600)
+        # Bind under a restrictive umask instead of relaxing the mode
+        # afterwards, so the socket is never briefly group/world accessible.
+        previous_umask = os.umask(0o177)
+        try:
+            self.vencord_server = await asyncio.start_unix_server(
+                self.handle_vencord_client, path=self.vencord_socket_path,
+                limit=COMPANION_READ_LIMIT)
+        finally:
+            os.umask(previous_umask)
+        self.vencord_socket_inode = self.vencord_socket_path.stat().st_ino
 
     async def handle_vencord_client(self, reader: asyncio.StreamReader,
                                     writer: asyncio.StreamWriter) -> None:
@@ -155,15 +173,27 @@ class Bridge:
         self.vencord_writer = writer
         try:
             while not writer.is_closing():
-                line = await reader.readline()
+                try:
+                    line = await reader.readline()
+                except ValueError:
+                    # Frame past COMPANION_READ_LIMIT. readline() has already
+                    # discarded the buffered head; the tail arrives as its own
+                    # unparseable line and is dropped below. Tearing the
+                    # connection down instead would only invite the companion
+                    # to reconnect and resend the same frame forever.
+                    continue
                 if not line:
                     break
-                message = json.loads(line)
+                try:
+                    message = json.loads(line)
+                except (json.JSONDecodeError, ValueError):
+                    # One malformed frame must not tear down a working session.
+                    continue
                 data = message.get("state") if message.get("type") == "state" else None
                 if isinstance(data, dict) and data.get("version") == 1 \
                         and data.get("backend") == "vencord":
                     self.apply_vencord_state(data)
-        except (OSError, json.JSONDecodeError, ValueError):
+        except OSError:
             pass
         finally:
             if self.vencord_writer is writer:
@@ -197,8 +227,16 @@ class Bridge:
         if not self.vencord_writer or self.vencord_writer.is_closing():
             return
         payload = {"type": "command", **command}
-        self.vencord_writer.write((json.dumps(payload, separators=(",", ":")) + "\n").encode())
-        await self.vencord_writer.drain()
+        writer = self.vencord_writer
+        writer.write((json.dumps(payload, separators=(",", ":")) + "\n").encode())
+        try:
+            # drain() blocks while the peer stops reading. This runs from the
+            # stdin loop, so an unbounded wait would freeze every later command
+            # too - drop the companion instead and fall back to Discord RPC.
+            await asyncio.wait_for(writer.drain(), COMPANION_WRITE_TIMEOUT)
+        except (asyncio.TimeoutError, OSError):
+            emit("companion_error", message="Vesktop companion stopped reading")
+            writer.close()
 
     def close(self) -> None:
         if self.writer:
@@ -414,10 +452,14 @@ async def main() -> None:
         if bridge.vencord_server:
             bridge.vencord_server.close()
             await bridge.vencord_server.wait_closed()
-        if bridge.vencord_socket_path:
+        if bridge.vencord_socket_path and bridge.vencord_socket_inode is not None:
             try:
-                bridge.vencord_socket_path.unlink()
-            except FileNotFoundError:
+                # Only remove the socket this process bound. A replacement
+                # bridge may already have rebound the path, and unlinking its
+                # socket would leave the companion unable to ever reconnect.
+                if bridge.vencord_socket_path.stat().st_ino == bridge.vencord_socket_inode:
+                    bridge.vencord_socket_path.unlink()
+            except OSError:
                 pass
 
 

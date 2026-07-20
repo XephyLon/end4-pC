@@ -130,6 +130,10 @@ Singleton {
             deafened = message.deaf === true;
             break;
         case "unavailable": status = "unavailable"; errorMessage = message.message || ""; break;
+        // The companion is one of two backends. Its failure leaves Discord's
+        // own RPC usable, so this reports the reason without moving `status`
+        // into an authorization state the user cannot act on.
+        case "companion_error": errorMessage = message.message || ""; break;
         case "disconnected": status = "disconnected"; backend = ""; channel = null; updateParticipants([]); break;
         case "error":
             status = "auth_required";
