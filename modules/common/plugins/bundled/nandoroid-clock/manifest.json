@@ -1,5 +1,5 @@
 {
-  "id": "nandoroid_clock", "name": "Nandoroid Clock", "description": "Material 3 Expressive digital, analog, code, text, and pill clock styles", "version": "1.0.0-port1", "apiVersion": 1,
+  "id": "nandoroid_clock", "name": "Clock", "description": "Material 3 Expressive digital, analog, code, text, and pill clock styles", "version": "1.0.0-port1", "apiVersion": 1,
   "author": "na-ive / nandoroid-shell", "license": "AGPL-3.0", "sourceUrl": "https://github.com/na-ive/nandoroid-shell", "upstreamRevision": "4994e2d2a264a015d5a6dac4786c60cfe94e5d8a",
   "capabilities": ["desktop-widget"], "permissions": ["settings_read"],
   "options": [
