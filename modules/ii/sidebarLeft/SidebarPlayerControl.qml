@@ -15,7 +15,11 @@ import Quickshell.Services.Mpris
 
 Item {
     id: root
-    property var player: Mpris.players.values[playerSelector.currentIndex] ?? Mpris.players.values[0]
+    // Follow MprisController's list rather than the raw Mpris one: it filters
+    // out the duplicate/bogus players and already resolves which player is
+    // active, so the sidebar and the bar cannot disagree about what is playing.
+    readonly property var availablePlayers: MprisController.players
+    property var player: availablePlayers[playerSelector.currentIndex] ?? MprisController.activePlayer
     property var artUrl: player?.trackArtUrl ?? ""
     property string artDownloadLocation: Directories.coverArt
     property string artFileName: Qt.md5(artUrl)
@@ -90,11 +94,31 @@ Item {
             // ── Player selector ──
             StyledComboBox {
                 id: playerSelector
-                visible: Mpris.players.values.length > 1
+                // A manual pick wins until that player disappears; otherwise the
+                // selector follows whichever player became active.
+                property bool userSelected: false
+
+                function syncToActivePlayer() {
+                    if (userSelected && currentIndex >= 0
+                        && currentIndex < root.availablePlayers.length) return;
+                    userSelected = false;
+                    const index = root.availablePlayers.indexOf(MprisController.activePlayer);
+                    currentIndex = index >= 0 ? index : 0;
+                }
+
+                visible: root.availablePlayers.length > 1
                 Layout.fillWidth: true
                 Layout.bottomMargin: Appearance.spacing.space100
-                model: Mpris.players.values.map(p => p.identity ?? p.desktopEntry ?? "Unknown")
+                model: root.availablePlayers.map(p => p.identity ?? p.desktopEntry ?? "Unknown")
                 currentIndex: 0
+                onActivated: userSelected = true
+                Component.onCompleted: syncToActivePlayer()
+
+                Connections {
+                    target: MprisController
+                    function onActivePlayerChanged() { playerSelector.syncToActivePlayer(); }
+                    function onPlayersChanged() { playerSelector.syncToActivePlayer(); }
+                }
             }
 
             // ── Album art ──
