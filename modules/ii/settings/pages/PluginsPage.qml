@@ -31,6 +31,7 @@ ContentPage {
                     text: Translation.tr("Plugin manifest URL")
                     placeholderText: Translation.tr("https://…/manifest.json")
                     fieldWidth: 300
+                    singleLine: true
                 }
                 RippleButton {
                     implicitWidth: installLabel.implicitWidth + Appearance.spacing.space300

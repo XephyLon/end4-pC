@@ -30,6 +30,10 @@ RowLayout {
     property bool password: false
     property bool revealButton: password
     property bool revealed: false
+    // Keep the value on one line for inputs like URLs, where wrapping into a
+    // stack of lines reads as broken. Overflow is clipped by the field rather
+    // than wrapped.
+    property bool singleLine: false
 
     spacing: Appearance.spacing.space150
     Layout.leftMargin: Appearance.spacing.space100
@@ -100,7 +104,7 @@ RowLayout {
                 // done purely by making the glyphs transparent and drawing PasswordChars
                 // over them instead. NoWrap keeps a masked value on one line, matching
                 // PasswordChars' flat left-to-right character layout.
-                wrapMode: root.password ? TextArea.NoWrap : TextArea.Wrap
+                wrapMode: (root.password || root.singleLine) ? TextArea.NoWrap : TextArea.Wrap
                 verticalAlignment: TextEdit.AlignVCenter
                 selectByMouse: true
                 inputMethodHints: root.password ? Qt.ImhSensitiveData : Qt.ImhNone
@@ -118,16 +122,17 @@ RowLayout {
                     variableAxes: Appearance.font.variableAxes.main
                 }
 
-                // A masked field is conceptually single-line - swallow Enter/Return
-                // instead of letting TextArea insert a newline into the stored value.
+                // A masked or single-line field is conceptually one line - swallow
+                // Enter/Return instead of letting TextArea insert a newline into
+                // the stored value.
                 Keys.onReturnPressed: (event) => {
-                    if (root.password) {
+                    if (root.password || root.singleLine) {
                         event.accepted = true;
                         textArea.focus = false;
                     }
                 }
                 Keys.onEnterPressed: (event) => {
-                    if (root.password) {
+                    if (root.password || root.singleLine) {
                         event.accepted = true;
                         textArea.focus = false;
                     }
