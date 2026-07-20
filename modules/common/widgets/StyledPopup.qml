@@ -14,7 +14,32 @@ LazyLoader {
     // Interactive popups can remain open after the pointer leaves the bar.
     // Passive users retain the original hover-only behavior.
     property bool pinnedOpen: false
-    active: pinnedOpen || (hoverTarget && hoverTarget.containsMouse)
+    property bool pointerOpen: false
+    property bool popupHovered: false
+    active: pinnedOpen || pointerOpen
+
+    function updatePointerOpen() {
+        if ((hoverTarget && hoverTarget.containsMouse) || popupHovered) {
+            root.hoverCloseTimer.stop();
+            pointerOpen = true;
+        } else if (pointerOpen) {
+            root.hoverCloseTimer.restart();
+        }
+    }
+
+    property Timer hoverCloseTimer: Timer {
+        interval: 180
+        onTriggered: root.pointerOpen = false
+    }
+
+    Connections {
+        target: root.hoverTarget
+        ignoreUnknownSignals: true
+        function onContainsMouseChanged() { root.updatePointerOpen(); }
+    }
+
+    onPopupHoveredChanged: updatePointerOpen()
+    Component.onCompleted: updatePointerOpen()
 
     readonly property bool barVertical: Config.options.bar.vertical
     readonly property string barEdge: {
@@ -38,24 +63,34 @@ LazyLoader {
         implicitWidth: popupBackground.implicitWidth + Appearance.sizes.elevationMargin * 2 + root.popupBackgroundMargin
         implicitHeight: popupBackground.implicitHeight + Appearance.sizes.elevationMargin * 2 + root.popupBackgroundMargin
 
-        readonly property real centerOffsetX: {
-            const base = root.QsWindow?.mapFromItem(
+        property real centerOffsetX: Appearance.sizes.elevationMargin
+        property real centerOffsetY: Appearance.sizes.elevationMargin
+
+        function updatePosition() {
+            if (!root.hoverTarget || !root.hoverTarget.QsWindow.window) return
+            const base = root.hoverTarget.QsWindow.mapFromItem(
                 root.hoverTarget,
                 (root.hoverTarget.width - popupBackground.implicitWidth) / 2, 0
-            ).x ?? 0
+            ).x
             const margin = Appearance.sizes.elevationMargin
             const maxLeft = popupWindow.screen.width - popupBackground.implicitWidth - margin - 10
-            return Math.max(margin, Math.min(base, maxLeft))
-        }
-        readonly property real centerOffsetY: {
-            const base = root.QsWindow?.mapFromItem(
+            popupWindow.centerOffsetX = Math.max(margin, Math.min(base, maxLeft))
+
+            const verticalBase = root.hoverTarget.QsWindow.mapFromItem(
                 root.hoverTarget,
                 0, (root.hoverTarget.height - popupBackground.implicitHeight) / 2
-            ).y ?? 0
-            const margin = Appearance.sizes.elevationMargin
+            ).y
             const maxTop = popupWindow.screen.height - popupBackground.implicitHeight - margin - 15
-            return Math.max(margin, Math.min(base, maxTop))
+            popupWindow.centerOffsetY = Math.max(margin, Math.min(verticalBase, maxTop))
         }
+
+        Timer {
+            id: initialPositionTimer
+            interval: 0
+            onTriggered: popupWindow.updatePosition()
+        }
+
+        Component.onCompleted: initialPositionTimer.start()
 
         mask: Region {
             item: popupBackground
@@ -105,6 +140,10 @@ LazyLoader {
             border.width: Appearance.borderWidth.standard
             border.color: Appearance.colors.colLayer0Border
 
+            HoverHandler {
+                onHoveredChanged: root.popupHovered = hovered
+            }
+
             // Reparent content here once the window is ready
             Component.onCompleted: {
                 if (popupWindow.innerContent) {
@@ -112,6 +151,7 @@ LazyLoader {
                     popupWindow.innerContent.anchors.centerIn = popupBackground
                 }
             }
+            Component.onDestruction: root.popupHovered = false
         }
     }
 }

@@ -35,3 +35,27 @@ def test_keyboard_indicator_honors_container_theme_color():
     assert "property color color:" in source
     assert "color: root.color" in source
     assert "color: Appearance.colors.colOnLayer0" not in source
+
+
+def test_plugin_blur_is_bounded_to_widget_geometry():
+    source = Path("modules/common/plugins/PluginWidget.qml").read_text()
+    image = source[source.index("id: wallpaperSample"):source.index("Rectangle {", source.index("id: wallpaperSample"))]
+    assert "anchors.fill: parent" in image
+    assert "sourceClipRect: Qt.rect(" in image
+    assert "wallpaperMetadata.sourceSize.width" in image
+    assert "width: rootWidget.scaledScreenWidth" not in image
+    assert "height: rootWidget.scaledScreenHeight" not in image
+    assert "x: -rootWidget.x" not in image
+
+
+def test_popups_wait_for_target_window_before_mapping():
+    source = Path("modules/common/widgets/StyledPopup.qml").read_text()
+    assert "active: pinnedOpen || pointerOpen" in source
+    assert "root.hoverTarget.QsWindow.mapFromItem(" in source
+    assert "root.QsWindow?.mapFromItem(" not in source
+    assert "readonly property real centerOffsetX" not in source
+    assert "Component.onCompleted: initialPositionTimer.start()" in source
+    assert "interval: 180" in source
+    assert "onHoveredChanged: root.popupHovered = hovered" in source
+    assert "property Timer hoverCloseTimer: Timer" in source
+    assert "root.hoverCloseTimer.restart()" in source
