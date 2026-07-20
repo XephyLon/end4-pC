@@ -28,6 +28,12 @@ TestCase {
         compare(config.options.audio.protection.maxAllowedIncrease, 10)
         compare(config.options.audio.protection.maxAllowed, 99)
 
+        // Bar divider. Divisor.qml switches on `style` by string and takes its
+        // blank width from `spacing`, so an unset or renamed key here degrades
+        // the divider silently rather than failing loudly.
+        compare(config.options.bar.divider.style, "rect")
+        compare(config.options.bar.divider.spacing, 20)
+
         // Test other options
         compare(config.options.dock.enable, false)
         compare(config.options.osd.timeout, 1000)
