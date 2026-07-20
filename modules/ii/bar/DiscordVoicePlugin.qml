@@ -14,7 +14,6 @@ MouseArea {
     property bool vertical: Config.options.bar.vertical
     property bool popupOpen: false
     readonly property int avatarLimit: PluginState.option("discord_voice", "maxBarAvatars", 4)
-    readonly property var shownParticipants: DiscordVoice.participants.slice(0, avatarLimit)
 
     implicitWidth: vertical ? 34 : content.implicitWidth + Appearance.spacing.space100 * 2
     implicitHeight: vertical ? content.implicitHeight + Appearance.spacing.space50 * 2 : Appearance.sizes.barHeight
@@ -31,24 +30,25 @@ MouseArea {
         id: content
         anchors.centerIn: parent
         spacing: Appearance.spacing.space50
-        MaterialSymbol {
-            text: "voice_chat"
-            fill: DiscordVoice.inVoice ? 1 : 0
-            iconSize: 21
-            color: DiscordVoice.inVoice ? Appearance.colors.colPrimary : Appearance.colors.colSubtext
+        DiscordPackage.DiscordGlyph {
+            implicitSize: 29
+            iconSize: 17
+            color: DiscordVoice.inVoice
+                ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer2
+            iconColor: DiscordVoice.inVoice
+                ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colSubtext
         }
         Row {
-            visible: !root.vertical && root.shownParticipants.length > 0
+            visible: !root.vertical && DiscordVoice.participantCount > 0
             spacing: -Appearance.spacing.space50
             Repeater {
-                model: root.shownParticipants
+                model: DiscordVoice.participantModel
                 DiscordPackage.ParticipantAvatar {
-                    required property var modelData
                     // Bound component behavior does not inject `index` into the
                     // delegate's scope; the overlapping avatar stack needs it to
                     // order itself, so it has to be taken as a required property.
                     required property int index
-                    participant: modelData
+                    visible: index < root.avatarLimit
                     avatarSize: 25
                     z: index
                 }
@@ -56,7 +56,7 @@ MouseArea {
         }
         StyledText {
             visible: !root.vertical && DiscordVoice.inVoice
-            text: DiscordVoice.participants.length
+            text: DiscordVoice.participantCount
             font.pixelSize: Appearance.font.pixelSize.small
             font.weight: Font.DemiBold
             color: Appearance.colors.colOnPrimaryContainer

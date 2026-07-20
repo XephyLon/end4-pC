@@ -5,22 +5,31 @@ import QtQuick.Layouts
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.common.plugins
 
 Rectangle {
     id: root
     readonly property int avatarLimit: PluginState.option("discord_voice", "maxOverlayAvatars", 8)
-    readonly property var visibleParticipants: DiscordVoice.participants.slice(0, avatarLimit)
+    readonly property real participantAvatarSize: PluginState.option("discord_voice", "overlayAvatarSize", 52)
+    readonly property string participantBackground: PluginState.option("discord_voice", "participantBackground", "none")
+    readonly property real participantBackgroundOpacity: PluginState.option("discord_voice", "participantBackgroundOpacity", 0.72)
+    readonly property bool blurEnabled: PluginState.option("discord_voice", "blurEnabled", true)
+    readonly property real backgroundOpacity: PluginState.option("discord_voice", "blurTintOpacity", 0.1)
+    readonly property string layoutMode: PluginState.option("discord_voice", "overlayLayout", "row")
+    readonly property bool columnMode: layoutMode === "column"
+    property bool namesOnLeft: false
 
-    implicitWidth: 344
-    implicitHeight: 154
+    implicitWidth: columnMode ? 256 : 344
+    implicitHeight: content.implicitHeight + Appearance.spacing.space300
     width: implicitWidth
     height: implicitHeight
     radius: Appearance.rounding.verylarge
-    color: Appearance.colors.colLayer1
-    border.width: Appearance.borderWidth.standard
-    border.color: Appearance.colors.colLayer0Border
+    color: root.blurEnabled
+        ? ColorUtils.transparentize(Appearance.colors.colLayer1, 1 - root.backgroundOpacity)
+        : "transparent"
+    border.width: 0
 
     function beginAuthorization() {
         // SUPER+G owns exclusive keyboard focus. Release it before Discord
@@ -30,28 +39,30 @@ Rectangle {
     }
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: Appearance.spacing.space150
+        id: content
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            margins: Appearance.spacing.space150
+        }
         spacing: Appearance.spacing.space100
 
         RowLayout {
             Layout.fillWidth: true
             spacing: Appearance.spacing.space75
-            Rectangle {
-                implicitWidth: 38; implicitHeight: 38
-                radius: Appearance.rounding.full
+            DiscordGlyph {
+                implicitSize: 36
+                iconSize: 20
                 color: Appearance.colors.colPrimaryContainer
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: "voice_chat"
-                    color: Appearance.colors.colOnPrimaryContainer
-                    iconSize: 22
-                    fill: DiscordVoice.inVoice ? 1 : 0
-                }
+                iconColor: Appearance.colors.colOnPrimaryContainer
             }
             ColumnLayout {
+                Layout.preferredWidth: Math.min(channelName.implicitWidth, root.columnMode ? 92 : 160)
+                Layout.maximumWidth: root.columnMode ? 92 : 160
                 spacing: 0
                 StyledText {
+                    id: channelName
                     Layout.fillWidth: true
                     text: DiscordVoice.channel?.name || (DiscordVoice.status === "auth_required"
                         ? "Connect Discord" : "No voice channel")
@@ -62,35 +73,85 @@ Rectangle {
                 }
                 StyledText {
                     text: DiscordVoice.inVoice
-                        ? `${DiscordVoice.participants.length} participant${DiscordVoice.participants.length === 1 ? "" : "s"}`
+                        ? `${DiscordVoice.participantCount} participant${DiscordVoice.participantCount === 1 ? "" : "s"}`
                         : (DiscordVoice.errorMessage || "Discord voice overlay")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                     elide: Text.ElideRight
                 }
             }
-            Item { Layout.fillWidth: true }
-            RippleButton {
-                implicitWidth: 38; implicitHeight: 38
-                buttonRadius: Appearance.rounding.full
-                colBackground: DiscordVoice.muted ? Appearance.colors.colErrorContainer : Appearance.colors.colLayer2
-                onClicked: DiscordVoice.setMuted(!DiscordVoice.muted)
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: DiscordVoice.muted ? "mic_off" : "mic"
-                    iconSize: 20
-                    color: DiscordVoice.muted ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnLayer2
+
+            RowLayout {
+                visible: DiscordVoice.status !== "auth_required" && DiscordVoice.status !== "authorizing"
+                spacing: 0
+
+                RippleButton {
+                    implicitWidth: 48
+                    implicitHeight: 48
+                    buttonRadius: Appearance.rounding.full
+                    colBackground: "transparent"
+                    colBackgroundHover: Appearance.colors.colLayer1Hover
+                    onClicked: DiscordVoice.setMuted(!DiscordVoice.muted)
+                    contentItem: MaterialShapeWrappedMaterialSymbol {
+                        text: DiscordVoice.muted ? "mic_off" : "mic"
+                        wrappedShape: DiscordVoice.muted ? MaterialShape.Shape.SoftBurst : MaterialShape.Shape.Cookie4Sided
+                        implicitSize: 46
+                        iconSize: 21
+                        fill: DiscordVoice.muted ? 1 : 0
+                        color: DiscordVoice.muted ? Appearance.colors.colErrorContainer : Appearance.colors.colSecondaryContainer
+                        colSymbol: DiscordVoice.muted ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnSecondaryContainer
+                        scale: parent?.down ? 0.88 : (parent?.hovered ? 1.08 : 1)
+                        Behavior on scale { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutBack } }
+                    }
+                    StyledToolTip { text: DiscordVoice.muted ? "Unmute" : "Mute" }
+                }
+
+                RippleButton {
+                    implicitWidth: 48
+                    implicitHeight: 48
+                    buttonRadius: Appearance.rounding.full
+                    colBackground: "transparent"
+                    colBackgroundHover: Appearance.colors.colLayer1Hover
+                    onClicked: DiscordVoice.setDeafened(!DiscordVoice.deafened)
+                    contentItem: MaterialShapeWrappedMaterialSymbol {
+                        text: DiscordVoice.deafened ? "headset_off" : "headphones"
+                        wrappedShape: DiscordVoice.deafened ? MaterialShape.Shape.Boom : MaterialShape.Shape.Clover4Leaf
+                        implicitSize: 46
+                        iconSize: 21
+                        fill: DiscordVoice.deafened ? 1 : 0
+                        color: DiscordVoice.deafened ? Appearance.colors.colErrorContainer : Appearance.colors.colTertiaryContainer
+                        colSymbol: DiscordVoice.deafened ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnTertiaryContainer
+                        scale: parent?.down ? 0.88 : (parent?.hovered ? 1.08 : 1)
+                        Behavior on scale { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutBack } }
+                    }
+                    StyledToolTip { text: DiscordVoice.deafened ? "Undeafen" : "Deafen" }
                 }
             }
+
+            Item { Layout.fillWidth: true }
         }
 
-        Row {
-            visible: root.visibleParticipants.length > 0
+        GridLayout {
+            visible: DiscordVoice.participantCount > 0
+            Layout.fillWidth: root.columnMode
             Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.space75
+            columns: root.columnMode ? 1 : Math.max(1, Math.min(root.avatarLimit, DiscordVoice.participantCount))
+            rowSpacing: Appearance.spacing.space75
+            columnSpacing: root.columnMode ? Appearance.spacing.space75 : Appearance.spacing.space200
             Repeater {
-                model: root.visibleParticipants
-                ParticipantAvatar { required property var modelData; participant: modelData; avatarSize: 52; showName: true }
+                model: DiscordVoice.participantModel
+                ParticipantAvatar {
+                    required property int index
+                    visible: index < root.avatarLimit
+                    avatarSize: root.participantAvatarSize
+                    showName: true
+                    maxNameWidth: root.columnMode ? 116 : 76
+                    backgroundMode: root.participantBackground
+                    backgroundOpacity: root.participantBackgroundOpacity
+                    horizontalLayout: root.columnMode
+                    nameOnLeft: root.namesOnLeft
+                    Layout.fillWidth: root.columnMode
+                }
             }
         }
 

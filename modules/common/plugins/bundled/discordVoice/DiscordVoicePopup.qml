@@ -8,6 +8,7 @@ import qs.modules.common.widgets
 
 StyledPopup {
     id: root
+    contentPadding: Appearance.spacing.space200
 
     function beginAuthorization() {
         root.pinnedOpen = false;
@@ -22,8 +23,8 @@ StyledPopup {
 
     ColumnLayout {
         id: panel
-        implicitWidth: 360
-        spacing: Appearance.spacing.space150
+        implicitWidth: 384
+        spacing: Appearance.spacing.space200
         transformOrigin: Item.Top
 
         ParallelAnimation {
@@ -35,13 +36,12 @@ StyledPopup {
         RowLayout {
             Layout.fillWidth: true
             spacing: Appearance.spacing.space100
-            MaterialShapeWrappedMaterialSymbol {
-                text: "voice_chat"
+            DiscordGlyph {
                 shape: MaterialShape.Shape.Cookie7Sided
                 implicitSize: 44
                 iconSize: 23
                 color: Appearance.colors.colPrimaryContainer
-                colSymbol: Appearance.colors.colOnPrimaryContainer
+                iconColor: Appearance.colors.colOnPrimaryContainer
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -58,7 +58,7 @@ StyledPopup {
                     readonly property string backendSuffix:
                         DiscordVoice.backendLabel ? ` · ${DiscordVoice.backendLabel}` : ""
                     text: DiscordVoice.inVoice
-                        ? `${DiscordVoice.participants.length} connected${backendSuffix}`
+                        ? `${DiscordVoice.participantCount} connected${backendSuffix}`
                         : (DiscordVoice.errorMessage || `Not connected to voice${backendSuffix}`)
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
@@ -73,17 +73,17 @@ StyledPopup {
         }
 
         Flow {
-            visible: DiscordVoice.participants.length > 0
+            visible: DiscordVoice.participantCount > 0
             Layout.fillWidth: true
-            spacing: Appearance.spacing.space100
+            spacing: Appearance.spacing.space150
             Repeater {
-                model: DiscordVoice.participants
-                ParticipantAvatar { required property var modelData; participant: modelData; avatarSize: 52; showName: true }
+                model: DiscordVoice.participantModel
+                ParticipantAvatar { avatarSize: 52; showName: true; maxNameWidth: 64 }
             }
         }
 
         Rectangle {
-            visible: DiscordVoice.participants.length === 0
+            visible: DiscordVoice.participantCount === 0
             Layout.fillWidth: true
             implicitHeight: 92
             radius: Appearance.rounding.large
@@ -108,7 +108,9 @@ StyledPopup {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.space100
+            Layout.topMargin: Appearance.spacing.space50
+            spacing: Appearance.spacing.space150
+            Item { visible: DiscordVoice.inVoice; Layout.fillWidth: true }
             RippleButton {
                 visible: DiscordVoice.status === "auth_required" || DiscordVoice.status === "authorizing"
                 enabled: DiscordVoice.status !== "authorizing"
@@ -136,30 +138,43 @@ StyledPopup {
             }
             RippleButton {
                 visible: DiscordVoice.inVoice
-                Layout.fillWidth: true
-                implicitHeight: 44
-                toggled: DiscordVoice.muted
+                implicitWidth: 64
+                implicitHeight: 64
                 buttonRadius: Appearance.rounding.full
+                colBackground: "transparent"
+                colBackgroundHover: Appearance.colors.colLayer1Hover
                 onClicked: DiscordVoice.setMuted(!DiscordVoice.muted)
-                Row {
-                    anchors.centerIn: parent; spacing: Appearance.spacing.space50
-                    MaterialSymbol { text: DiscordVoice.muted ? "mic_off" : "mic"; color: DiscordVoice.muted ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1 }
-                    StyledText { text: DiscordVoice.muted ? "Unmute" : "Mute"; color: DiscordVoice.muted ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1 }
+                contentItem: MaterialShapeWrappedMaterialSymbol {
+                        text: DiscordVoice.muted ? "mic_off" : "mic"
+                        wrappedShape: DiscordVoice.muted ? MaterialShape.Shape.SoftBurst : MaterialShape.Shape.Cookie4Sided
+                        implicitSize: 56
+                        iconSize: 24
+                        fill: DiscordVoice.muted ? 1 : 0
+                        color: DiscordVoice.muted ? Appearance.colors.colErrorContainer : Appearance.colors.colSecondaryContainer
+                        colSymbol: DiscordVoice.muted ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnSecondaryContainer
                 }
+                StyledToolTip { text: DiscordVoice.muted ? "Unmute" : "Mute" }
             }
             RippleButton {
                 visible: DiscordVoice.inVoice
-                Layout.fillWidth: true
-                implicitHeight: 44
-                toggled: DiscordVoice.deafened
+                implicitWidth: 64
+                implicitHeight: 64
                 buttonRadius: Appearance.rounding.full
+                colBackground: "transparent"
+                colBackgroundHover: Appearance.colors.colLayer1Hover
                 onClicked: DiscordVoice.setDeafened(!DiscordVoice.deafened)
-                Row {
-                    anchors.centerIn: parent; spacing: Appearance.spacing.space50
-                    MaterialSymbol { text: DiscordVoice.deafened ? "headset_off" : "headphones"; color: DiscordVoice.deafened ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1 }
-                    StyledText { text: DiscordVoice.deafened ? "Undeafen" : "Deafen"; color: DiscordVoice.deafened ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1 }
+                contentItem: MaterialShapeWrappedMaterialSymbol {
+                        text: DiscordVoice.deafened ? "headset_off" : "headphones"
+                        wrappedShape: DiscordVoice.deafened ? MaterialShape.Shape.Boom : MaterialShape.Shape.Clover4Leaf
+                        implicitSize: 56
+                        iconSize: 24
+                        fill: DiscordVoice.deafened ? 1 : 0
+                        color: DiscordVoice.deafened ? Appearance.colors.colErrorContainer : Appearance.colors.colTertiaryContainer
+                        colSymbol: DiscordVoice.deafened ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnTertiaryContainer
                 }
+                StyledToolTip { text: DiscordVoice.deafened ? "Undeafen" : "Deafen" }
             }
+            Item { visible: DiscordVoice.inVoice; Layout.fillWidth: true }
         }
     }
 }
