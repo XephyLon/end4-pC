@@ -82,76 +82,73 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
         self.assertIn("/runtime/discord-ipc-9", paths)
         self.assertIn("/runtime/app/com.discordapp.Discord/discord-ipc-0", paths)
 
-    def test_fresh_vencord_state_is_accepted_and_stale_state_is_rejected(self):
-        with tempfile.TemporaryDirectory() as directory:
+    def test_vencord_socket_pushes_state_and_returns_commands(self):
+        class Reader:
+            def __init__(self, line):
+                self.lines = [line, b""]
+            async def readline(self):
+                return self.lines.pop(0)
+
+        class Writer:
+            def __init__(self):
+                self.output = b""
+                self.closed = False
+            def is_closing(self): return self.closed
+            def write(self, data): self.output += data
+            async def drain(self): pass
+            def close(self): self.closed = True
+
+        async def scenario(directory):
             with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": directory}):
                 bridge = bridge_module.Bridge()
-                state = {
-                    "version": 1,
-                    "backend": "vencord",
-                    "timestamp": bridge_module.time.time() * 1000,
-                    "user": {"id": "1", "username": "test"},
-                    "channel": None,
-                    "users": [],
-                    "mute": False,
-                    "deaf": False,
-                }
-                bridge.vencord_state_path.write_text(json.dumps(state))
-                self.assertEqual(bridge.read_vencord_state()["backend"], "vencord")
-                state["timestamp"] -= 5000
-                bridge.vencord_state_path.write_text(json.dumps(state))
-                self.assertIsNone(bridge.read_vencord_state())
+                state = {"version": 1, "backend": "vencord", "user": {"id": "1"},
+                         "channel": None, "users": [], "mute": False, "deaf": False}
+                line = (json.dumps({"type": "state", "state": state}) + "\n").encode()
+                writer = Writer()
+                bridge.vencord_writer = writer
+                bridge.apply_vencord_state(state)
+                self.assertTrue(bridge.vencord_active)
+                await bridge.send_vencord_command(mute=True)
+                self.assertEqual(json.loads(writer.output), {"type": "command", "mute": True})
+                # The parser accepts the same newline-delimited state frame.
+                await bridge.handle_vencord_client(Reader(line), Writer())
 
-    def test_companion_channel_refuses_symlinks_and_shared_directories(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
+            asyncio.run(scenario(directory))
+
+    def test_companion_socket_refuses_symlinks_and_shared_directories(self):
         with tempfile.TemporaryDirectory() as directory:
             victim = Path(directory) / "victim"
             victim.write_text("user data")
-            os.chmod(victim, 0o644)
             runtime = Path(directory) / "runtime"
             runtime.mkdir()
             with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": str(runtime)}):
                 bridge = bridge_module.Bridge()
-                # A symlink planted at either path must not redirect the write
-                # (which also chmodded the target before) or the read.
-                os.symlink(victim, bridge.vencord_command_path)
-                with self.assertRaises(OSError):
-                    bridge.send_vencord_command(mute=True)
+                os.symlink(victim, bridge.vencord_socket_path)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    asyncio.run(bridge.start_vencord_server())
+                self.assertIsNone(bridge.vencord_server)
                 self.assertEqual(victim.read_text(), "user data")
-                self.assertEqual(stat.S_IMODE(victim.stat().st_mode), 0o644)
-                os.symlink(victim, bridge.vencord_state_path)
-                self.assertIsNone(bridge.read_vencord_state())
 
-        # Without XDG_RUNTIME_DIR there is no user-private directory to use, so
-        # the companion channel is disabled rather than moved to a shared one.
         with mock.patch.dict(os.environ, {}, clear=True):
             bridge = bridge_module.Bridge()
-            self.assertIsNone(bridge.vencord_state_path)
-            self.assertIsNone(bridge.vencord_command_path)
-            self.assertIsNone(bridge.read_vencord_state())
-            bridge.send_vencord_command(mute=True)
-
-    def test_future_dated_vencord_state_expires(self):
-        with tempfile.TemporaryDirectory() as directory:
-            with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": directory}):
-                bridge = bridge_module.Bridge()
-                bridge.vencord_state_path.write_text(json.dumps({
-                    "version": 1, "backend": "vencord",
-                    "timestamp": (bridge_module.time.time() + 9999) * 1000,
-                }))
-                self.assertIsNone(bridge.read_vencord_state())
+            self.assertIsNone(bridge.vencord_socket_path)
+            asyncio.run(bridge.start_vencord_server())
+            self.assertIsNone(bridge.vencord_server)
 
     def test_companion_native_helper_has_no_shared_directory_fallback(self):
         native = (COMPANION / "native.ts").read_text()
+        index = (COMPANION / "index.ts").read_text()
+        bridge = BRIDGE_PATH.read_text()
         self.assertNotIn("tmpdir", native)
-        self.assertIn("O_NOFOLLOW", native)
-
-    def test_vencord_commands_are_owner_only(self):
-        with tempfile.TemporaryDirectory() as directory:
-            with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": directory}):
-                bridge = bridge_module.Bridge()
-                bridge.send_vencord_command(mute=True)
-                self.assertEqual(stat.S_IMODE(bridge.vencord_command_path.stat().st_mode), 0o600)
-                self.assertEqual(json.loads(bridge.vencord_command_path.read_text()), {"mute": True})
+        self.assertIn("createConnection", native)
+        self.assertIn("nextCommand", native)
+        self.assertIn("asyncio.start_unix_server", bridge)
+        self.assertNotIn("vencord_monitor", bridge)
+        self.assertNotIn("read_vencord_state", bridge)
+        self.assertNotIn("readCommands", index)
+        self.assertIn("await Native.nextCommand()", index)
+        self.assertIn("setInterval(() => void publish(), 5000)", index)
 
 
 class DiscordVoicePluginSafetyTests(unittest.TestCase):
@@ -221,9 +218,121 @@ class DiscordVoicePluginSafetyTests(unittest.TestCase):
         self.assertIn('name: "End4DiscordVoice"', index)
         self.assertIn("SelectedChannelStore", index)
         self.assertIn("toggleSelfMute", index)
-        self.assertIn("end4-discord-voice-vencord.json", native)
-        self.assertIn("mode: 0o600", native)
+        self.assertIn("end4-discord-voice-vencord.sock", native)
+        self.assertIn("nextCommand", native)
         self.assertIn('case "backend"', SERVICE.read_text())
+
+    def test_overlay_has_expressive_voice_controls_and_column_mode(self):
+        widget = (PLUGIN / "Widget.qml").read_text()
+        manifest = json.loads((PLUGIN / "manifest.json").read_text())
+        options = {option["key"]: option for option in manifest["options"]}
+        self.assertEqual(options["overlayLayout"]["default"], "row")
+        self.assertEqual({choice["value"] for choice in options["overlayLayout"]["choices"]},
+                         {"row", "column"})
+        self.assertIn("MaterialShapeWrappedMaterialSymbol", widget)
+        self.assertIn('text: DiscordVoice.deafened ? "headset_off" : "headphones"', widget)
+        self.assertIn("DiscordVoice.setDeafened(!DiscordVoice.deafened)", widget)
+        self.assertIn("top: parent.top", widget)
+        self.assertNotIn("anchors.fill: parent", widget)
+        self.assertEqual(widget.count("implicitWidth: 48"), 2)
+        self.assertEqual(widget.count("implicitSize: 46"), 2)
+        self.assertIn("spacing: 0", widget)
+        self.assertLess(widget.index("DiscordVoice.setMuted(!DiscordVoice.muted)"), widget.index("GridLayout"))
+        self.assertIn("Math.min(channelName.implicitWidth", widget)
+        self.assertIn("Item { Layout.fillWidth: true }", widget)
+        self.assertIn('readonly property bool columnMode: layoutMode === "column"', widget)
+        self.assertEqual(options["overlayAvatarSize"]["from"], 32)
+        self.assertEqual(options["overlayAvatarSize"]["to"], 80)
+        self.assertEqual({choice["value"] for choice in options["participantBackground"]["choices"]},
+                         {"none", "card", "name"})
+        self.assertEqual(options["participantBackgroundOpacity"]["from"], 0)
+        self.assertEqual(options["participantBackgroundOpacity"]["to"], 1)
+        self.assertEqual(options["participantBackgroundOpacity"]["step"], 0.05)
+        self.assertIn('PluginState.option("discord_voice", "participantBackgroundOpacity"', widget)
+        avatar = (PLUGIN / "ParticipantAvatar.qml").read_text()
+        self.assertIn("property real backgroundOpacity", avatar)
+        self.assertEqual(avatar.count("1 - root.backgroundOpacity"), 2)
+        self.assertNotIn("anchors.fill: parent\n        visible: root.backgroundMode === \"card\"", avatar)
+        self.assertIn("Math.min(ring.x, nameText.x)", avatar)
+        self.assertIn("Math.max(ring.x + ring.width, nameText.x + nameText.width)", avatar)
+        self.assertIn("Math.min(root.maxNameWidth, implicitWidth)", avatar)
+        self.assertIn("nameText.width + Appearance.spacing.space200", avatar)
+        self.assertIn('visible: root.showName && root.backgroundMode === "name"', avatar)
+        self.assertIn("root.maxNameWidth", avatar)
+        self.assertIn("root.backgroundMode === \"name\" ? Appearance.spacing.space200 : 0", avatar)
+        self.assertIn("columnSpacing: root.columnMode ? Appearance.spacing.space75 : Appearance.spacing.space200", widget)
+        self.assertIn('PluginState.option("discord_voice", "blurTintOpacity"', widget)
+        self.assertIn("ColorUtils.transparentize", widget)
+        self.assertIn(': "transparent"', widget)
+        overlay = (ROOT / "modules/ii/overlay/discordVoice/DiscordVoiceOverlay.qml").read_text()
+        self.assertIn("editorBackgroundOpacity: 0", overlay)
+        self.assertIn("editorBorderVisible: true", overlay)
+        self.assertIn("DiscordPackage.DiscordGlyph", overlay)
+        fallback_bar = (PLUGIN / "BarWidget.qml").read_text()
+        self.assertIn("DiscordGlyph", fallback_bar)
+        self.assertNotIn('text: "voice_chat"', fallback_bar)
+        native_bar = (ROOT / "modules/ii/bar/DiscordVoicePlugin.qml").read_text()
+        self.assertIn("DiscordPackage.DiscordGlyph", native_bar)
+        self.assertNotIn('text: "voice_chat"', native_bar)
+        overlay_taskbar = (ROOT / "modules/ii/overlay/OverlayTaskbar.qml").read_text()
+        self.assertIn('widgetButton.identifier === "discordVoice"', overlay_taskbar)
+        self.assertIn("DiscordPackage.DiscordGlyph", overlay_taskbar)
+        self.assertIn("border.width: 0", widget)
+
+    def test_numeric_plugin_options_reserve_label_space_without_slider_overlap(self):
+        options = (ROOT / "modules/common/plugins/PluginOptions.qml").read_text()
+        slider = (ROOT / "modules/common/widgets/ConfigSlider.qml").read_text()
+        self.assertIn("textWidth: optionLoader.optionData.labelWidth ?? 176", options)
+        self.assertIn("Layout.minimumWidth: root.textWidth", slider)
+        self.assertIn("Layout.minimumWidth: 96", slider)
+        self.assertIn("elide: Text.ElideRight", slider)
+
+    def test_bar_popup_uses_fixed_participant_cells_and_expressive_actions(self):
+        popup = (PLUGIN / "DiscordVoicePopup.qml").read_text()
+        self.assertIn("maxNameWidth: 64", popup)
+        self.assertIn("contentPadding: Appearance.spacing.space200", popup)
+        self.assertIn("implicitWidth: 384", popup)
+        self.assertIn("MaterialShape.Shape.SoftBurst", popup)
+        self.assertIn("MaterialShape.Shape.Clover4Leaf", popup)
+        self.assertNotIn("toggled: DiscordVoice.muted", popup)
+        self.assertNotIn("toggled: DiscordVoice.deafened", popup)
+        self.assertIn('StyledToolTip { text: DiscordVoice.muted ? "Unmute" : "Mute" }', popup)
+        self.assertNotIn('text: DiscordVoice.muted ? "Unmute" : "Mute"\n                        color:', popup)
+        avatar = (PLUGIN / "ParticipantAvatar.qml").read_text()
+        self.assertIn("property real maxNameWidth", avatar)
+        self.assertIn('property string backgroundMode: "none"', avatar)
+
+    def test_discord_brand_and_participant_state_shapes_are_expressive(self):
+        glyph = (PLUGIN / "DiscordGlyph.qml").read_text()
+        avatar = (PLUGIN / "ParticipantAvatar.qml").read_text()
+        widget = (PLUGIN / "Widget.qml").read_text()
+        self.assertIn('source: "discord.svg"', glyph)
+        self.assertIn('iconFolder: Qt.resolvedUrl("assets")', glyph)
+        self.assertTrue((PLUGIN / "assets" / "discord.svg").is_file())
+        self.assertIn("MaterialShape.Shape.SoftBurst", avatar)
+        self.assertIn("MaterialShape.Shape.Cookie4Sided", avatar)
+        self.assertIn("MaterialShape.Shape.Boom", avatar)
+        self.assertIn("shape: root.displayedShape", avatar)
+        self.assertIn("onAvatarShapeChanged", avatar)
+        self.assertIn('property: "transitionScale"', avatar)
+        self.assertIn("ParticipantVisualState.previous", avatar)
+        self.assertIn("shape: root.displayedShape", avatar)
+        self.assertTrue((PLUGIN / "ParticipantVisualState.js").exists())
+        self.assertIn("horizontalLayout: root.columnMode", widget)
+        overlay = (ROOT / "modules/ii/overlay/discordVoice/DiscordVoiceOverlay.qml").read_text()
+        self.assertIn("root.x + root.width / 2 >= root.parent.width / 2", overlay)
+
+    def test_participants_update_in_place_without_reordering_or_delegate_flicker(self):
+        service = SERVICE.read_text()
+        widget = (PLUGIN / "Widget.qml").read_text()
+        popup = (PLUGIN / "DiscordVoicePopup.qml").read_text()
+        bar = (ROOT / "modules/ii/bar/DiscordVoicePlugin.qml").read_text()
+        self.assertIn("id: participantsModel", service)
+        self.assertIn("participantsModel.setProperty(existingIndex", service)
+        self.assertIn("participantsModel.append({ participant: user })", service)
+        self.assertIn("for (let index = participantsModel.count - 1", service)
+        for consumer in (widget, popup, bar):
+            self.assertIn("DiscordVoice.participantModel", consumer)
 
 
 if __name__ == "__main__":
