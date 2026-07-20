@@ -180,10 +180,15 @@ Item {
                             }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
+                        // Handlers rather than a MouseArea: an item anchored to
+                        // fill a layout is undefined behavior, and these are not
+                        // items, so the row's layout ignores them.
+                        TapHandler {
+                            onTapped: root.showingProfile = !root.showingProfile
+                        }
+
+                        HoverHandler {
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: root.showingProfile = !root.showingProfile
                         }
                     }
 

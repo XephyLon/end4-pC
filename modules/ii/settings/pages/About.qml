@@ -116,9 +116,9 @@ ContentPage {
                 }
             }
             RowLayout {
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.margins: 0
+                // Anchors on a layout-managed item are undefined behavior;
+                // alignment expresses the same bottom-right pin.
+                Layout.alignment: Qt.AlignRight | Qt.AlignBottom
                 spacing: Appearance.spacing.space100
                 RippleButton {
                     buttonText: Translation.tr("Update Dots")

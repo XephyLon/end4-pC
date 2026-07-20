@@ -683,7 +683,9 @@ ContentPage {
 
                 ColumnLayout {
                     id: translationCol
-                    anchors { fill: parent; margins: 0 }
+                    // Inside GroupedList's own layout, so fill through the
+                    // layout rather than anchoring across it.
+                    Layout.fillWidth: true
                     spacing: Appearance.spacing.space100
 
                     ConfigTextArea {
