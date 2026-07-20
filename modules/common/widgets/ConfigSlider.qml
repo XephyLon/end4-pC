@@ -32,8 +32,11 @@ RowLayout {
         }
         StyledText {
             id: labelWidget
+            // Preferred, not minimum: the label may shrink and elide in a
+            // narrow pane. Pinning a floor here would push the row wider than
+            // its container for every ConfigSlider in the settings window.
             Layout.preferredWidth: root.textWidth
-            Layout.minimumWidth: root.textWidth
+            Layout.maximumWidth: root.textWidth
             text: root.text
             elide: Text.ElideRight
             clip: true
