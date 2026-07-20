@@ -21,5 +21,11 @@ connection. The five-second heartbeat is only for crash detection and
 reconnection; it does not poll Discord state. No Discord token is read or
 exported.
 
+Because the heartbeat is that infrequent, a Flux event arriving while a publish
+is already in flight is re-published as soon as that one finishes rather than
+dropped — otherwise the shell would show stale mute state for up to five
+seconds. If `XDG_RUNTIME_DIR` is unset the companion disables itself; it never
+falls back to a shared temporary directory.
+
 Official Discord does not need this companion. The Quickshell bridge continues
 to use Discord's native local RPC and authorization flow when it is available.

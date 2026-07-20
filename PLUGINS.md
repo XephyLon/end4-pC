@@ -73,6 +73,20 @@ Do not instantiate it from widget components or replace the native bar route
 with nested loaders. The bar popup is click-only and closes through
 `HyprlandFocusGrab`.
 
+The companion speaks to the bridge over a Unix socket at
+`$XDG_RUNTIME_DIR/end4-discord-voice-vencord.sock`, bound under a restrictive
+umask so it is never briefly readable by other users. There is no
+shared-directory fallback: without `XDG_RUNTIME_DIR` the companion channel
+disables itself rather than falling back to a world-writable path. The bridge
+treats that socket as untrusted input — a malformed or oversized frame is
+skipped rather than tearing down the session, and a companion that stops
+reading is dropped after `COMPANION_WRITE_TIMEOUT` so it cannot stall the
+bridge's stdin loop.
+
+A companion fault emits `companion_error`, not `error`. Discord's own RPC
+backend stays usable, so the UI must show the reason without offering an
+authorization button the user cannot act on.
+
 Manifest options support `boolean`, `choice`, `number`, and `text`. Text options use the shell's
 native `ConfigTextArea`; `placeholder`, `maxLength`, and `uppercase` may be supplied for short values
 such as currency codes.

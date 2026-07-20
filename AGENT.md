@@ -413,6 +413,22 @@ debounces icon change signals into `stableIconSource`, retains the last non-empt
 fallback glyph for missing/error states. Keep that mediation in place; `tests/lint_systray_icon_binding.sh`
 guards the critical source binding.
 
+**Shared chrome must not branch on a specific widget or plugin identifier.** When one overlay widget
+needed a brand logo instead of a Material Symbol, the first version taught `OverlayTaskbar.qml` to
+check `identifier === "discordVoice"` and imported that plugin's package into generic overlay chrome.
+Every later branded widget would have added another branch. The registry entry carries the exception
+instead: `OverlayContext.availableWidgets` entries accept an optional `iconComponent`, and the taskbar
+renders whatever it is given and binds `toggled` on it. The same rule produced
+`StyledOverlayWidget.titleIconComponent`. If shared code needs to know *which* widget it is drawing,
+the data model is missing a field.
+
+**A widget whose size inputs are user-configurable cannot have a fixed implicit size on either axis.**
+The Discord overlay derived `implicitHeight` from its content but left `implicitWidth` hardcoded, while
+avatar size (32-80) and count (1-12) both remained settings — a full row reached ~960px inside a 344px
+box. Derive the growing axis too, but compute it *arithmetically* from the inputs rather than reading a
+child layout's `implicitWidth`: the content is anchored to this item's width, so reading its implicit
+size back would bind width to itself. Cap the result and let the grid wrap instead of growing forever.
+
 ## Design language
 
 The shell follows **Material 3 / Material 3 Expressive**. `Appearance.qml` is the single source of

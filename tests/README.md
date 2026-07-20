@@ -113,6 +113,14 @@ without executing a single assertion. Three modules shipped in that state.
 state minimization, requires one bounded bridge with capped restart backoff, and
 keeps the clickable Discord bar widget on its native single-owner geometry path.
 
+Its companion-transport cases are behavioral, not textual: they bind a real
+socket under a permissive umask to prove the mode comes from the bind rather
+than a later `chmod`, drive a hanging `drain()` to prove a wedged companion
+cannot stall the bridge, and feed a malformed frame ahead of a valid one to
+prove one bad frame does not end the session. Each was confirmed to fail with
+its fix reverted — assert the property that matters, not the presence of the
+line that implements it.
+
 ## Runtime harnesses (repository root)
 
 `CurrencyRuntimeTest.qml`, `DesignSystemCompile.qml`, `DiscordVoiceRuntimeTest.qml`, `DockerRuntimeTest.qml`,
