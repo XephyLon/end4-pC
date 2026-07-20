@@ -1,7 +1,9 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
+import QtQuick
 import Quickshell
 import qs.modules.common
+import "../../common/plugins/bundled/discordVoice" as DiscordPackage
 
 Singleton {
     id: root
@@ -17,9 +19,19 @@ Singleton {
         { identifier: "notes", materialSymbol: "note_stack" },
         { identifier: "volumeMixer", materialSymbol: "volume_up" },
     ]
+    // Optional per-entry override for widgets whose identity a Material Symbol
+    // cannot carry. The overlay taskbar renders `iconComponent` instead of
+    // `materialSymbol` when one is present and binds `toggled` on the result,
+    // so branded widgets need no special case in the shared taskbar.
+    readonly property Component discordVoiceIcon: Component { DiscordPackage.TaskbarGlyph {} }
+
     readonly property list<var> availableWidgets: root.builtInWidgets.concat(
         Config.options.plugins.enabled.includes("discord_voice")
-            ? [{ identifier: "discordVoice", materialSymbol: "voice_chat" }]
+            ? [{
+                identifier: "discordVoice",
+                materialSymbol: "voice_chat",
+                iconComponent: root.discordVoiceIcon
+            }]
             : [])
     
     readonly property bool hasPinnedWidgets: root.pinnedWidgetIdentifiers.length > 0

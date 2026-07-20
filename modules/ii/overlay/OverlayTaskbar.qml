@@ -8,7 +8,6 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.common.widgets.widgetCanvas
-import "../../common/plugins/bundled/discordVoice" as DiscordPackage
 
 Rectangle {
     id: root
@@ -45,6 +44,7 @@ Rectangle {
                     required property var modelData
                     identifier: modelData.identifier
                     materialSymbol: modelData.materialSymbol
+                    iconComponent: modelData.iconComponent ?? null
                 }
             }
         }
@@ -116,6 +116,7 @@ Rectangle {
         id: widgetButton
         required property string identifier
         required property string materialSymbol
+        property Component iconComponent: null
 
         Layout.alignment: Qt.AlignVCenter
 
@@ -142,21 +143,23 @@ Rectangle {
             implicitHeight: 32
             MaterialSymbol {
                 id: iconWidget
-                visible: widgetButton.identifier !== "discordVoice"
+                visible: !widgetButton.iconComponent
                 anchors.centerIn: parent
                 iconSize: 24
                 text: widgetButton.materialSymbol
                 color: widgetButton.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
             }
-            DiscordPackage.DiscordGlyph {
-                visible: widgetButton.identifier === "discordVoice"
+            Loader {
+                id: brandIcon
+                active: !!widgetButton.iconComponent
                 anchors.centerIn: parent
-                implicitSize: 28
-                iconSize: 16
-                color: widgetButton.toggled
-                    ? Appearance.colors.colSecondaryContainer : Appearance.colors.colLayer2
-                iconColor: widgetButton.toggled
-                    ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
+                sourceComponent: widgetButton.iconComponent
+            }
+            Binding {
+                target: brandIcon.item
+                property: "toggled"
+                value: widgetButton.toggled
+                when: brandIcon.item !== null
             }
         }
     }

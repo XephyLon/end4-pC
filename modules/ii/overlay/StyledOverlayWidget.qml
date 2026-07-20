@@ -16,6 +16,14 @@ import qs.modules.common.widgets.widgetCanvas
  * 3. Add an entry in Persistent.states.overlay.<yourWidgetIdentifier> with x, y, width, height, pinned, clickthrough properties set to reasonable defaults
  * 4. Add an entry in OverlayWidgetDelegateChooser with roleValue=<yourWidgetIdentifier> and Declare your widget in there
  * Use existing entries as reference.
+ *
+ * Branding: a Material Symbol cannot carry a third-party logo. Both the widget
+ * titlebar and the overlay taskbar accept a Component instead:
+ * - titlebar: set titleIconComponent on your widget
+ * - taskbar: add iconComponent to your OverlayContext.availableWidgets entry;
+ *   the taskbar binds `toggled` on whatever it creates
+ * Neither is required, and neither should be answered by teaching shared
+ * overlay chrome to recognise a specific widget identifier.
  */
 AbstractOverlayWidget {
     id: root

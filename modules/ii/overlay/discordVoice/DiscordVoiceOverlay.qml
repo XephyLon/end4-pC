@@ -17,9 +17,6 @@ StyledOverlayWidget {
     // Widget.qml owns the tint opacity; do not stack the editor frame's opaque
     // fill behind it while Super+G is open.
     editorBackgroundOpacity: 0
-    // Keep the resize boundary visible in overlay editing mode. The shared
-    // overlay frame makes this border transparent again during normal use.
-    editorBorderVisible: true
     minimumWidth: overlayContent.implicitWidth
     minimumHeight: overlayContent.implicitHeight
 
