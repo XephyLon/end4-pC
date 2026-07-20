@@ -166,9 +166,27 @@ class Bridge:
             os.umask(previous_umask)
         self.vencord_socket_inode = self.vencord_socket_path.stat().st_ino
 
+    @staticmethod
+    async def shutdown_writer(writer: asyncio.StreamWriter) -> None:
+        """Close a companion writer and wait for the transport to release.
+
+        close() only requests the shutdown, so returning here without
+        wait_closed() leaves the socket dangling until the garbage collector
+        runs. wait_closed() is bounded because the peer this drops is often one
+        that has already stopped behaving.
+        """
+        writer.close()
+        try:
+            await asyncio.wait_for(writer.wait_closed(), COMPANION_WRITE_TIMEOUT)
+        except (asyncio.TimeoutError, OSError, ConnectionError):
+            pass
+
     async def handle_vencord_client(self, reader: asyncio.StreamReader,
                                     writer: asyncio.StreamWriter) -> None:
         if self.vencord_writer and self.vencord_writer is not writer:
+            # Request only, deliberately not awaited: the displaced peer may be
+            # unresponsive, and blocking here would hold up the companion that
+            # just connected. Its own handler awaits the transport in `finally`.
             self.vencord_writer.close()
         self.vencord_writer = writer
         try:
@@ -203,7 +221,7 @@ class Bridge:
                     self.vencord_signature = ""
                     emit("disconnected", reason="Vesktop companion stopped")
                     await self.connect()
-            writer.close()
+            await self.shutdown_writer(writer)
 
     def apply_vencord_state(self, data: dict[str, Any], force: bool = False) -> None:
         stable = {key: value for key, value in data.items() if key != "timestamp"}
@@ -236,7 +254,7 @@ class Bridge:
             await asyncio.wait_for(writer.drain(), COMPANION_WRITE_TIMEOUT)
         except (asyncio.TimeoutError, OSError):
             emit("companion_error", message="Vesktop companion stopped reading")
-            writer.close()
+            await self.shutdown_writer(writer)
 
     def close(self) -> None:
         if self.writer:
@@ -448,7 +466,7 @@ async def main() -> None:
     finally:
         bridge.close()
         if bridge.vencord_writer:
-            bridge.vencord_writer.close()
+            await bridge.shutdown_writer(bridge.vencord_writer)
         if bridge.vencord_server:
             bridge.vencord_server.close()
             await bridge.vencord_server.wait_closed()

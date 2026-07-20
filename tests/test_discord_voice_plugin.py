@@ -1,12 +1,14 @@
 import importlib.util
 import asyncio
 import contextlib
+import gc
 import io
 import json
 import os
 import stat
 import tempfile
 import unittest
+import warnings
 from unittest import mock
 from pathlib import Path
 
@@ -97,6 +99,7 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
             def write(self, data): self.output += data
             async def drain(self): pass
             def close(self): self.closed = True
+            async def wait_closed(self): pass
 
         async def scenario(directory):
             with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": directory}):
@@ -104,6 +107,12 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
                 state = {"version": 1, "backend": "vencord", "user": {"id": "1"},
                          "channel": None, "users": [], "mute": False, "deaf": False}
                 line = (json.dumps({"type": "state", "state": state}) + "\n").encode()
+                async def no_fallback():
+                    return False
+                # candidate_paths() probes /tmp as well as XDG_RUNTIME_DIR, so
+                # the temporary directory alone does not keep the disconnect
+                # path away from a real Discord socket.
+                bridge.connect = no_fallback
                 writer = Writer()
                 bridge.vencord_writer = writer
                 bridge.apply_vencord_state(state)
@@ -160,6 +169,80 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
         # be aimed at a path something else has since swapped in.
         self.assertNotIn("os.chmod(self.vencord_socket_path", BRIDGE_PATH.read_text())
 
+    def test_companion_disconnect_releases_its_transport(self):
+        # close() only requests a shutdown. A handler that returns without
+        # awaiting wait_closed() leaves the socket alive until the garbage
+        # collector runs, which is what reported it as an unclosed
+        # StreamWriter. Asserting the await is the contract; asserting the
+        # absence of the warning is not, because a still-running event loop
+        # completes the close on its own and hides the difference.
+        class Writer:
+            def __init__(self):
+                self.closed = False
+                self.awaited = False
+            def is_closing(self): return self.closed
+            def write(self, data): pass
+            async def drain(self): pass
+            def close(self): self.closed = True
+            async def wait_closed(self): self.awaited = True
+
+        class Reader:
+            async def readline(self): return b""
+
+        async def scenario():
+            bridge = bridge_module.Bridge()
+
+            async def no_fallback():
+                return False
+            bridge.connect = no_fallback
+            writer = Writer()
+            await bridge.handle_vencord_client(Reader(), writer)
+            return writer
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            writer = asyncio.run(scenario())
+        self.assertTrue(writer.closed)
+        self.assertTrue(writer.awaited,
+                        "handler returned before the transport was released")
+
+    def test_companion_transport_is_clean_over_a_real_socket(self):
+        state = {"version": 1, "backend": "vencord", "user": {"id": "1"},
+                 "channel": None, "users": [], "mute": False, "deaf": False}
+
+        async def scenario(runtime):
+            with mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": runtime}):
+                bridge = bridge_module.Bridge()
+
+                async def no_fallback():
+                    return False
+                # Keep the disconnect path off this machine's real Discord socket.
+                bridge.connect = no_fallback
+                await bridge.start_vencord_server()
+                try:
+                    _, writer = await asyncio.open_unix_connection(
+                        bridge.vencord_socket_path)
+                    writer.write((json.dumps({"type": "state", "state": state}) + "\n").encode())
+                    await writer.drain()
+                    await asyncio.sleep(0.05)
+                    writer.close()
+                    await writer.wait_closed()
+                    await asyncio.sleep(0.05)
+                    # The handler ran to completion and let go of the peer.
+                    self.assertIsNone(bridge.vencord_writer)
+                finally:
+                    bridge.vencord_server.close()
+                    await bridge.vencord_server.wait_closed()
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            with tempfile.TemporaryDirectory() as runtime, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                asyncio.run(scenario(runtime))
+            gc.collect()
+        leaked = [str(entry.message) for entry in caught
+                  if issubclass(entry.category, ResourceWarning)]
+        self.assertEqual(leaked, [])
+
     def test_wedged_companion_cannot_stall_the_bridge_command_loop(self):
         class HangingWriter:
             def __init__(self):
@@ -168,6 +251,7 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
             def write(self, data): pass
             async def drain(self): await asyncio.sleep(3600)
             def close(self): self.closed = True
+            async def wait_closed(self): pass
 
         async def scenario():
             bridge = bridge_module.Bridge()
@@ -197,6 +281,7 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
             def write(self, data): pass
             async def drain(self): pass
             def close(self): self.closed = True
+            async def wait_closed(self): pass
 
         state = {"version": 1, "backend": "vencord", "user": {"id": "1"},
                  "channel": None, "users": [], "mute": False, "deaf": False}
@@ -204,6 +289,13 @@ class DiscordVoiceBridgeTests(unittest.TestCase):
 
         async def scenario():
             bridge = bridge_module.Bridge()
+
+            async def no_fallback():
+                return False
+            # End-of-stream falls back to Discord's RPC. Unstubbed, and with
+            # XDG_RUNTIME_DIR left alone, candidate_paths resolves to this
+            # machine's real discord-ipc socket and the test opens it.
+            bridge.connect = no_fallback
             # Garbage first: the valid frame behind it must still be applied.
             await bridge.handle_vencord_client(Reader([b"{not json\n", good]), Writer())
 
