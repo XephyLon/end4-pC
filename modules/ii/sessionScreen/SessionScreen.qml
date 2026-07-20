@@ -101,8 +101,8 @@ Scope {
 
                 GridLayout {
                     columns: 4
-                    columnSpacing: 15
-                    rowSpacing: 15
+                    columnSpacing: Appearance.spacing.space200
+                    rowSpacing: Appearance.spacing.space200
 
                     SessionActionButton {
                         id: sessionLock

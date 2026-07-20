@@ -220,7 +220,7 @@ AbstractBackgroundWidget {
 
                 Grid {
                     columns: 7
-                    rowSpacing: 4
+                    rowSpacing: Appearance.spacing.space50
                     columnSpacing: 0
                     Layout.fillWidth: true
                     Layout.topMargin: Appearance.spacing.space50

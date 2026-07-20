@@ -150,7 +150,7 @@ PopupWindow {
             sourceComponent: RippleButton {
                 id: backButton
                 buttonRadius: popupBackground.radius - popupBackground.padding
-                horizontalPadding: 12
+                horizontalPadding: Appearance.spacing.space150
                 implicitWidth: contentItem.implicitWidth + horizontalPadding * 2
                 implicitHeight: 36
 
@@ -179,7 +179,7 @@ PopupWindow {
         RippleButton {
             id: pinEntry
             buttonRadius: popupBackground.radius - popupBackground.padding
-            horizontalPadding: 12
+            horizontalPadding: Appearance.spacing.space150
             implicitWidth: contentItem.implicitWidth + horizontalPadding * 2
             implicitHeight: 36
             Layout.topMargin: 0

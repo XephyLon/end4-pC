@@ -6,8 +6,8 @@ GroupButton {
     id: button
     property string buttonText
 
-    horizontalPadding: 8
-    verticalPadding: 6
+    horizontalPadding: Appearance.spacing.space100
+    verticalPadding: Appearance.spacing.space75
 
     baseWidth: contentItem.implicitWidth + horizontalPadding * 2
     clickedWidth: baseWidth + 14

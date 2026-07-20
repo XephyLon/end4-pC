@@ -839,8 +839,8 @@ ContentPage {
             GridLayout {
                 Layout.fillWidth: true
                 columns: 2
-                rowSpacing: 8
-                columnSpacing: 8
+                rowSpacing: Appearance.spacing.space100
+                columnSpacing: Appearance.spacing.space100
                 Repeater {
                     model: [
                         {

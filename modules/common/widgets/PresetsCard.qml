@@ -136,8 +136,8 @@ Rectangle {
                 Layout.fillWidth: false
                 Layout.fillHeight: false
                 implicitHeight: 36
-                horizontalPadding: 14
-                verticalPadding: 8
+                horizontalPadding: Appearance.spacing.space175
+                verticalPadding: Appearance.spacing.space100
                 colBackground: "transparent"
                 colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colPrimaryContainerHover, 0.8)
                 colBackgroundActive: Appearance.colors.colPrimaryContainerActive
@@ -159,8 +159,8 @@ Rectangle {
                 Layout.fillWidth: false
                 Layout.fillHeight: false
                 implicitHeight: 36
-                horizontalPadding: 14
-                verticalPadding: 8
+                horizontalPadding: Appearance.spacing.space175
+                verticalPadding: Appearance.spacing.space100
                 colBackground: Appearance.colors.colPrimaryContainer
                 colBackgroundHover: Appearance.colors.colPrimaryContainerHover
                 colBackgroundActive: Appearance.colors.colPrimaryContainerActive

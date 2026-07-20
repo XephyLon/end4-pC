@@ -33,8 +33,8 @@ Item {
                 id: schemeGrid
                 anchors { left: parent.left; right: parent.right; top: parent.top; margins: Appearance.spacing.space150 }
                 columns: 3
-                rowSpacing: 6
-                columnSpacing: 6
+                rowSpacing: Appearance.spacing.space75
+                columnSpacing: Appearance.spacing.space75
 
                 Repeater {
                     id: schemeRepeater

@@ -138,8 +138,8 @@ ContentPage {
                     GridLayout {
                         Layout.fillWidth: true
                         columns: 3
-                        rowSpacing: 2
-                        columnSpacing: 2
+                        rowSpacing: Appearance.spacing.space25
+                        columnSpacing: Appearance.spacing.space25
 
                         Repeater {
                             model: [
@@ -228,8 +228,8 @@ ContentPage {
             GridLayout {
                 Layout.fillWidth: true
                 columns: 2
-                rowSpacing: 8
-                columnSpacing: 8
+                rowSpacing: Appearance.spacing.space100
+                columnSpacing: Appearance.spacing.space100
 
                 Rectangle {
                     Layout.fillWidth: true

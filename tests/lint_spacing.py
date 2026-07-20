@@ -19,7 +19,9 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "modules")
 ROOT = os.path.normpath(ROOT)
 
 PROP = re.compile(
-    r'^\s*(spacing|padding|topPadding|bottomPadding|leftPadding|rightPadding'
+    r'^\s*(spacing|rowSpacing|columnSpacing'
+    r'|padding|topPadding|bottomPadding|leftPadding|rightPadding'
+    r'|horizontalPadding|verticalPadding'
     r'|Layout\.(?:margins|leftMargin|rightMargin|topMargin|bottomMargin)'
     r'|anchors\.(?:margins|leftMargin|rightMargin|topMargin|bottomMargin))'
     r'\s*:\s*(.+)$'

@@ -72,8 +72,8 @@ Item {
         id: gridLayout
         columns: root.vertical ? 1 : -1
         anchors.centerIn: parent
-        rowSpacing: 4
-        columnSpacing: -6
+        rowSpacing: Appearance.spacing.space50
+        columnSpacing: -Appearance.spacing.space75
 
         RippleButton {
             id: trayOverflowButton
@@ -114,8 +114,8 @@ Item {
                     id: trayOverflowLayout
                     anchors.centerIn: parent
                     columns: Math.ceil(Math.sqrt(root.unpinnedItems.length))
-                    columnSpacing: 6
-                    rowSpacing: 6
+                    columnSpacing: Appearance.spacing.space75
+                    rowSpacing: Appearance.spacing.space75
 
                     Repeater {
                         model: root.unpinnedItems

@@ -127,8 +127,8 @@ StyledPopup {
         GridLayout {
             id: gridLayout
             columns: 2
-            rowSpacing: 4
-            columnSpacing: 4
+            rowSpacing: Appearance.spacing.space50
+            columnSpacing: Appearance.spacing.space50
             uniformCellWidths: true
             
             Layout.leftMargin: Appearance.spacing.space25

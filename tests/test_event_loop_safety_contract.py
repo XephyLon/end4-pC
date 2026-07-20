@@ -91,6 +91,18 @@ def test_settings_window_rule_is_stable_across_locale_and_reload():
     assert 'title = "^Settings$"' not in source
 
 
+def test_tray_grid_uses_spacing_tokens_and_lint_covers_grid_gaps():
+    tray = Path("modules/ii/bar/SysTray.qml").read_text()
+    lint = Path("tests/lint_spacing.py").read_text()
+    assert "columnSpacing: Appearance.spacing.space75" in tray
+    assert "rowSpacing: Appearance.spacing.space75" in tray
+    # Grid gaps and the QQC2 axis paddings are spelled differently from plain
+    # `spacing`/`padding`, so each name has to be listed explicitly or the lint
+    # silently passes raw literals on those properties.
+    for prop in ("rowSpacing", "columnSpacing", "horizontalPadding", "verticalPadding"):
+        assert f"|{prop}" in lint, f"lint does not cover {prop}"
+
+
 if __name__ == "__main__":
     import sys
     from contract_runner import run

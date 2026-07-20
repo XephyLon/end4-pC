@@ -10,7 +10,7 @@ RippleButton {
     id: root
     required property string materialSymbol
     required property bool current
-    horizontalPadding: 10
+    horizontalPadding: Appearance.spacing.space125
 
     implicitHeight: 40
     implicitWidth: implicitContentWidth + horizontalPadding * 2

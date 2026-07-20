@@ -166,8 +166,8 @@ ContentPage {
         GridLayout {
             columns: 2
             Layout.fillWidth: true
-            rowSpacing: 8
-            columnSpacing: 8
+            rowSpacing: Appearance.spacing.space100
+            columnSpacing: Appearance.spacing.space100
 
             AboutCard {
                 icon: "memory"
