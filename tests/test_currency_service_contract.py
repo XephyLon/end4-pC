@@ -37,3 +37,9 @@ def test_currency_service_has_bounded_non_reentrant_request():
     assert "id: requestTimeout" in source
     assert ".abort()" not in source
     assert 'root.errorMessage = "Network timeout"' in source
+
+
+if __name__ == "__main__":
+    import sys
+    from contract_runner import run
+    sys.exit(run(globals()))

@@ -4,6 +4,10 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# The Python contract checks resolve source files relative to the repository
+# root, so make the suite independent of the caller's working directory.
+cd "$PROJECT_ROOT" || exit 1
+
 # Find Qt6 qmltestrunner
 QMLTESTRUNNER=""
 POSSIBLE_PATHS=(

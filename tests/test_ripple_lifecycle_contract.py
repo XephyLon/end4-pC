@@ -21,3 +21,9 @@ def test_ripple_animations_stop_before_delegate_destruction():
         assert "Component.onDestruction" in source, path
         assert "rippleAnim.stop()" in source, path
         assert "rippleFadeAnim.stop()" in source, path
+
+
+if __name__ == "__main__":
+    import sys
+    from contract_runner import run
+    sys.exit(run(globals()))
