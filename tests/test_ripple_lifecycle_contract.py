@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 
@@ -12,7 +13,9 @@ def test_ripple_handlers_call_the_owning_component_explicitly():
         source = path.read_text()
         assert "root.startRipple(" in source, path
         handler = source[source.index("MouseArea {"):source.index("RippleAnim {", source.index("MouseArea {"))]
-        assert "\n            startRipple(" not in handler, path
+        # Any unqualified call resolves through the delegate context, which
+        # may already be invalid by the time the handler runs.
+        assert not re.search(r"(?<![\w.])startRipple\(", handler), path
 
 
 def test_ripple_animations_stop_before_delegate_destruction():

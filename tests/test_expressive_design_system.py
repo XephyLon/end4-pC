@@ -2,6 +2,7 @@
 """Structural guarantees for the shared expressive library and widget plugins."""
 
 import json
+import re
 from pathlib import Path
 import unittest
 
@@ -91,8 +92,8 @@ class ExpressiveDesignSystemTest(unittest.TestCase):
         background = (ROOT / "modules/ii/background/Background.qml").read_text(encoding="utf-8")
         self.assertIn("modelData.startupSafe !== false", background)
         host = (ROOT / "modules/common/plugins/PluginWidget.qml").read_text(encoding="utf-8")
-        self.assertIn("id: blurredBackdrop\n        z: -1", host)
-        self.assertIn("id: pluginNode\n        z: 1", host)
+        self.assertRegex(host, r"id:\s*blurredBackdrop\s*z:\s*-1\b")
+        self.assertRegex(host, r"id:\s*pluginNode\s*z:\s*1\b")
         currency_widget = (
             DESIGN_SYSTEM / "widgets" / "DesktopCurrencyWidget.qml"
         ).read_text(encoding="utf-8")

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 
@@ -6,7 +7,8 @@ def test_removed_notification_timer_is_a_noop():
     guard = source.index("if (!notifObject)")
     dereference = source.index("if (notifObject.isTransient)")
     assert guard < dereference
-    assert "destroy();\n                return;" in source[guard:dereference]
+    # Whitespace-tolerant: the contract is the early return, not its indentation.
+    assert re.search(r"destroy\(\);\s*return;", source[guard:dereference])
 
 
 def test_system_icon_loader_has_no_item_size_feedback_loop():
@@ -19,9 +21,9 @@ def test_system_icon_loader_has_no_item_size_feedback_loop():
 
 def test_system_icons_use_stable_implicit_layout_geometry():
     source = Path("modules/ii/bar/SystemIcons.qml").read_text()
-    assert "GridLayout {\n        id: flow" in source
+    assert re.search(r"GridLayout\s*\{\s*id:\s*flow\b", source)
     assert "columns: root.vertical ? 1 : -1" in source
-    assert "Flow {\n        id: flow" not in source
+    assert not re.search(r"\bFlow\s*\{\s*id:\s*flow\b", source)
 
 
 def test_bar_only_assigns_mirrored_to_visualizers():
