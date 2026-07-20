@@ -13,7 +13,7 @@ RippleButton {
     // QQC2 Control declares that FINAL, and overriding it fails to compile.
     property int labelInset: Appearance.spacing.space150
 
-    implicitHeight: 30
+    implicitHeight: 32
     implicitWidth: forceCircle ? implicitHeight : (contentItem.implicitWidth + labelInset * 2)
     Behavior on implicitWidth {
         SmoothedAnimation {

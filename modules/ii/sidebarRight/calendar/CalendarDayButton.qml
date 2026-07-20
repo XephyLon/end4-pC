@@ -11,8 +11,8 @@ RippleButton {
 
     Layout.fillWidth: false
     Layout.fillHeight: false
-    implicitWidth: 38; 
-    implicitHeight: 38;
+    implicitWidth: 36;
+    implicitHeight: 36;
 
     toggled: (isToday == 1)
     buttonRadius: Appearance.rounding.small

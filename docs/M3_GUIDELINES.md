@@ -75,6 +75,18 @@ they hide the actual spatial relationship. Only genuine large one-off *dimension
 `tests/lint_spacing.py` (run by `tests/run_tests.sh` / CI) fails on any raw spacing literal in the
 token range.
 
+### Dimensions
+
+Element *dimensions* - `implicitWidth`/`implicitHeight`, cell sizes, container heights - are a
+different axis from spacing and are deliberately **not** tokenized (there is no natural clustering
+to build a scale from, only a long tail of per-widget values). They stay literals, and the lint
+does not look at them.
+
+They should still land on the **4dp grid**. When a fixed-height container has to hold
+content-sized children, size the children so the total lands on the grid rather than letting the
+container grow - see the sidebar's bottom widget group in `AGENT.md`'s design-language section for
+a worked example of why growing the container is the expensive choice.
+
 ## 2. Motion and Animation
 
 This codebase uses the **M3 Expressive** motion scheme. You must use the component factories in `Appearance.animation` or the explicit curve/duration definitions in `Appearance.animationCurves`. 
@@ -146,7 +158,7 @@ The following existing widgets contain hardcoded values that violate these stric
   - `StyledComboBox` uses a floating popup but lacks the standard 1px `colLayer0Border` outline found on `StyledPopup`.
 - **Hardcoded Spacing**:
   - Most `spacing`/`padding`/margin literals matching or closely matching an `Appearance.spacing.*`
-    value have been migrated. Values outside that scale (`0`, `1`, `7`, `9`, `11`, `13`, `14`,
+    value have been migrated. Values outside that scale (`0`, `1`, `7`, `9`, `11`, `13`, `15`,
     `17`-`19`, `>=21`, and negative offsets used for deliberate overlap/bleed effects) are left as
     literals rather than force-fit onto the nearest token - re-evaluate case by case if a widget is
     touched again, rather than bulk-snapping them.

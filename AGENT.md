@@ -425,6 +425,23 @@ freezes the shell (this is exactly what a bulk token migration did to `ConfigRow
 
 **Strict UI Guidelines:** See [`docs/M3_GUIDELINES.md`](docs/M3_GUIDELINES.md) for the definitive rules on tokens, rounding, layering, and expressive motion that all new components must follow.
 
+**The sidebar's bottom widget group has a fixed height, and that is load-bearing.**
+`BottomWidgetGroup.qml`'s `expandedHeight` is a constant (352) rather than a binding on its
+content, because the group and the notification list share the sidebar column: every pixel the
+group grows is a pixel the notification list loses. Making it content-sized (`Math.max(350,
+tabStack.implicitHeight + ...)`) looks like a harmless fix for the calendar being clipped, but it
+silently hands ~36px of the notification list to the calendar, and once the group is above the
+floor no amount of tightening the calendar's own spacing changes anything visible - the number
+just moves around above the threshold. Size the *tab* to the budget instead. The calendar's
+`dayCellSize` (36), `CalendarHeaderButton.implicitHeight` (32), the column's `space75` gaps and
+`contentPadding` (`space150`) are chosen together so the total is exactly 350 inside 352.
+
+`CalendarWidget`'s column is top-anchored at `contentPadding`, not `anchors.centerIn: parent`. The
+parent is stretched to the group's fixed height, so centring drifts the header row down by half
+the leftover space and knocks the month pill and the ‹ › buttons off the navigation rail's collapse
+button. The rail's `Layout.topMargin` and the calendar's `contentPadding` must stay equal, and the
+header button and the rail button must stay the same height, or that shared centre line breaks.
+
 Shared building blocks to reach for before writing something from scratch: `StyledText`,
 `StyledComboBox`/`StyledComboBoxSearch`, `StyledSlider`, `StyledToolTip`/`StyledToolTipContent`,
 `RippleButton`, `MaterialSymbol`, `ResourceCard`, `GroupedList` + `ConfigSwitch`/`ConfigSpinBox`/

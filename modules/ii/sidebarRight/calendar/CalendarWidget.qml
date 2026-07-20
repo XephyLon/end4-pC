@@ -8,13 +8,19 @@ import QtQuick.Layouts
 Item {
     id: root
     property int monthShift: 0
-    // One grid column. The header's circular buttons match it so they sit
-    // centred over the last two day columns instead of a few pixels off.
-    readonly property int dayCellSize: 38
+    // One grid column, on the 4dp grid. Seven rows of this plus the 32px header,
+    // the gaps and the padding have to fit BottomWidgetGroup's fixed height, or
+    // the group grows and takes it straight out of the notification list below.
+    readonly property int dayCellSize: 36
     property var viewingDate: CalendarLayout.getDateInXMonthsTime(monthShift)
     property var calendarLayout: CalendarLayout.getCalendarLayout(viewingDate, monthShift === 0)
+    // Matches the navigation rail's top margin in BottomWidgetGroup: the header
+    // row and the rail's collapse button are both 30px tall, so an equal inset
+    // is what puts them on a shared centre line.
+    readonly property int contentPadding: Appearance.spacing.space150
+
     width: calendarColumn.width
-    implicitHeight: calendarColumn.height + Appearance.spacing.space150 * 2
+    implicitHeight: calendarColumn.height + contentPadding * 2
 
     Keys.onPressed: (event) => {
         if ((event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp)
@@ -40,8 +46,16 @@ Item {
 
     ColumnLayout {
         id: calendarColumn
-        anchors.centerIn: parent
-        spacing: Appearance.spacing.space100
+        // Top-anchored, not centred: the parent is stretched to the group's
+        // fixed height, so centring would drift the header off the rail button
+        // by half the leftover space.
+        anchors.top: parent.top
+        anchors.topMargin: root.contentPadding
+        anchors.horizontalCenter: parent.horizontalCenter
+        // Eight rows means seven gaps, so every step up this token costs the
+        // notification list below seven pixels of height. space75 is the
+        // scale's closest value to the 5px this grid was drawn at.
+        spacing: Appearance.spacing.space75
 
         // Calendar header
         RowLayout {
@@ -65,7 +79,6 @@ Item {
             }
             CalendarHeaderButton {
                 forceCircle: true
-                implicitHeight: root.dayCellSize
                 downAction: () => {
                     monthShift--;
                 }
@@ -78,7 +91,6 @@ Item {
             }
             CalendarHeaderButton {
                 forceCircle: true
-                implicitHeight: root.dayCellSize
                 downAction: () => {
                     monthShift++;
                 }
@@ -96,7 +108,7 @@ Item {
             id: weekDaysRow
             Layout.alignment: Qt.AlignHCenter
             Layout.fillHeight: false
-            spacing: Appearance.spacing.space100
+            spacing: Appearance.spacing.space75
             Repeater {
                 model: CalendarLayout.weekDays
                 delegate: CalendarDayButton {
@@ -118,7 +130,7 @@ Item {
             delegate: RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillHeight: false
-                spacing: Appearance.spacing.space100
+                spacing: Appearance.spacing.space75
                 Repeater {
                     model: Array(7).fill(modelData)
                     delegate: CalendarDayButton {

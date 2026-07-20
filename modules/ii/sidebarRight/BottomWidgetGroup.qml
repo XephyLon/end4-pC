@@ -13,11 +13,10 @@ Rectangle {
     radius: Appearance.rounding.normal
     color: Appearance.colors.colLayer1
     clip: true
-    // 350 is the floor for the tabs that fill their parent (To Do, Timer). The
-    // calendar is content-sized and taller than that, so it was being clipped
-    // by the group's rounded surface - grow to whatever the loaded tab needs.
-    readonly property int expandedHeight: Math.max(350,
-        tabStack.implicitHeight + Appearance.spacing.space150 * 2)
+    // Fixed, not content-sized: every pixel this grows comes straight out of
+    // the notification list above it. The calendar - the only content-sized
+    // tab - is dimensioned to fit inside this budget rather than push past it.
+    readonly property int expandedHeight: 352
     implicitHeight: collapsed ? collapsedBottomWidgetGroupRow.implicitHeight : expandedHeight
     property int selectedTab: Persistent.states.sidebar.bottomGroup.tab
     property int previousIndex: -1
