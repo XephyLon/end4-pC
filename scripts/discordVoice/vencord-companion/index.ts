@@ -11,7 +11,6 @@ const Native = VencordNative.pluginHelpers.End4DiscordVoice as PluginNative<type
 const AudioActions = findByPropsLazy("toggleSelfMute", "toggleSelfDeaf");
 
 let timer: ReturnType<typeof setInterval> | undefined;
-let lastPayload = "";
 let publishing = false;
 
 function participant(userId: string, state: any, guildId?: string) {
@@ -74,20 +73,15 @@ async function applyCommands() {
     }
 }
 
-async function publish(force = false) {
+// Always republishes, even when nothing changed: the timestamp is what lets
+// the bridge tell a live companion from a state file left behind by an exited
+// Vesktop, so skipping an unchanged payload would read as the companion dying.
+async function publish() {
     if (publishing) return;
     publishing = true;
     try {
         await applyCommands();
-        const payload = JSON.stringify(snapshot());
-        if (force || payload !== lastPayload) {
-            lastPayload = payload;
-            await Native.publishState(payload);
-        } else {
-            // Refresh the timestamp so Quickshell can distinguish a live
-            // companion from a stale state file after Vesktop exits.
-            await Native.publishState(JSON.stringify(snapshot()));
-        }
+        await Native.publishState(JSON.stringify(snapshot()));
     } finally {
         publishing = false;
     }
@@ -100,15 +94,15 @@ export default definePlugin({
     enabledByDefault: true,
 
     flux: {
-        VOICE_STATE_UPDATES() { void publish(true); },
-        AUDIO_TOGGLE_SELF_MUTE() { void publish(true); },
-        AUDIO_TOGGLE_SELF_DEAF() { void publish(true); },
-        SPEAKING() { void publish(true); },
-        STOP_SPEAKING() { void publish(true); }
+        VOICE_STATE_UPDATES() { void publish(); },
+        AUDIO_TOGGLE_SELF_MUTE() { void publish(); },
+        AUDIO_TOGGLE_SELF_DEAF() { void publish(); },
+        SPEAKING() { void publish(); },
+        STOP_SPEAKING() { void publish(); }
     },
 
     start() {
-        void publish(true);
+        void publish();
         timer = setInterval(() => void publish(), 1000);
     },
 

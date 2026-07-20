@@ -55,9 +55,11 @@ StyledPopup {
                     elide: Text.ElideRight
                 }
                 StyledText {
+                    readonly property string backendSuffix:
+                        DiscordVoice.backendLabel ? ` · ${DiscordVoice.backendLabel}` : ""
                     text: DiscordVoice.inVoice
-                        ? `${DiscordVoice.participants.length} connected`
-                        : (DiscordVoice.errorMessage || "Not connected to voice")
+                        ? `${DiscordVoice.participants.length} connected${backendSuffix}`
+                        : (DiscordVoice.errorMessage || `Not connected to voice${backendSuffix}`)
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                 }

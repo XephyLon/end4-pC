@@ -10,7 +10,12 @@ Singleton {
     id: root
 
     property string status: "starting"
+    // Which client is driving the state. Worth surfacing: the two backends fail
+    // in different ways, and "Vesktop" in the popup is what tells a user the
+    // companion plugin is actually running.
     property string backend: ""
+    readonly property string backendLabel: backend === "vencord" ? "Vesktop"
+        : (backend === "discord" ? "Discord" : "")
     property string errorMessage: ""
     property var currentUser: ({})
     property var channel: null
