@@ -52,7 +52,7 @@ Item {
                 clip: true
                 // Pull the button out by its own inset so the month label starts
                 // on the first day column's left edge instead of 12px right of it.
-                Layout.leftMargin: -horizontalPadding
+                Layout.leftMargin: -labelInset
                 buttonText: `${monthShift != 0 ? "• " : ""}${viewingDate.toLocaleDateString(Qt.locale(), "MMMM yyyy")}`
                 tooltipText: (monthShift === 0) ? "" : Translation.tr("Jump to current month")
                 downAction: () => {
