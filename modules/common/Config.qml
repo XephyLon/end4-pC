@@ -384,6 +384,10 @@ Singleton {
                     property int swapWarningThreshold: 85
                     property int cpuWarningThreshold: 90
                 }
+                property JsonObject divider: JsonObject {
+                    property string style: "rect" // rect - dot - space
+                    property int spacing: 20
+                }
 
                 property JsonObject layouts: JsonObject {
                     property list<string> leftLayout: ["workspaces"]
