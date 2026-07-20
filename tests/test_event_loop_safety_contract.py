@@ -81,6 +81,16 @@ def test_calendar_popup_avoids_layout_and_filter_binding_loops():
     assert "readonly property var pendingTodos:" in source
 
 
+def test_settings_window_rule_is_stable_across_locale_and_reload():
+    source = Path("modules/ii/settings/Settings.qml").read_text()
+    assert 'readonly property string windowRuleTitle: "end4 Settings"' in source
+    assert "title: root.windowRuleTitle" in source
+    assert 'name = "end4-settings-window"' in source
+    assert "end4_settings_window_rule:set_enabled(false)" in source
+    assert 'title = "^${root.windowRuleTitle}$"' in source
+    assert 'title = "^Settings$"' not in source
+
+
 if __name__ == "__main__":
     import sys
     from contract_runner import run
