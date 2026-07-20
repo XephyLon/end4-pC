@@ -25,6 +25,7 @@ AbstractOverlayWidget {
     property bool fancyBorders: true
     property bool showCenterButton: false
     property bool showClickabilityButton: true
+    property Component titleIconComponent: null
 
     // Defaults n stuff
     required property var modelData
@@ -38,6 +39,8 @@ AbstractOverlayWidget {
     property real resizeMargin: Appearance.spacing.space100
     property real padding: Appearance.spacing.space100
     property real contentRadius: radius - padding
+    property real editorBackgroundOpacity: 1
+    property bool editorBorderVisible: true
 
     // Resizing
     function getXResizeDirection(x) {
@@ -199,10 +202,12 @@ AbstractOverlayWidget {
             fill: parent
             margins: root.resizeMargin
         }
-        color: ColorUtils.transparentize(Appearance.colors.colLayer1Base, (root.fancyBorders && GlobalStates.overlayOpen) ? 0 : 1)
+        color: ColorUtils.transparentize(Appearance.colors.colLayer1Base,
+            (root.fancyBorders && GlobalStates.overlayOpen) ? 1 - root.editorBackgroundOpacity : 1)
         radius: root.radius
-        border.color: ColorUtils.transparentize(Appearance.colors.colOutlineVariant, GlobalStates.overlayOpen ? 0 : 1)
-        border.width: Appearance.borderWidth.standard
+        border.color: ColorUtils.transparentize(Appearance.colors.colOutlineVariant,
+            GlobalStates.overlayOpen && root.editorBorderVisible ? 0 : 1)
+        border.width: root.editorBorderVisible ? Appearance.borderWidth.standard : 0
 
         layer.enabled: GlobalStates.overlayOpen
         layer.effect: OpacityMask {
@@ -239,9 +244,20 @@ AbstractOverlayWidget {
                     spacing: Appearance.spacing.space25
 
                     MaterialSymbol {
+                        visible: root.titleIconComponent === null
                         text: root.materialSymbol
                         Layout.leftMargin: Appearance.spacing.space100
                         iconSize: 20
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.rightMargin: Appearance.spacing.space50
+                    }
+
+                    Loader {
+                        visible: root.titleIconComponent !== null
+                        sourceComponent: root.titleIconComponent
+                        Layout.leftMargin: Appearance.spacing.space100
+                        Layout.preferredWidth: 20
+                        Layout.preferredHeight: 20
                         Layout.alignment: Qt.AlignVCenter
                         Layout.rightMargin: Appearance.spacing.space50
                     }

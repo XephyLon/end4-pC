@@ -8,6 +8,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.common.widgets.widgetCanvas
+import "../../common/plugins/bundled/discordVoice" as DiscordPackage
 
 Rectangle {
     id: root
@@ -141,10 +142,21 @@ Rectangle {
             implicitHeight: 32
             MaterialSymbol {
                 id: iconWidget
+                visible: widgetButton.identifier !== "discordVoice"
                 anchors.centerIn: parent
                 iconSize: 24
                 text: widgetButton.materialSymbol
                 color: widgetButton.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
+            }
+            DiscordPackage.DiscordGlyph {
+                visible: widgetButton.identifier === "discordVoice"
+                anchors.centerIn: parent
+                implicitSize: 28
+                iconSize: 16
+                color: widgetButton.toggled
+                    ? Appearance.colors.colSecondaryContainer : Appearance.colors.colLayer2
+                iconColor: widgetButton.toggled
+                    ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
             }
         }
     }
