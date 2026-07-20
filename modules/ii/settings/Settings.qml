@@ -3,119 +3,95 @@
 //@ pragma Env QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
 import Quickshell.Io
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
-import qs.modules.common.functions as CF
 
 Scope {
     id: root
 
+    readonly property int windowWidth: 980
+    readonly property int windowHeight: 665
+
     Component.onCompleted: {
         GlobalStates.settingsOpen = false;
+        // Hyprland tiles new toplevels, and its Lua config schema dropped the
+        // runtime `keyword` command, so the float rule has to go in through
+        // `eval`. Registering it from the shell keeps it with the window it
+        // describes instead of relying on the user's compositor config.
+        Quickshell.execDetached(["hyprctl", "eval",
+            `hl.window_rule({ match = { class = "^org%.quickshell$", title = "^Settings$" },`
+            + ` float = true, center = true, size = {${root.windowWidth}, ${root.windowHeight}} })`]);
     }
 
-    PanelWindow {
-        id: panelWindow
+    // A real toplevel rather than an overlay layer: Settings is a place you sit
+    // in and alt-tab back to, so it should be movable and managed by the
+    // compositor like any other window.
+    FloatingWindow {
+        id: settingsWindow
         visible: GlobalStates.settingsOpen
+        title: Translation.tr("Settings")
+        color: Appearance.colors.colLayer0
 
-        function hide() {
-            GlobalStates.settingsOpen = false;
-        }
+        // Fixed size: the layout is designed around these dimensions, and a
+        // floating utility window has no reason to be resized.
+        implicitWidth: root.windowWidth
+        implicitHeight: root.windowHeight
+        minimumSize.width: root.windowWidth
+        minimumSize.height: root.windowHeight
+        maximumSize.width: root.windowWidth
+        maximumSize.height: root.windowHeight
 
-        exclusiveZone: 0
-        WlrLayershell.namespace: "quickshell:settings"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: GlobalStates.settingsOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
-        color: "transparent"
-
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
-        }
-
+        // Closing from the titlebar has to feed back into the state the IPC
+        // handler and the shortcut both drive.
         onVisibleChanged: {
-            if (visible) {
-                GlobalFocusGrab.addDismissable(panelWindow);
-            } else {
-                GlobalFocusGrab.removeDismissable(panelWindow);
-            }
+            if (!visible && GlobalStates.settingsOpen)
+                GlobalStates.settingsOpen = false;
         }
 
-        Connections {
-            target: GlobalFocusGrab
-            function onDismissed() {
-                // The region selector temporarily takes exclusive focus so it can capture
-                // pointer input. Keep Settings visible behind it so screenshots can include
-                // the panel; normal focus loss should still dismiss Settings.
-                if (!GlobalStates.settingsHeldForRegionSelector)
-                    panelWindow.hide();
-            }
-        }
-
-        Connections {
-            target: GlobalStates
-            function onRegionSelectorOpenChanged() {
-                // GlobalFocusGrab clears its dismissable list when the selector takes focus.
-                // Restore this window to the grab once selection finishes, since its visible
-                // state did not change and onVisibleChanged therefore will not run again.
-                if (!GlobalStates.regionSelectorOpen && GlobalStates.settingsOpen)
-                    GlobalFocusGrab.addDismissable(panelWindow);
-            }
-        }
-
-        Rectangle {
+        SettingsContent {
+            id: settingsContent
             anchors.fill: parent
-            color: "transparent"
-            opacity: GlobalStates.settingsOpen ? 1 : 0
-            z: 0
-            Behavior on opacity {
-                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
-            }
-            MouseArea {
-                anchors.fill: parent
-                propagateComposedEvents: false
-                onClicked: panelWindow.hide()
-            }
-        }
+            focus: true
 
-        Rectangle {
-            id: settingsWindow
-            anchors.centerIn: parent
-            width: Math.min(parent.width - 80, 980)
-            height: Math.min(parent.height - 80, 665)
-            color: Appearance.colors.colLayer0
-            border.width: Appearance.borderWidth.standard
-            border.color: Appearance.colors.colLayer0Border
-            radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5
-            z: 1
-
-            opacity: GlobalStates.settingsOpen ? 1 : 0
-            scale: GlobalStates.settingsOpen ? 1 : 0.95
-
-            Behavior on opacity {
-                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
-            }
-            Behavior on scale {
-                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
-            }
-
-            Keys.onPressed: (event) => {
+            Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) {
-                    panelWindow.hide();
+                    GlobalStates.settingsOpen = false;
+                    event.accepted = true;
                 }
             }
+        }
 
-            SettingsContent {
-                anchors.fill: parent
+        // Hyprland draws no server-side decorations, so the window carries its
+        // own close affordance.
+        RippleButton {
+            id: closeButton
+            anchors {
+                top: parent.top
+                right: parent.right
+                margins: Appearance.spacing.space150
+            }
+            implicitWidth: 32
+            implicitHeight: 32
+            buttonRadius: Appearance.rounding.full
+            colBackground: "transparent"
+            colBackgroundHover: Appearance.colors.colLayer1Hover
+            colRipple: Appearance.colors.colLayer1Active
+            onClicked: GlobalStates.settingsOpen = false
+
+            contentItem: MaterialSymbol {
+                anchors.centerIn: parent
+                horizontalAlignment: Text.AlignHCenter
+                text: "close"
+                iconSize: Appearance.font.pixelSize.larger
+                color: Appearance.colors.colOnLayer0
+            }
+
+            StyledToolTip {
+                text: Translation.tr("Close")
             }
         }
     }
