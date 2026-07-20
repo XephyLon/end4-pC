@@ -12,6 +12,7 @@ const AudioActions = findByPropsLazy("toggleSelfMute", "toggleSelfDeaf");
 
 let timer: ReturnType<typeof setInterval> | undefined;
 let publishing = false;
+let pending = false;
 let running = false;
 
 function participant(userId: string, state: any, guildId?: string) {
@@ -79,13 +80,24 @@ async function commandLoop() {
     }
 }
 
+// Coalesces bursts of Flux events into one in-flight publish, but always
+// re-publishes afterwards if anything arrived meanwhile. Dropping the trailing
+// event outright would leave the shell showing stale mute state until the next
+// heartbeat, five seconds later.
 async function publish() {
-    if (publishing) return;
+    if (publishing) {
+        pending = true;
+        return;
+    }
     publishing = true;
     try {
-        await Native.publishState(JSON.stringify(snapshot()));
+        do {
+            pending = false;
+            await Native.publishState(JSON.stringify(snapshot()));
+        } while (pending);
     } finally {
         publishing = false;
+        pending = false;
     }
 }
 

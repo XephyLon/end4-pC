@@ -30,6 +30,9 @@ function deliver(command: string) {
 function connect() {
     if (!socketPath || connecting || (socket && !socket.destroyed)) return;
     connecting = true;
+    // A dropped connection can leave a partial line buffered. Carrying it into
+    // the next session would corrupt that session's first command.
+    input = "";
     const candidate = createConnection(socketPath);
     socket = candidate;
     candidate.setEncoding("utf8");
