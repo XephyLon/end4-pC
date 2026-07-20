@@ -104,6 +104,10 @@ Item {
             StyledPopup {
                 id: overflowPopup
                 hoverTarget: trayOverflowButton
+                // Click-toggled menu: hold it open explicitly. StyledPopup's
+                // hover path reads containsMouse, which a QQC2-derived
+                // RippleButton does not expose.
+                pinnedOpen: root.trayOverflowOpen && root.unpinnedItems.length > 0
                 active: root.trayOverflowOpen && root.unpinnedItems.length > 0
 
                 GridLayout {
