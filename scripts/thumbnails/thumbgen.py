@@ -56,7 +56,7 @@ def make_thumbnail(fpath: str) -> bool:
     return True
 
 
-@logger.catch()
+@logger.catch(reraise=True)
 def thumbnail_folder(*, dir_path: Path, workers: int, only_images: bool, recursive: bool, machine_progress: bool = False) -> None:
     all_files = get_all_files(dir_path=dir_path, recursive=recursive)
     if only_images:

@@ -28,21 +28,6 @@ md5() {
     echo -n "$1" | md5sum | awk '{print $1}'
 }
 
-urlencode() {
-    # Percent-encode a string for use in a URI, but do not encode slashes
-    local str="$1"
-    local encoded=""
-    local c
-    for ((i=0; i<${#str}; i++)); do
-        c="${str:$i:1}"
-        case "$c" in
-            [a-zA-Z0-9.~_-]|/|'('|')'|'*') encoded+="$c" ;;
-            *) printf -v hex '%%%02X' "'${c}'"; encoded+="$hex" ;;
-        esac
-    done
-    echo "$encoded"
-}
-
 generate_thumbnail() {
     local src="$1"
     local abs_path
@@ -53,10 +38,9 @@ generate_thumbnail() {
             return
             ;;
     esac
-    local encoded_path
-    encoded_path="$(urlencode "$abs_path")"
     local uri
-    uri="file://$encoded_path"
+    uri="$(GIO_USE_VFS=local gio info -a standard::target-uri "$abs_path" | sed -n 's/^uri: //p')"
+    [ -n "$uri" ] || return 1
     local hash
     hash="$(md5 "$uri")"
     local out="$CACHE_DIR/$hash.png"
@@ -117,12 +101,14 @@ case "$MODE" in
         fi
         for f in "$TARGET"/*; do
             [ -f "$f" ] || continue
-            generate_thumbnail "$f" &
+            # Avoid launching one ImageMagick process per wallpaper at once;
+            # large collections can otherwise exhaust memory and freeze the shell.
+            if ! generate_thumbnail "$f"; then
+                echo "Failed to generate thumbnail: $f" >&2
+            fi
         done
-        wait
         ;;
     *)
         usage
         ;;
 esac
-

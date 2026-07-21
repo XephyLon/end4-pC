@@ -111,6 +111,12 @@ if ! python3 "$SCRIPT_DIR/test_terminal_background.py"; then
     exit 1
 fi
 
+echo "Running wallpaper thumbnail fallback tests..."
+if ! python3 "$SCRIPT_DIR/test_thumbnail_fallback.py"; then
+    echo "Wallpaper thumbnail fallback tests failed."
+    exit 1
+fi
+
 echo "Running Settings navigation tests..."
 if ! python3 "$SCRIPT_DIR/test_settings_navigation.py"; then
     echo "Settings navigation tests failed."

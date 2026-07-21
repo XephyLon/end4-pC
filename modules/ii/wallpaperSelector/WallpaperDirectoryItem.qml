@@ -73,16 +73,14 @@ MouseArea {
                         Connections {
                             target: Wallpapers
                             function onThumbnailGenerated(directory) {
-                                if (thumbnailImage.status !== Image.Error) return;
+                                if (thumbnailImage.status !== Image.Error && !thumbnailImage.usingSourceFallback) return;
                                 if (FileUtils.parentDirectory(thumbnailImage.sourcePath) !== FileUtils.trimFileProtocol(directory)) return;
-                                thumbnailImage.source = "";
-                                thumbnailImage.source = thumbnailImage.thumbnailPath;
+                                thumbnailImage.reloadThumbnail();
                             }
                             function onThumbnailGeneratedFile(filePath) {
-                                if (thumbnailImage.status !== Image.Error) return;
+                                if (thumbnailImage.status !== Image.Error && !thumbnailImage.usingSourceFallback) return;
                                 if (Qt.resolvedUrl(thumbnailImage.sourcePath) !== Qt.resolvedUrl(filePath)) return;
-                                thumbnailImage.source = "";
-                                thumbnailImage.source = thumbnailImage.thumbnailPath;
+                                thumbnailImage.reloadThumbnail();
                             }
                         }
 
