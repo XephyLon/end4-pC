@@ -245,6 +245,7 @@ MouseArea {
     // Left toolbar
     Toolbar {
         id: leftIsland
+        visible: Config.options.lock.showToolbars
         anchors {
             right: mainIsland.left
             top: mainIsland.top
@@ -431,6 +432,7 @@ MouseArea {
     // Right toolbar
     Toolbar {
         id: rightIsland
+        visible: Config.options.lock.showToolbars
         anchors {
             left: mainIsland.right
             top: mainIsland.top

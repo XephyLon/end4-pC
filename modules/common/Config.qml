@@ -203,6 +203,7 @@ Singleton {
                 property string avatarPath: ""
                 property string avatarPicture: ""
                 property string descriptionText: "::distro::"
+                property string displayName: ""
 
             }
 
@@ -593,6 +594,7 @@ Singleton {
                 property bool launchOnStartup: false
                 property bool showWidgets: false
                 property bool showMedia: true
+                property bool showToolbars: true
                 property JsonObject blur: JsonObject {
                     property bool enable: true
                     property real radius: 100

@@ -34,6 +34,14 @@ RowLayout {
     // stack of lines reads as broken. Overflow is clipped by the field rather
     // than wrapped.
     property bool singleLine: false
+    // Optional trailing confirm button
+    property bool confirmButtonVisible: false
+    property string confirmButtonIcon: "check"
+    property color colConfirmBackground: Appearance.colors.colPrimaryContainer
+    property color colConfirmBackgroundHover: Appearance.colors.colPrimaryContainerHover
+    property color colConfirmBackgroundActive: Appearance.colors.colPrimaryContainerActive
+    property color colOnConfirmBackground: Appearance.colors.colOnPrimaryContainer
+    signal confirmClicked()
 
     spacing: Appearance.spacing.space150
     Layout.leftMargin: Appearance.spacing.space100
@@ -174,6 +182,24 @@ RowLayout {
                 text: root.revealed ? "visibility_off" : "visibility"
                 color: Appearance.colors.colOnLayer1
             }
+        }
+    }
+    RippleButton {
+        visible: root.confirmButtonVisible
+        implicitWidth: 40
+        implicitHeight: 40
+        Layout.alignment: Qt.AlignVCenter
+        buttonRadius: Appearance.rounding.small
+        colBackground: root.colConfirmBackground
+        colBackgroundHover: root.colConfirmBackgroundHover
+        colRipple: root.colConfirmBackgroundActive
+        onClicked: root.confirmClicked()
+
+        contentItem: MaterialSymbol {
+            anchors.centerIn: parent
+            text: root.confirmButtonIcon
+            iconSize: Appearance.font.pixelSize.large
+            color: root.colOnConfirmBackground
         }
     }
 }
