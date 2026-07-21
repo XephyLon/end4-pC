@@ -87,7 +87,7 @@ class PresetTests(unittest.TestCase):
         self.assertIn("onCurrentConfigChanged: applyPersistedPosition()", widget)
         self.assertIn("Component.onCompleted: applyPersistedPosition()", widget)
 
-    def test_plugin_positions_round_trip_without_replacing_options(self):
+    def test_complete_plugin_state_round_trips_between_presets(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             config_dir = home / ".config/illogical-impulse"
@@ -120,6 +120,9 @@ class PresetTests(unittest.TestCase):
             subprocess.run(["bash", str(PRESETS), "--save", "layout"], env=env, check=True)
             preset = json.loads((config_dir / "presets/layout.json").read_text())
             self.assertEqual(preset["_pluginState"]["desktopPositions"]["DP-1"]["weather"]["x"], 120)
+            self.assertEqual(preset["_pluginState"]["pluginOptions"]["weather"], {
+                "blurEnabled": True,
+            })
 
             state_file.write_text(json.dumps({
                 "version": 2,
@@ -131,15 +134,61 @@ class PresetTests(unittest.TestCase):
             restored = json.loads(state_file.read_text())
             self.assertEqual(restored["desktopPositions"]["DP-1"]["weather"]["x"], 120)
             self.assertEqual(restored["pluginOptions"]["weather"], {
-                "blurEnabled": False,
-                "fontSize": 24,
+                "blurEnabled": True,
             })
             self.assertNotIn("_pluginState", json.loads(config_file.read_text()))
 
-    def test_legacy_preset_keeps_current_plugin_positions(self):
+    def test_position_only_preset_keeps_current_plugin_options(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            config_dir = home / ".config/illogical-impulse"
+            script_dir = home / ".config/quickshell/end4-pC/scripts"
+            (config_dir / "presets").mkdir(parents=True)
+            (script_dir / "wallpapers").mkdir(parents=True)
+            (script_dir / "colors").mkdir(parents=True)
+            base = {
+                "background": {"wallpaperPath": "/tmp/wallpaper.jpg"},
+                "wallpaperSelector": {"wallpaperEngine": {"activePath": ""}},
+            }
+            (config_dir / "config.json").write_text(json.dumps(base))
+            (config_dir / "plugin-state.json").write_text(json.dumps({
+                "version": 2,
+                "desktopPositions": {"DP-1": {"weather": {"x": 999, "y": 999}}},
+                "pluginOptions": {"weather": {"blurEnabled": False}},
+            }))
+            (config_dir / "presets/legacy.json").write_text(json.dumps(base | {
+                "_pluginState": {
+                    "desktopPositions": {"DP-1": {"weather": {"x": 120, "y": 240}}},
+                },
+            }))
+            for helper in (script_dir / "wallpapers/wallpaper-engine.sh", script_dir / "colors/switchwall.sh"):
+                helper.write_text("#!/usr/bin/env bash\nexit 0\n")
+                helper.chmod(0o755)
+
+            subprocess.run(["bash", str(PRESETS), "--apply", "legacy"],
+                           env=os.environ | {"HOME": str(home)}, check=True)
+            restored = json.loads((config_dir / "plugin-state.json").read_text())
+
+            self.assertEqual(restored["desktopPositions"]["DP-1"]["weather"]["x"], 120)
+            self.assertEqual(restored["pluginOptions"]["weather"]["blurEnabled"], False)
+
+    def test_preset_without_plugin_state_keeps_current_state(self):
         source = PRESETS.read_text()
-        self.assertIn('._pluginState.desktopPositions // empty', source)
-        self.assertIn('if [ -n "$preset_positions" ]', source)
+        self.assertIn("preset_plugin_state=", source)
+        self.assertIn('if [ -n "$preset_plugin_state" ]', source)
+
+    def test_apply_does_not_replace_unchanged_watched_files(self):
+        source = PRESETS.read_text()
+        self.assertIn("replace_if_changed()", source)
+        self.assertIn('cmp -s "$candidate" "$destination"', source)
+        self.assertIn(
+            'replace_if_changed "${PLUGIN_STATE_FILE}.tmp" "$PLUGIN_STATE_FILE"',
+            source,
+        )
+        self.assertIn(
+            'replace_if_changed "${CONFIG_FILE}.tmp" "$CONFIG_FILE"',
+            source,
+        )
 
 
 if __name__ == "__main__":

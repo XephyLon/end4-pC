@@ -15,6 +15,21 @@ WALLPAPER_ENGINE="$HOME/.config/quickshell/end4-pC/scripts/wallpapers/wallpaper-
 
 mkdir -p "$PRESETS_DIR"
 
+# FileView reacts to every replacement of these files. Avoid replacing an
+# identical document: doing so needlessly rebuilds plugin delegates and their
+# (potentially monitor-sized) blur textures while a preset is being applied.
+replace_if_changed() {
+    local candidate="$1"
+    local destination="$2"
+
+    if [ -f "$destination" ] && cmp -s "$candidate" "$destination"; then
+        rm -f "$candidate"
+        return 1
+    fi
+    mv "$candidate" "$destination"
+    return 0
+}
+
 action="$1"
 name="$2"
 
@@ -26,9 +41,14 @@ fi
 case "$action" in
     --save)
         description="$3"
-        plugin_positions="$(jq -c '.desktopPositions // {}' "$PLUGIN_STATE_FILE" 2>/dev/null || printf '{}')"
-        jq --argjson positions "$plugin_positions" \
-            'del(._presetMeta, ._pluginState) | ._pluginState = {desktopPositions: $positions}' \
+        plugin_state="$(jq -c '{
+            version: (.version // 2),
+            desktopPositions: (.desktopPositions // {}),
+            pluginOptions: (.pluginOptions // {})
+        }' "$PLUGIN_STATE_FILE" 2>/dev/null \
+            || printf '{"version":2,"desktopPositions":{},"pluginOptions":{}}')"
+        jq --argjson pluginState "$plugin_state" \
+            'del(._presetMeta, ._pluginState) | ._pluginState = $pluginState' \
             "$CONFIG_FILE" > "$PRESETS_DIR/${name}.json"
         if [ -n "$description" ]; then
             jq --arg desc "$description" '._presetMeta = {"description": $desc}' \
@@ -51,15 +71,31 @@ case "$action" in
         if [ -z "$previous_engine_project" ]; then
             previous_engine_preview="$(jq -r '.background.wallpaperPath // empty' "$CONFIG_FILE")"
         fi
-        preset_positions="$(jq -c '._pluginState.desktopPositions // empty' "$preset_file")"
-        if [ -n "$preset_positions" ]; then
-            plugin_options="$(jq -c '.pluginOptions // {}' "$PLUGIN_STATE_FILE" 2>/dev/null || printf '{}')"
-            jq -n --argjson positions "$preset_positions" --argjson options "$plugin_options" \
-                '{version: 2, desktopPositions: $positions, pluginOptions: $options}' \
-                > "${PLUGIN_STATE_FILE}.tmp" && mv "${PLUGIN_STATE_FILE}.tmp" "$PLUGIN_STATE_FILE"
+        preset_plugin_state="$(jq -c '._pluginState // empty' "$preset_file")"
+        if [ -n "$preset_plugin_state" ]; then
+            current_plugin_state="$(jq -c '{
+                version: (.version // 2),
+                desktopPositions: (.desktopPositions // {}),
+                pluginOptions: (.pluginOptions // {})
+            }' "$PLUGIN_STATE_FILE" 2>/dev/null \
+                || printf '{"version":2,"desktopPositions":{},"pluginOptions":{}}')"
+            # Top-level merging keeps fields omitted by older position-only
+            # presets, while a new preset's complete maps replace current state.
+            jq -n --argjson current "$current_plugin_state" --argjson preset "$preset_plugin_state" \
+                '$current * $preset
+                    | .version = 2
+                    | .desktopPositions = (if ($preset | has("desktopPositions"))
+                        then ($preset.desktopPositions // {})
+                        else ($current.desktopPositions // {}) end)
+                    | .pluginOptions = (if ($preset | has("pluginOptions"))
+                        then ($preset.pluginOptions // {})
+                        else ($current.pluginOptions // {}) end)' \
+                > "${PLUGIN_STATE_FILE}.tmp" \
+                && replace_if_changed "${PLUGIN_STATE_FILE}.tmp" "$PLUGIN_STATE_FILE" || true
         fi
         jq -s '.[0] * .[1] | del(._presetMeta, ._pluginState)' "$CONFIG_FILE" "$preset_file" \
-            > "${CONFIG_FILE}.tmp" && mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
+            > "${CONFIG_FILE}.tmp" \
+            && replace_if_changed "${CONFIG_FILE}.tmp" "$CONFIG_FILE" || true
         engine_path="$(jq -r '.wallpaperSelector.wallpaperEngine.activePath // empty' "$CONFIG_FILE")"
         if [ -n "$engine_path" ] && [ -d "$engine_path" ]; then
             engine_still="$(jq -r '.wallpaperSelector.wallpaperEngine.activeStill // empty' "$CONFIG_FILE")"
