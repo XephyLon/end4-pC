@@ -161,6 +161,51 @@ categorize_wallpaper() {
     echo "$img_cat" > "$STATE_DIR/user/generated/wallpaper/category.txt"
 }
 
+switch_lock_only() {
+    local imgpath="$1"
+    local mode_flag="$2"
+    local type_flag="$3"
+
+    if [[ -z "$imgpath" ]]; then
+        echo 'Aborted'
+        exit 0
+    fi
+
+    if is_video "$imgpath"; then
+        mkdir -p "$THUMBNAIL_DIR"
+        local thumbnail="$THUMBNAIL_DIR/$(basename "$imgpath")-lock.jpg"
+        ffmpeg -y -i "$imgpath" -vframes 1 "$thumbnail" 2>/dev/null
+        imgpath="$thumbnail"
+    fi
+
+    if [[ -z "$mode_flag" ]]; then
+        current_mode=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+        if [[ "$current_mode" == "prefer-dark" ]]; then
+            mode_flag="dark"
+        else
+            mode_flag="light"
+        fi
+    fi
+
+    if [[ -z "$type_flag" || "$type_flag" == "auto" ]]; then
+        type_flag=$(jq -r '.appearance.palette.type' "$SHELL_CONFIG_FILE" 2>/dev/null)
+        if [[ -z "$type_flag" || "$type_flag" == "auto" || "$type_flag" == "null" ]]; then
+            type_flag="scheme-tonal-spot"
+        fi
+    fi
+
+    mkdir -p "$STATE_DIR"/user/generated
+
+    source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
+    python3 "$SCRIPT_DIR/generate_colors_material.py" \
+        --path "$imgpath" \
+        --mode "$mode_flag" \
+        --scheme "$type_flag" \
+        --json-output "$STATE_DIR/user/generated/colors-lock.json" \
+        > /dev/null
+    deactivate
+}
+
 switch() {
     imgpath="$1"
     mode_flag="$2"
@@ -339,6 +384,7 @@ main() {
     noswitch_flag=""
     colors_only_flag=""
     explicit_image=""
+    lock_colors_only_flag=""
 
     get_type_from_config() {
         jq -r '.appearance.palette.type' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "auto"
@@ -392,6 +438,11 @@ main() {
                 fi
                 shift
                 ;;
+            --lock-colors-only)
+                lock_colors_only_flag="1"
+                imgpath="$2"
+                shift 2
+                ;;
             *)
                 if [[ -z "$imgpath" ]]; then
                     imgpath="$1"
@@ -400,6 +451,11 @@ main() {
                 ;;
         esac
     done
+
+    if [[ -n "$lock_colors_only_flag" ]]; then
+        switch_lock_only "$imgpath" "$mode_flag" "$type_flag"
+        exit 0
+    fi
 
     if [[ -n "$noswitch_flag" && -n "$explicit_image" ]]; then
         colors_only_flag="1"
