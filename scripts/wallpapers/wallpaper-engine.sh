@@ -11,18 +11,38 @@ state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/user/wallpaper-engine"
 restore_dir="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/custom/scripts"
 restore_script="$restore_dir/__restore_video_wallpaper.sh"
 log_file="$state_dir/runtime.log"
+pid_file="$state_dir/runtime.pid"
 runner_path="$(readlink -f "$0")"
 
 stop_engine() {
-    # Match the full command line: Linux truncates comm names to 15 bytes, so
-    # `pkill -x linux-wallpaperengine` cannot reliably find this executable.
-    pkill -f '(^|/)[l]inux-wallpaperengine( |$)' 2>/dev/null || true
+    local pid=""
+    [[ -r "$pid_file" ]] && read -r pid <"$pid_file"
+    if [[ "$pid" =~ ^[0-9]+$ && -r "/proc/$pid/cmdline" ]]; then
+        local command_line
+        command_line="$(tr '\0' ' ' <"/proc/$pid/cmdline")"
+        if [[ "$command_line" == *linux-wallpaperengine* && "$command_line" == *"--layer background"* ]]; then
+            # The runtime is its own session/process group. Stop the complete
+            # tree so mpv/CEF helpers cannot survive wallpaper changes.
+            kill -- "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
+            local waited=0
+            while kill -0 "$pid" 2>/dev/null && (( waited < 20 )); do
+                sleep 0.05
+                waited=$((waited + 1))
+            done
+            kill -9 -- "-$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
+        fi
+    fi
+    rm -f "$pid_file"
+    # Backward-compatible cleanup for a runtime started before PID tracking.
+    # Restrict the fallback to background-layer instances so offscreen still
+    # renderers are never killed by an unrelated live-wallpaper apply.
+    pkill -f '(^|/)[l]inux-wallpaperengine .*--layer background( |$)' 2>/dev/null || true
 }
 
 # Render a scene to a still image for use as a peel/lock transition texture.
-# No --screen-root or --window is passed, so the render happens offscreen and
-# never creates a visible surface; the throwaway instance is stopped once the
-# file lands. Result is cached, so re-applying the same wallpaper is instant.
+# No --screen-root is passed, so the sized --window render remains an offscreen
+# screenshot target rather than a live wallpaper layer. The throwaway process
+# group is stopped once the file lands. Results are cached for later reuse.
 generate_screenshot() {
     local dir="$1" out="$2" scaling="${3:-fill}" force="${4:-}"
     [[ -d "$dir" && -n "$out" ]] || return 2
@@ -57,9 +77,9 @@ generate_screenshot() {
         waited=$((waited + 1))
     done
     sleep 0.3                            # let the writer flush
-    kill "$pid" 2>/dev/null
+    kill -- "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
     sleep 0.2
-    kill -9 "$pid" 2>/dev/null
+    kill -9 -- "-$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
 
     if [[ -s "$tmp" ]]; then
         mv "$tmp" "$out"
@@ -116,6 +136,10 @@ mkdir -p "$state_dir" "$restore_dir"
 stop_engine
 pkill -x mpvpaper 2>/dev/null || true
 setsid linux-wallpaperengine "${args[@]}" >>"$log_file" 2>&1 &
+runtime_pid=$!
+pid_tmp="$pid_file.$$"
+printf '%s\n' "$runtime_pid" >"$pid_tmp"
+mv "$pid_tmp" "$pid_file"
 
 {
     printf '#!/usr/bin/env bash\n'
