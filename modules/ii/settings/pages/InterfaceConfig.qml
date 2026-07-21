@@ -264,7 +264,14 @@ ContentPage {
                     onCheckedChanged: { Config.options.lock.showWidgets = checked }
                 }
                 ConfigSwitch {
+                    buttonIcon: "tools_installation_kit"
+                    text: Translation.tr("Show Toolbars")
+                    checked: Config.options.lock.showToolbars
+                    onCheckedChanged: { Config.options.lock.showToolbars = checked }
+                }
+                ConfigSwitch {
                     buttonIcon: "music_note"
+                    enabled: Config.options.lock.showToolbars
                     text: Translation.tr("Show media player info")
                     checked: Config.options.lock.showMedia
                     onCheckedChanged: { Config.options.lock.showMedia = checked }

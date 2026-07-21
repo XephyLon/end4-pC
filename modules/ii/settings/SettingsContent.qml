@@ -158,7 +158,7 @@ Item {
                             Layout.fillWidth: true
 
                             StyledText {
-                                text: SystemInfo.username
+                                text: Config.options.profile.displayName === "" ? SystemInfo.username : Config.options.profile.displayName
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 color: Appearance.colors.colOnLayer1
                                 font.weight: Font.Medium

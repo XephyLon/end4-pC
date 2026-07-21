@@ -33,7 +33,6 @@ Item {
     property bool showWifiDialog: false
     property bool editMode: false
     property bool showIconPickerDialog: false
-    property string hostname: "arch"
 
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property var realPlayers: MprisController.players
@@ -75,18 +74,6 @@ Item {
                     Config.options.sidebar.bannerImage = path
                 }
             }
-        }
-    }
-
-    Process {
-        id: hostnameProcess
-        command: ["cat", "/etc/hostname"]
-        running: true
-        stdout: StdioCollector {
-            id: hostnameOutput
-        }
-        onExited: {
-            hostname = hostnameOutput.text.trim()
         }
     }
 
@@ -224,7 +211,7 @@ Item {
                                 }
 
                                 StyledText {
-                                    text: SystemInfo.username + "@" + hostname
+                                    text: (Config.options.profile.displayName === "" ? SystemInfo.username : Config.options.profile.displayName) + "@" + SystemInfo.hostname
                                     font.pixelSize: Appearance.font.pixelSize.small
                                     font.weight: Font.DemiBold
                                     color: Appearance.colors.colOnLayer1
