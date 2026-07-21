@@ -1,6 +1,7 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
 import Quickshell
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
@@ -13,6 +14,17 @@ AbstractBackgroundWidget {
         ? PluginState.option(manifest.id, "blurEnabled", manifest.desktopWidget?.blur === true)
         : false
     readonly property real blurTintOpacity: Config.options.plugins.blurOpacity
+    readonly property bool liveWallpaperActive: Config.options.wallpaperSelector.wallpaperEngine.activeProject !== ""
+        && !GlobalStates.screenLocked
+    // Hyprland needs a compositor-visible primitive to apply layer blur. An
+    // offscreen OpacityMask is suitable for the static FastBlur path, but it
+    // flattens the live path and can make Hyprland sample an unrelated cached
+    // buffer. Direct rounded rectangles below mirror UserCardWidget's working
+    // compositor structure. This carrier only exposes the blur region; the
+    // plugin component applies the user-selected Material tint separately.
+    // Reusing blurTintOpacity here would apply (for example) 75% twice and
+    // combine into a nearly opaque 94% surface that hides the blur.
+    readonly property real compositorBlurAlpha: 0.1
     readonly property bool hasBlurSurface: !pluginNode.hasCustomBlurRegions
         || pluginNode.blurRegions.length > 0
 
@@ -63,7 +75,8 @@ AbstractBackgroundWidget {
         z: -1
         anchors.fill: parent
         clip: true
-        visible: rootWidget.blurEnabled && rootWidget.hasBlurSurface
+        visible: !rootWidget.liveWallpaperActive
+            && rootWidget.blurEnabled && rootWidget.hasBlurSurface
             && Config.options.appearance.transparency.enable
         layer.enabled: visible
         layer.effect: OpacityMask {
@@ -98,7 +111,8 @@ AbstractBackgroundWidget {
         // decoded pixmap is shared rather than duplicated per plugin.
         Image {
             id: wallpaperMetadata
-            source: rootWidget.wallpaperPath ? ("file://" + rootWidget.wallpaperPath) : ""
+            source: !rootWidget.liveWallpaperActive && rootWidget.wallpaperPath
+                ? ("file://" + rootWidget.wallpaperPath) : ""
             asynchronous: true
             cache: true
             visible: false
@@ -106,10 +120,12 @@ AbstractBackgroundWidget {
 
         Image {
             id: wallpaperSample
-            source: rootWidget.wallpaperPath ? ("file://" + rootWidget.wallpaperPath) : ""
+            source: !rootWidget.liveWallpaperActive && rootWidget.wallpaperPath
+                ? ("file://" + rootWidget.wallpaperPath) : ""
             asynchronous: true
             cache: true
             anchors.fill: parent
+            visible: !rootWidget.liveWallpaperActive
             fillMode: Image.Stretch
             readonly property real cropScale: wallpaperMetadata.sourceSize.width > 0
                     && wallpaperMetadata.sourceSize.height > 0
@@ -133,6 +149,31 @@ AbstractBackgroundWidget {
             anchors.fill: parent
             color: Appearance.colors.colScrim
             opacity: pluginNode.managesBlurTint ? 0 : rootWidget.blurTintOpacity
+        }
+    }
+
+    // Live Wallpaper Engine blur must remain in the main scene graph. Each
+    // primitive exactly follows the plugin's declared blur region, so separated
+    // cards (such as the resource monitor) do not blur the empty space between.
+    Repeater {
+        model: rootWidget.liveWallpaperActive && rootWidget.blurEnabled
+            && rootWidget.hasBlurSurface && Config.options.appearance.transparency.enable
+            ? (pluginNode.hasCustomBlurRegions
+                ? pluginNode.blurRegions
+                : [{ x: 0, y: 0, width: rootWidget.width,
+                    height: rootWidget.height, radius: rootWidget.widgetRounding }])
+            : []
+
+        Rectangle {
+            required property var modelData
+            z: -1
+            x: Number(modelData.x || 0)
+            y: Number(modelData.y || 0)
+            width: Number(modelData.width || 0)
+            height: Number(modelData.height || 0)
+            radius: Number(modelData.radius ?? rootWidget.widgetRounding)
+            color: Appearance.colors.colScrim
+            opacity: rootWidget.compositorBlurAlpha
         }
     }
 

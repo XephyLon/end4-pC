@@ -198,8 +198,12 @@ switch() {
             exit 0
         fi
 
-        check_and_prompt_upscale "$imgpath" &
-        kill_existing_mpvpaper
+        # Color-only inputs can be low-resolution previews used solely for
+        # palette extraction; they are never displayed as the wallpaper.
+        [[ -z "$coloronly" ]] && check_and_prompt_upscale "$imgpath" &
+        # Color-only requests are used to theme live wallpapers from their
+        # preview. They must not tear down the wallpaper process they describe.
+        [[ -z "$coloronly" ]] && kill_existing_mpvpaper
         if [[ -z "$coloronly" && -f "$SHELL_CONFIG_FILE" ]]; then
             jq '.wallpaperSelector.wallpaperEngine.activeProject = "" |
                 .wallpaperSelector.wallpaperEngine.activePath = "" |

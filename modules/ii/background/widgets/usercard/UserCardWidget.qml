@@ -23,6 +23,8 @@ AbstractBackgroundWidget {
     property string username: Config.options.profile.displayName === "" ? SystemInfo.username : Config.options.profile.displayName
     property string userDisplay: username.length > 10 ? username : (username + "@" + hostname)
     property var currentQuip: weatherQuip()
+    readonly property bool liveWallpaperActive: Config.options.wallpaperSelector.wallpaperEngine.activeProject !== ""
+        && !GlobalStates.screenLocked
     
 
     function weatherQuip() {
@@ -51,7 +53,7 @@ AbstractBackgroundWidget {
         Image {
             id: bgImage
             anchors.fill: parent
-            source: "file://" + Config.options.background.wallpaperPath
+            source: root.wallpaperPath ? ("file://" + root.wallpaperPath) : ""
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: false
@@ -62,6 +64,7 @@ AbstractBackgroundWidget {
             id: blurredBg
             anchors.fill: bgImage
             source: bgImage
+            visible: !root.liveWallpaperActive
             radius: 48
             layer.enabled: true
             layer.effect: OpacityMask {

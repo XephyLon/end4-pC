@@ -52,7 +52,7 @@ def confined_preview(directory: Path, preview_name: object) -> Path:
 
 
 def scan(configured: str) -> list[dict[str, object]]:
-    projects: list[dict[str, object]] = []
+    projects_by_id: dict[str, tuple[tuple[int, int, str], dict[str, object]]] = {}
     for root in project_roots(configured):
         for manifest in sorted(root.glob("*/project.json")):
             try:
@@ -62,12 +62,12 @@ def scan(configured: str) -> list[dict[str, object]]:
             directory = manifest.parent
             preview_name = data.get("preview", "")
             preview = confined_preview(directory, preview_name)
-            if not preview:
+            if preview == Path():
                 preview = next(
                     (path for name in ("preview.jpg", "preview.png", "preview.gif") if (path := directory / name).is_file()),
                     Path(),
                 )
-            projects.append({
+            project = {
                 "id": directory.name,
                 "title": str(data.get("title") or directory.name),
                 "type": str(data.get("type") or "unknown"),
@@ -76,7 +76,21 @@ def scan(configured: str) -> list[dict[str, object]]:
                 # An empty Path() is "." and truthy, so compare explicitly to
                 # avoid emitting "." when no preview file was found.
                 "preview": str(preview) if preview != Path() else "",
-            })
+            }
+            try:
+                file_count = sum(1 for path in directory.rglob("*") if path.is_file())
+                manifest_mtime = manifest.stat().st_mtime_ns
+            except OSError:
+                file_count = 0
+                manifest_mtime = 0
+            # The same Workshop item may exist in multiple Steam libraries.
+            # Prefer its newest revision, then its more complete installation;
+            # the path gives the final selection a stable tie-breaker.
+            score = (manifest_mtime, file_count, str(directory))
+            current = projects_by_id.get(directory.name)
+            if current is None or score > current[0]:
+                projects_by_id[directory.name] = (score, project)
+    projects = [entry[1] for entry in projects_by_id.values()]
     projects.sort(key=lambda item: str(item["title"]).casefold())
     return projects
 
