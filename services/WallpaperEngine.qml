@@ -15,6 +15,8 @@ Singleton {
     property string error: ""
     readonly property bool stillGenerating: stillProcess.running
     readonly property bool available: projects.length > 0
+    readonly property bool fullscreenActive: HyprlandData.monitors.some(monitor =>
+        HyprlandData.workspaceById[monitor?.activeWorkspace?.id]?.hasfullscreen ?? false)
     readonly property string activeArtwork: {
         const we = Config.options.wallpaperSelector.wallpaperEngine;
         if (!we.activeProject) return Config.options.background.wallpaperPath;
@@ -27,6 +29,15 @@ Singleton {
     signal refreshed()
     signal applied(string projectId)
     signal transitionRequested(string fromStill, string fromPreview, string toStill, string toPreview)
+
+    onFullscreenActiveChanged: {
+        if (Config.options.wallpaperSelector.wallpaperEngine.activeProject)
+            root.setPaused(fullscreenActive);
+    }
+
+    function setPaused(paused) {
+        Quickshell.execDetached([root.runnerPath, paused ? "pause" : "resume"]);
+    }
 
     function requestTransition(fromStill, fromPreview, toStill, toPreview) {
         root.transitionRequested(fromStill, fromPreview, toStill, toPreview);
@@ -119,6 +130,9 @@ Singleton {
             Config.options.wallpaperSelector.wallpaperEngine.scaling,
             Config.options.wallpaperSelector.wallpaperEngine.silent ? "true" : "false"
         ]);
+        // The runner performs the same initial check after writing its PID.
+        // This call keeps the desired state explicit for an already-live runtime.
+        root.setPaused(root.fullscreenActive);
         root.applied(project.id);
     }
 

@@ -14,13 +14,40 @@ log_file="$state_dir/runtime.log"
 pid_file="$state_dir/runtime.pid"
 runner_path="$(readlink -f "$0")"
 
-stop_engine() {
+engine_pid() {
     local pid=""
     [[ -r "$pid_file" ]] && read -r pid <"$pid_file"
-    if [[ "$pid" =~ ^[0-9]+$ && -r "/proc/$pid/cmdline" ]]; then
-        local command_line
-        command_line="$(tr '\0' ' ' <"/proc/$pid/cmdline")"
-        if [[ "$command_line" == *linux-wallpaperengine* && "$command_line" == *"--layer background"* ]]; then
+    [[ "$pid" =~ ^[0-9]+$ && -r "/proc/$pid/cmdline" ]] || return 1
+    local command_line
+    command_line="$(tr '\0' ' ' <"/proc/$pid/cmdline")"
+    [[ "$command_line" == *linux-wallpaperengine* && "$command_line" == *"--layer background"* ]] || return 1
+    printf '%s\n' "$pid"
+}
+
+set_engine_paused() {
+    local paused="$1" pid
+    pid="$(engine_pid)" || return 0
+    if [[ "$paused" == "true" ]]; then
+        kill -STOP -- "-$pid" 2>/dev/null || kill -STOP "$pid" 2>/dev/null || true
+    else
+        kill -CONT -- "-$pid" 2>/dev/null || kill -CONT "$pid" 2>/dev/null || true
+    fi
+}
+
+fullscreen_active() {
+    jq -e -s '
+        .[0] as $monitors | .[1] as $clients
+        | [$monitors[].activeWorkspace.id] as $active
+        | any($clients[]; (.workspace.id as $id | $active | index($id)) != null
+            and ((.fullscreen // 0) != 0))
+    ' <(hyprctl monitors -j 2>/dev/null) <(hyprctl clients -j 2>/dev/null) >/dev/null 2>&1
+}
+
+stop_engine() {
+    local pid=""
+    if pid="$(engine_pid)"; then
+            # A stopped process cannot handle SIGTERM until continued.
+            kill -CONT -- "-$pid" 2>/dev/null || kill -CONT "$pid" 2>/dev/null || true
             # The runtime is its own session/process group. Stop the complete
             # tree so mpv/CEF helpers cannot survive wallpaper changes.
             kill -- "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
@@ -30,7 +57,6 @@ stop_engine() {
                 waited=$((waited + 1))
             done
             kill -9 -- "-$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
-        fi
     fi
     rm -f "$pid_file"
     # Backward-compatible cleanup for a runtime started before PID tracking.
@@ -94,6 +120,16 @@ if [[ "$action" == "stop" ]]; then
     exit 0
 fi
 
+if [[ "$action" == "pause" ]]; then
+    set_engine_paused true
+    exit 0
+fi
+
+if [[ "$action" == "resume" ]]; then
+    set_engine_paused false
+    exit 0
+fi
+
 if [[ "$action" == "screenshot" ]]; then
     generate_screenshot "$project_path" "${3:-}" "${4:-fill}" "${5:-}"
     exit $?
@@ -140,6 +176,13 @@ runtime_pid=$!
 pid_tmp="$pid_file.$$"
 printf '%s\n' "$runtime_pid" >"$pid_tmp"
 mv "$pid_tmp" "$pid_file"
+
+# Avoid rendering even briefly behind a fullscreen client when the runtime is
+# launched while one is already present. Subsequent changes are handled by the
+# reactive Quickshell service.
+if fullscreen_active; then
+    set_engine_paused true
+fi
 
 {
     printf '#!/usr/bin/env bash\n'

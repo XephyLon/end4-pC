@@ -154,6 +154,20 @@ class WallpaperEngineTests(unittest.TestCase):
         self.assertIn('args=(--layer background --fps "$fps")', runner)
         self.assertNotIn("\neval ", runner)
 
+    def test_runtime_pauses_reactively_for_fullscreen_clients(self):
+        runner = (ROOT / "scripts/wallpapers/wallpaper-engine.sh").read_text()
+        service = (ROOT / "services/WallpaperEngine.qml").read_text()
+
+        self.assertIn('if [[ "$action" == "pause" ]]', runner)
+        self.assertIn('if [[ "$action" == "resume" ]]', runner)
+        self.assertIn('kill -STOP -- "-$pid"', runner)
+        self.assertIn('kill -CONT -- "-$pid"', runner)
+        self.assertIn("if fullscreen_active; then", runner)
+        self.assertIn("readonly property bool fullscreenActive:", service)
+        self.assertIn("HyprlandData.workspaceById[monitor?.activeWorkspace?.id]?.hasfullscreen", service)
+        self.assertIn("onFullscreenActiveChanged:", service)
+        self.assertIn('paused ? "pause" : "resume"', service)
+
     def test_runner_builds_a_single_multi_monitor_command(self):
         runner = ROOT / "scripts/wallpapers/wallpaper-engine.sh"
         with tempfile.TemporaryDirectory() as directory:
