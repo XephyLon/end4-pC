@@ -22,6 +22,16 @@ def load_scanner():
 
 
 class WallpaperEngineTests(unittest.TestCase):
+    def test_quick_palette_changes_preserve_the_live_wallpaper(self):
+        quick_config = (ROOT / "modules/ii/settings/pages/QuickConfig.qml").read_text()
+
+        self.assertIn('const artwork = WallpaperEngine.activeArtwork', quick_config)
+        self.assertIn('"--noswitch", "--coloronly"', quick_config)
+        self.assertIn('page.refreshTheme(["--mode"', quick_config)
+        self.assertIn('page.refreshTheme(["--type", modelData.value])', quick_config)
+        self.assertIn('page.refreshTheme(["--color"])', quick_config)
+        self.assertNotIn('execDetached(["bash", "-c"', quick_config)
+
     def test_scanner_reads_metadata_and_skips_malformed_projects(self):
         scanner = load_scanner()
         with tempfile.TemporaryDirectory() as directory:
@@ -323,6 +333,24 @@ class WallpaperEngineTests(unittest.TestCase):
         self.assertIn("Config.options.wallpaperSelector.wallpaperEngine.activePreview", sidebar)
         self.assertNotIn("liveWallpaperBanner", sidebar)
         self.assertNotIn("CutoutFill", sidebar)
+
+    def test_settings_and_presets_show_wallpaper_engine_artwork(self):
+        service = (ROOT / "services/WallpaperEngine.qml").read_text()
+        quick = (ROOT / "modules/ii/settings/pages/QuickConfig.qml").read_text()
+        background = (ROOT / "modules/ii/settings/pages/BackgroundConfig.qml").read_text()
+        profile = (ROOT / "modules/ii/settings/pages/Profile.qml").read_text()
+        self.assertIn("readonly property string activeArtwork:", service)
+        self.assertIn("return we.activeStill || we.activePreview", service)
+        self.assertIn("source: WallpaperEngine.activeArtwork", quick)
+        self.assertGreaterEqual(background.count("WallpaperEngine.activeArtwork"), 2)
+        self.assertIn("engine.activeStill || engine.activePreview", profile)
+
+    def test_presets_restore_the_saved_wallpaper_mode(self):
+        presets = (ROOT / "scripts/presets.sh").read_text()
+        self.assertIn('WALLPAPER_ENGINE=', presets)
+        self.assertIn(".wallpaperSelector.wallpaperEngine.activePath // empty", presets)
+        self.assertIn('"$WALLPAPER_ENGINE" apply "$engine_path"', presets)
+        self.assertIn('"$WALLPAPER_ENGINE" stop', presets)
 
 
 

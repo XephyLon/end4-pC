@@ -17,6 +17,22 @@ ContentPage {
     baseWidth: 720
     bottomContentPadding: 35
 
+    function themeArguments(extraArguments) {
+        const commandArguments = [Directories.wallpaperSwitchScriptPath, "--noswitch", "--coloronly"]
+        const artwork = WallpaperEngine.activeArtwork
+        if (artwork && artwork.length > 0)
+            commandArguments.push("--image", artwork)
+        if (extraArguments) {
+            for (let index = 0; index < extraArguments.length; ++index)
+                commandArguments.push(extraArguments[index])
+        }
+        return commandArguments
+    }
+
+    function refreshTheme(extraArguments) {
+        Quickshell.execDetached(themeArguments(extraArguments))
+    }
+
     function goTo(term) {
         const t = term.toLowerCase().trim()
         function findTarget(rootItem) {
@@ -47,7 +63,7 @@ ContentPage {
         toggled: Appearance.m3colors.darkmode === dark
         colBackground: Appearance.colors.colLayer2
         onClicked: {
-            Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`]);
+            page.refreshTheme(["--mode", dark ? "dark" : "light"])
         }
         contentItem: Item {
             anchors.centerIn: parent
@@ -98,7 +114,7 @@ ContentPage {
                         sourceSize.width: 420
                         sourceSize.height: 280
                         fillMode: Image.PreserveAspectCrop
-                        source: Config.options.background.wallpaperPath
+                        source: WallpaperEngine.activeArtwork
                         cache: false
                         layer.enabled: true
                         layer.effect: OpacityMask {
@@ -115,7 +131,7 @@ ContentPage {
                         anchors.margins: Appearance.spacing.space100
                         iconText: "colorize"
                         onClicked: {
-                            Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch", "--color"]);
+                            page.refreshTheme(["--color"])
                         }
                         StyledToolTip {
                             text: "Change accent color"
@@ -193,7 +209,7 @@ ContentPage {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         Config.options.appearance.palette.type = modelData.value
-                                        Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --noswitch`])
+                                        page.refreshTheme(["--type", modelData.value])
                                     }
                                 }
                             }
