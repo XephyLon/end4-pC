@@ -10,6 +10,7 @@ Singleton {
     id: root
 
     property var projects: []
+    property var stillQueue: []
     property bool loading: false
     property string error: ""
     readonly property bool stillGenerating: stillProcess.running
@@ -53,16 +54,27 @@ Singleton {
         Config.options.wallpaperSelector.wallpaperEngine.activePreview = project.preview;
         root.ensureStill(project.id, project.path);
         if (project.preview) {
-            themeProcess.project = project;
-            themeProcess.command = [
-                Directories.wallpaperSwitchScriptPath,
-                "--mode", Appearance.m3colors.darkmode ? "dark" : "light",
-                "--coloronly", "--image", project.preview
-            ];
-            themeProcess.running = true;
+            root.enqueueTheme(project);
         } else {
             root.startRuntime(project);
         }
+    }
+
+    function enqueueTheme(project) {
+        if (themeProcess.running) {
+            // Theme generation is intentionally latest-wins. Starting another
+            // command on the same Process would only replace its metadata while
+            // the old child kept running, pairing the wrong colors and project.
+            themeProcess.pendingProject = project;
+            return;
+        }
+        themeProcess.project = project;
+        themeProcess.command = [
+            Directories.wallpaperSwitchScriptPath,
+            "--mode", Appearance.m3colors.darkmode ? "dark" : "light",
+            "--coloronly", "--image", project.preview
+        ];
+        themeProcess.running = true;
     }
 
     function startRuntime(project) {
@@ -87,11 +99,32 @@ Singleton {
     function ensureStill(projectId, projectPath, force) {
         const out = root.stillPathFor(projectId);
         if (!out || !projectPath) return;
-        stillProcess.projectId = projectId;
-        stillProcess.outPath = out;
-        stillProcess.command = [root.runnerPath, "screenshot", projectPath, out,
-            Config.options.wallpaperSelector.wallpaperEngine.scaling, force ? "force" : ""];
+        const job = { projectId, projectPath, outPath: out, force: force === true };
+        if (stillProcess.running) {
+            if (stillProcess.projectId === projectId && !job.force)
+                return;
+            // Still rendering is also latest-wins. Retaining every wallpaper the
+            // user briefly hovered/clicked would create a long queue of obsolete
+            // five-second GPU jobs before the active wallpaper could be cached.
+            root.stillQueue = [job];
+            return;
+        }
+        root.startStillJob(job);
+    }
+
+    function startStillJob(job) {
+        stillProcess.projectId = job.projectId;
+        stillProcess.outPath = job.outPath;
+        stillProcess.command = [root.runnerPath, "screenshot", job.projectPath, job.outPath,
+            Config.options.wallpaperSelector.wallpaperEngine.scaling, job.force ? "force" : ""];
         stillProcess.running = true;
+    }
+
+    function startNextStillJob() {
+        if (stillProcess.running || root.stillQueue.length === 0) return;
+        const next = root.stillQueue[0];
+        root.stillQueue = root.stillQueue.slice(1);
+        root.startStillJob(next);
     }
 
     // Re-render the active wallpaper's still, e.g. after its scene or the chosen
@@ -104,6 +137,8 @@ Singleton {
 
     function stop() {
         Quickshell.execDetached([root.runnerPath, "stop"]);
+        root.stillQueue = [];
+        themeProcess.pendingProject = null;
         Config.options.wallpaperSelector.wallpaperEngine.activeProject = "";
         Config.options.wallpaperSelector.wallpaperEngine.activePath = "";
         Config.options.wallpaperSelector.wallpaperEngine.activePreview = "";
@@ -115,25 +150,39 @@ Singleton {
         property string projectId: ""
         property string outPath: ""
         onExited: exitCode => {
-            if (exitCode !== 0 || !stillProcess.outPath) return;
+            const completedProjectId = stillProcess.projectId;
+            const completedOutPath = stillProcess.outPath;
+            stillProcess.projectId = "";
+            stillProcess.outPath = "";
             // Ignore a stale render if the user has since switched wallpapers.
-            if (stillProcess.projectId !== Config.options.wallpaperSelector.wallpaperEngine.activeProject) return;
-            // Re-set (clear first) so an unchanged path still forces dependent
-            // Images to reload now that the file exists.
-            Config.options.wallpaperSelector.wallpaperEngine.activeStill = "";
-            Config.options.wallpaperSelector.wallpaperEngine.activeStill = stillProcess.outPath;
+            if (exitCode === 0 && completedOutPath
+                    && completedProjectId === Config.options.wallpaperSelector.wallpaperEngine.activeProject) {
+                // Re-set (clear first) so an unchanged path still forces dependent
+                // Images to reload now that the file exists.
+                Config.options.wallpaperSelector.wallpaperEngine.activeStill = "";
+                Config.options.wallpaperSelector.wallpaperEngine.activeStill = completedOutPath;
+            }
+            Qt.callLater(root.startNextStillJob);
         }
     }
 
     Process {
         id: themeProcess
         property var project: null
+        property var pendingProject: null
         onExited: exitCode => {
+            const completedProject = themeProcess.project;
+            const pendingProject = themeProcess.pendingProject;
+            themeProcess.project = null;
+            themeProcess.pendingProject = null;
             if (exitCode !== 0)
                 root.error = "Wallpaper theme generation failed";
-            if (themeProcess.project)
-                root.startRuntime(themeProcess.project);
-            themeProcess.project = null;
+            if (pendingProject) {
+                Qt.callLater(() => root.enqueueTheme(pendingProject));
+            } else if (completedProject
+                    && completedProject.id === Config.options.wallpaperSelector.wallpaperEngine.activeProject) {
+                root.startRuntime(completedProject);
+            }
         }
     }
 
