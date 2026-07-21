@@ -12,6 +12,15 @@ SHELL_CONFIG_FILE="$XDG_CONFIG_HOME/illogical-impulse/config.json"
 MATUGEN_DIR="$XDG_CONFIG_HOME/matugen"
 terminalscheme="$SCRIPT_DIR/terminal/scheme-base.json"
 
+allowed_types=(scheme-content scheme-expressive scheme-fidelity scheme-fruit-salad scheme-monochrome scheme-neutral scheme-rainbow scheme-tonal-spot auto)
+
+detect_scheme_type_from_image() {
+    local img="$1"
+    source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
+    "$SCRIPT_DIR"/scheme_for_image.py "$img" 2>/dev/null | tr -d '\n'
+    deactivate
+}
+
 handle_kde_material_you_colors() {
     # Check if Qt app theming is enabled in config
     if [ -f "$SHELL_CONFIG_FILE" ]; then
@@ -187,9 +196,26 @@ switch_lock_only() {
         fi
     fi
 
-    if [[ -z "$type_flag" || "$type_flag" == "auto" ]]; then
+    if [[ -z "$type_flag" ]]; then
         type_flag=$(jq -r '.appearance.palette.type' "$SHELL_CONFIG_FILE" 2>/dev/null)
-        if [[ -z "$type_flag" || "$type_flag" == "auto" || "$type_flag" == "null" ]]; then
+    fi
+
+    if [[ -z "$type_flag" || "$type_flag" == "auto" || "$type_flag" == "null" ]]; then
+        if [[ -f "$imgpath" ]]; then
+            detected_type="$(detect_scheme_type_from_image "$imgpath")"
+            valid_detected=0
+            for t in "${allowed_types[@]}"; do
+                if [[ "$detected_type" == "$t" && "$detected_type" != "auto" ]]; then
+                    valid_detected=1
+                    break
+                fi
+            done
+            if [[ $valid_detected -eq 1 ]]; then
+                type_flag="$detected_type"
+            else
+                type_flag="scheme-tonal-spot"
+            fi
+        else
             type_flag="scheme-tonal-spot"
         fi
     fi
@@ -365,6 +391,7 @@ switch() {
     matugen "${matugen_args[@]}"
     source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
     python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
+        --json-output "$STATE_DIR/user/generated/colors.json" \
         > "$STATE_DIR"/user/generated/material_colors.scss
     deactivate
     "$SCRIPT_DIR"/applycolor.sh
@@ -395,13 +422,6 @@ main() {
     set_accent_color() {
         local color="$1"
         jq --arg color "$color" '.appearance.palette.accentColor = $color' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
-    }
-
-    detect_scheme_type_from_image() {
-        local img="$1"
-        source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
-        "$SCRIPT_DIR"/scheme_for_image.py "$img" 2>/dev/null | tr -d '\n'
-        deactivate
     }
 
     while [[ $# -gt 0 ]]; do
@@ -474,7 +494,6 @@ main() {
     fi
 
     # Validate type_flag (allow 'auto' as well)
-    allowed_types=(scheme-content scheme-expressive scheme-fidelity scheme-fruit-salad scheme-monochrome scheme-neutral scheme-rainbow scheme-tonal-spot auto)
     valid_type=0
     for t in "${allowed_types[@]}"; do
         if [[ "$type_flag" == "$t" ]]; then
