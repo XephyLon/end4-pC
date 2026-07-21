@@ -291,27 +291,33 @@ MouseArea {
                         Loader {
                             active: root.source !== "local"
                             visible: active
-                            sourceComponent: RowLayout {
-                                spacing: 4
-                                Repeater {
-                                    model: ["1080p", "2K", "4K"]
-                                    delegate: RippleButton {
-                                        required property string modelData
-                                        implicitHeight: 38
-                                        buttonRadius: height / 2
-                                        toggled: root.selectedResolution === modelData
-                                        colBackgroundToggled: Appearance.colors.colSecondaryContainer
-                                        colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
-                                        colRippleToggled: Appearance.colors.colSecondaryContainerActive
-                                        onClicked: root.selectedResolution = modelData
-                                        contentItem: StyledText {
-                                            anchors.centerIn: parent
-                                            text: modelData
-                                            color: parent.toggled
-                                                ? Appearance.colors.colOnSecondaryContainer
-                                                : Appearance.colors.colOnLayer2
+                            sourceComponent: Toolbar {
+                                ToolbarTextField {
+                                    id: onlineSearchField
+                                    placeholderText: Translation.tr("Search online wallpapers")
+                                    clip: true
+                                    font.pixelSize: Appearance.font.pixelSize.small
+                                    onTextChanged: OnlineWallpapers.query = text
+                                    onAccepted: OnlineWallpapers.fetch()
+                                    onActiveFocusChanged: root.filterFieldFocused = activeFocus
+                                    Connections {
+                                        target: GlobalStates
+                                        function onWallpaperSelectorOpenChanged() {
+                                            if (!GlobalStates.wallpaperSelectorOpen) onlineSearchField.text = ""
                                         }
                                     }
+                                    Keys.onPressed: event => {
+                                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                            event.accepted = true;
+                                            return;
+                                        }
+                                        event.accepted = false;
+                                    }
+                                }
+                                IconToolbarButton {
+                                    implicitWidth: height
+                                    text: "refresh"
+                                    onClicked: OnlineWallpapers.fetch()
                                 }
                             }
                         }
@@ -499,46 +505,6 @@ MouseArea {
                                         }
                                         event.accepted = false;
                                     }
-                                }
-                                IconToolbarButton {
-                                    implicitWidth: height
-                                    enabled: OnlineWallpapers.page > 1
-                                    text: "chevron_left"
-                                    onClicked: OnlineWallpapers.prevPage()
-                                }
-                                ToolbarTextField {
-                                    id: pageField
-                                    implicitWidth: Math.max(40, pageField.contentWidth + 24)
-                                    horizontalAlignment: Text.AlignHCenter
-                                    text: OnlineWallpapers.page.toString()
-                                    font.pixelSize: Appearance.font.pixelSize.small
-                                    inputMethodHints: Qt.ImhDigitsOnly
-                                    validator: IntValidator { bottom: 1 }
-                                    onAccepted: {
-                                        const p = parseInt(text);
-                                        if (p > 0) {
-                                            OnlineWallpapers.page = p;
-                                            OnlineWallpapers._doFetch();
-                                        }
-                                    }
-                                    Connections {
-                                        target: OnlineWallpapers
-                                        function onFetched() {
-                                            pageField.text = OnlineWallpapers.page.toString();
-                                        }
-                                    }
-                                }
-                                StyledText {
-                                    visible: root.source !== "unsplash"
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "/ " + OnlineWallpapers.totalPages
-                                    font.pixelSize: Appearance.font.pixelSize.small
-                                    color: Appearance.colors.colSubtext
-                                }
-                                IconToolbarButton {
-                                    implicitWidth: height
-                                    text: "chevron_right"
-                                    onClicked: OnlineWallpapers.nextPage()
                                 }
                                 IconToolbarButton {
                                     implicitWidth: height
