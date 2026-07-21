@@ -37,9 +37,18 @@ AbstractBackgroundWidget {
         : PluginState.defaultPosition()
     placementStrategy: currentConfig.placementStrategy || "free"
 
-    // Override targetX and targetY to avoid errors when configEntry is undefined
-    targetX: Math.max(0, Math.min(currentConfig.x !== undefined ? currentConfig.x : 100, scaledScreenWidth - width))
-    targetY: Math.max(0, Math.min(currentConfig.y !== undefined ? currentConfig.y : 100, scaledScreenHeight - height))
+    // Dragging assigns targetX/targetY directly and therefore intentionally
+    // breaks their initial bindings. Re-apply persisted geometry whenever the
+    // external state file changes so preset switches also move live widgets.
+    function applyPersistedPosition() {
+        const nextX = currentConfig.x !== undefined ? currentConfig.x : 100;
+        const nextY = currentConfig.y !== undefined ? currentConfig.y : 100;
+        rootWidget.targetX = Math.max(0, Math.min(nextX, scaledScreenWidth - width));
+        rootWidget.targetY = Math.max(0, Math.min(nextY, scaledScreenHeight - height));
+    }
+
+    onCurrentConfigChanged: applyPersistedPosition()
+    Component.onCompleted: applyPersistedPosition()
 
     onReleased: {
         rootWidget.targetX = rootWidget.x;

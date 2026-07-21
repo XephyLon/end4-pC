@@ -82,6 +82,15 @@ Scope {
         }
     }
 
+    IpcHandler {
+        target: "wallpaperEngine"
+
+        function transition(fromStill: string, fromPreview: string,
+                toStill: string, toPreview: string): void {
+            WallpaperEngine.requestTransition(fromStill, fromPreview, toStill, toPreview);
+        }
+    }
+
     GlobalShortcut {
         name: "wallpaperSelectorToggle"
         description: "Toggle wallpaper selector"

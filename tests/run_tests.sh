@@ -123,6 +123,12 @@ if ! python3 "$SCRIPT_DIR/test_wallpaper_engine.py"; then
     exit 1
 fi
 
+echo "Running preset state tests..."
+if ! python3 "$SCRIPT_DIR/test_presets.py"; then
+    echo "Preset state tests failed."
+    exit 1
+fi
+
 echo "Running Settings navigation tests..."
 if ! python3 "$SCRIPT_DIR/test_settings_navigation.py"; then
     echo "Settings navigation tests failed."
