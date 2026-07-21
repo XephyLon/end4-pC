@@ -827,6 +827,15 @@ Singleton {
                 property int columns: 4
                 property bool closeAfterSelection: true
                 property int changeInterval: 0 
+                property JsonObject wallpaperEngine: JsonObject {
+                    property string libraryPath: ""
+                    property string activeProject: ""
+                    property string activePath: ""
+                    property string activePreview: ""
+                    property int fps: 30
+                    property string scaling: "fill"
+                    property bool silent: true
+                }
             }
 
             property JsonObject windows: JsonObject {

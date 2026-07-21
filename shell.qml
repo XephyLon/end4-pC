@@ -41,6 +41,7 @@ ShellRoot {
         ConflictKiller.load()
         Cliphist.refresh()
         Wallpapers.load()
+        WallpaperEngine.load()
         Updates.load()
         LyricsService.restartLyrics()
     }

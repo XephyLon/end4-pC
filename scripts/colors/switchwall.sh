@@ -113,6 +113,7 @@ is_video() {
 
 kill_existing_mpvpaper() {
     pkill -f -9 mpvpaper || true
+    pkill -f '(^|/)[l]inux-wallpaperengine( |$)' 2>/dev/null || true
 }
 
 create_restore_script() {
@@ -199,6 +200,12 @@ switch() {
 
         check_and_prompt_upscale "$imgpath" &
         kill_existing_mpvpaper
+        if [[ -z "$coloronly" && -f "$SHELL_CONFIG_FILE" ]]; then
+            jq '.wallpaperSelector.wallpaperEngine.activeProject = "" |
+                .wallpaperSelector.wallpaperEngine.activePath = "" |
+                .wallpaperSelector.wallpaperEngine.activePreview = ""' \
+                "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
+        fi
 
         if is_video "$imgpath"; then
             mkdir -p "$THUMBNAIL_DIR"

@@ -20,6 +20,7 @@ MouseArea {
     property string selectedResolution: "1080p"
     property bool toolbarVisible: showControls || Config.options.wallpaperSelector.showSearchbar
     property bool filterFieldFocused: false
+    property string wallpaperEngineSearch: ""
 
     property var quickDirs: [
         { icon: "home",       name: "Home   ",       path: `${Directories.home}`,                alwaysVisible: Config.options.wallpaperSelector.showHomePath },
@@ -69,6 +70,15 @@ MouseArea {
                 Wallpapers.select(filePath, root.useDarkMode);
             }
         }
+    }
+
+    function selectWallpaperEngineProject(project) {
+        if (GlobalStates.wallpaperSelectorTarget === "lockWall") {
+            if (project.preview)
+                root.selectWallpaperPath(project.preview);
+            return;
+        }
+        WallpaperEngine.apply(project);
     }
 
     acceptedButtons: Qt.BackButton | Qt.ForwardButton
@@ -289,7 +299,7 @@ MouseArea {
                         }
 
                         Loader {
-                            active: root.source !== "local"
+                            active: root.source !== "local" && root.source !== "wallpaperEngine"
                             visible: active
                             sourceComponent: RowLayout {
                                 spacing: Appearance.spacing.space50
@@ -315,6 +325,63 @@ MouseArea {
                                 }
                             }
                         }
+
+                        Loader {
+                            active: root.source === "wallpaperEngine"
+                            visible: active
+                            sourceComponent: RowLayout {
+                                spacing: Appearance.spacing.space100
+
+                                StyledText {
+                                    text: Translation.tr("Steam Workshop")
+                                    color: Appearance.colors.colOnLayer2
+                                }
+
+                                StyledComboBox {
+                                    implicitWidth: 92
+                                    model: [
+                                        { value: 24, displayName: "24 FPS" },
+                                        { value: 30, displayName: "30 FPS" },
+                                        { value: 60, displayName: "60 FPS" }
+                                    ]
+                                    textRole: "displayName"
+                                    Component.onCompleted: {
+                                        const configured = Config.options.wallpaperSelector.wallpaperEngine.fps;
+                                        currentIndex = configured === 24 ? 0 : configured === 60 ? 2 : 1;
+                                    }
+                                    onActivated: index => Config.options.wallpaperSelector.wallpaperEngine.fps = model[index].value
+                                }
+
+                                StyledComboBox {
+                                    implicitWidth: 90
+                                    model: [
+                                        { value: "fill", displayName: Translation.tr("Fill") },
+                                        { value: "fit", displayName: Translation.tr("Fit") },
+                                        { value: "stretch", displayName: Translation.tr("Stretch") }
+                                    ]
+                                    textRole: "displayName"
+                                    Component.onCompleted: {
+                                        const configured = Config.options.wallpaperSelector.wallpaperEngine.scaling;
+                                        currentIndex = configured === "fit" ? 1 : configured === "stretch" ? 2 : 0;
+                                    }
+                                    onActivated: index => Config.options.wallpaperSelector.wallpaperEngine.scaling = model[index].value
+                                }
+
+                                RippleButton {
+                                    implicitWidth: 38
+                                    implicitHeight: 38
+                                    buttonRadius: height / 2
+                                    toggled: Config.options.wallpaperSelector.wallpaperEngine.silent
+                                    onClicked: Config.options.wallpaperSelector.wallpaperEngine.silent = !Config.options.wallpaperSelector.wallpaperEngine.silent
+                                    contentItem: MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: Config.options.wallpaperSelector.wallpaperEngine.silent ? "volume_off" : "volume_up"
+                                        color: parent.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+                                    }
+                                    StyledToolTip { text: Translation.tr("Wallpaper audio") }
+                                }
+                            }
+                        }
                     }
 
                     RowLayout {
@@ -327,9 +394,10 @@ MouseArea {
 
                         StyledComboBox {
                             id: sourceCombo
-                            implicitWidth: 120
+                            implicitWidth: 168
                             model: [
                                 { value: "local",     displayName: Translation.tr("Local") },
+                                { value: "wallpaperEngine", displayName: Translation.tr("Wallpaper Engine") },
                                 { value: "wallhaven", displayName: Translation.tr("Wallhaven") },
                                 { value: "unsplash",  displayName: Translation.tr("Unsplash") },
                                 { value: "pexels",    displayName: Translation.tr("Pexels") },
@@ -378,7 +446,11 @@ MouseArea {
                     Loader {
                         id: gridLoader
                         anchors.fill: parent
-                        sourceComponent: root.source === "local" ? localGridComponent : onlineGridComponent
+                        sourceComponent: root.source === "local"
+                            ? localGridComponent
+                            : root.source === "wallpaperEngine"
+                                ? wallpaperEngineGridComponent
+                                : onlineGridComponent
                     }
 
                     Component {
@@ -387,6 +459,16 @@ MouseArea {
                             columns: root.columns
                             previewCellAspectRatio: root.previewCellAspectRatio
                             onWallpaperSelected: path => root.selectWallpaperPath(path)
+                        }
+                    }
+
+                    Component {
+                        id: wallpaperEngineGridComponent
+                        WallpaperEngineGrid {
+                            columns: root.columns
+                            previewCellAspectRatio: root.previewCellAspectRatio
+                            searchQuery: root.wallpaperEngineSearch
+                            onProjectSelected: project => root.selectWallpaperEngineProject(project)
                         }
                     }
 
@@ -482,7 +564,32 @@ MouseArea {
                         }
 
                         Loader {
-                            active: root.source !== "local"
+                            active: root.source === "wallpaperEngine"
+                            visible: active
+                            sourceComponent: Toolbar {
+                                ToolbarTextField {
+                                    placeholderText: Translation.tr("Search Wallpaper Engine projects")
+                                    clip: true
+                                    font.pixelSize: Appearance.font.pixelSize.small
+                                    onTextChanged: root.wallpaperEngineSearch = text
+                                    onActiveFocusChanged: root.filterFieldFocused = activeFocus
+                                }
+                                IconToolbarButton {
+                                    text: "refresh"
+                                    enabled: !WallpaperEngine.loading
+                                    onClicked: WallpaperEngine.refresh()
+                                }
+                                IconToolbarButton {
+                                    text: "stop_circle"
+                                    enabled: Config.options.wallpaperSelector.wallpaperEngine.activeProject !== ""
+                                    onClicked: WallpaperEngine.stop()
+                                    StyledToolTip { text: Translation.tr("Stop live wallpaper") }
+                                }
+                            }
+                        }
+
+                        Loader {
+                            active: root.source !== "local" && root.source !== "wallpaperEngine"
                             visible: active
                             sourceComponent: Toolbar {
                                 ToolbarTextField {

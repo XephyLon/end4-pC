@@ -91,6 +91,19 @@ hl.bind("SUPER + escape", hl.dsp.global("quickshell:settingsToggle"), {descripti
 The shell supports declarative manifests and installable QML plugin packages. See
 [PLUGINS.md](PLUGINS.md) for entry points, remote installation, permissions, and lifecycle safety.
 
+## 🖼️ Wallpaper Engine
+
+The Wallpaper Selector can browse installed Steam Wallpaper Engine Workshop
+projects and apply them through
+[`linux-wallpaperengine`](https://github.com/Almamu/linux-wallpaperengine). It
+automatically discovers Steam library folders and exposes project search, FPS,
+scaling, audio, refresh, and stop controls. Install `linux-wallpaperengine`,
+open the selector, and choose **Wallpaper Engine** from the source menu.
+
+The selected project's preview is passed through the existing Material color
+pipeline, and the live wallpaper is restored by the same Hyprland restore hook
+used for video wallpapers.
+
 ## 🙏 Credits
 
 Huge thanks to the people who made this possible:
