@@ -6,6 +6,7 @@ import qs.modules.common.widgets
 
 ColumnLayout {
     id: root
+    readonly property bool settingsNavigationSection: true
     property var shape: MaterialShape.Shape.Clover4Leaf
     property string title
     property string icon: ""
