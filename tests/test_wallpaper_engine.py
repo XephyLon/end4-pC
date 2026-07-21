@@ -118,7 +118,10 @@ class WallpaperEngineTests(unittest.TestCase):
         # Exactly one persistent multi-monitor runtime. The screenshot action
         # spawns its own throwaway instance, so count the bounded launch itself.
         self.assertEqual(runner.count('setsid linux-wallpaperengine "${args[@]}"'), 1)
-        self.assertIn("pkill -f '(^|/)[l]inux-wallpaperengine( |$)'", runner)
+        self.assertIn('pid_file="$state_dir/runtime.pid"', runner)
+        self.assertIn('kill -- "-$pid"', runner)
+        self.assertIn("pkill -f '(^|/)[l]inux-wallpaperengine .*--layer background( |$)'", runner)
+        self.assertNotIn("pkill -f '(^|/)[l]inux-wallpaperengine( |$)'", runner)
         self.assertIn("grep -q -- '--layer'", runner)
         self.assertIn('args=(--layer background --fps "$fps")', runner)
         self.assertNotIn("\neval ", runner)
@@ -176,10 +179,23 @@ class WallpaperEngineTests(unittest.TestCase):
         self.assertIn("WallpaperEngine.stop()", selector)
         self.assertIn('"--coloronly", "--image", project.preview', service)
         self.assertIn("onExited: exitCode =>", service)
-        self.assertIn("root.startRuntime(themeProcess.project)", service)
+        self.assertIn("function enqueueTheme(project)", service)
+        self.assertIn("property var pendingProject: null", service)
+        self.assertIn("root.startRuntime(completedProject)", service)
         self.assertIn("signal transitionRequested(string fromStill, string fromPreview, string toStill, string toPreview)", service)
         self.assertIn("root.transitionRequested(fromStill, project.previousPreview,", service)
         self.assertIn("Config.options.wallpaperSelector.wallpaperEngine.activeProject", service)
+
+    def test_wallpaper_jobs_are_serialized_and_keep_latest_theme(self):
+        service = (ROOT / "services/WallpaperEngine.qml").read_text()
+        self.assertIn("property var stillQueue: []", service)
+        self.assertIn("if (stillProcess.running)", service)
+        self.assertIn("root.stillQueue = [job]", service)
+        self.assertIn("function startNextStillJob()", service)
+        self.assertIn("Qt.callLater(root.startNextStillJob)", service)
+        self.assertIn("if (themeProcess.running)", service)
+        self.assertIn("themeProcess.pendingProject = project", service)
+        self.assertIn("completedProject.id === Config.options.wallpaperSelector.wallpaperEngine.activeProject", service)
 
     def test_selector_reopens_on_the_active_wallpaper_source(self):
         selector = (ROOT / "modules/ii/wallpaperSelector/WallpaperSelectorContent.qml").read_text()
