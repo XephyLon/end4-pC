@@ -111,6 +111,12 @@ if ! python3 "$SCRIPT_DIR/test_terminal_background.py"; then
     exit 1
 fi
 
+echo "Running Matugen application theme tests..."
+if ! python3 "$SCRIPT_DIR/test_matugen_app_themes.py"; then
+    echo "Matugen application theme tests failed."
+    exit 1
+fi
+
 echo "Running wallpaper thumbnail fallback tests..."
 if ! python3 "$SCRIPT_DIR/test_thumbnail_fallback.py"; then
     echo "Wallpaper thumbnail fallback tests failed."

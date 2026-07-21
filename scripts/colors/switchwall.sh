@@ -322,7 +322,9 @@ switch() {
         [[ "$term_fg_boost" != "null" && -n "$term_fg_boost" ]] && generate_colors_material_args+=(--term_fg_boost "$term_fg_boost")
     fi
 
+    "$SCRIPT_DIR/install_matugen_app_themes.sh"
     matugen "${matugen_args[@]}"
+    python3 "$SCRIPT_DIR/apply_matugen_app_themes.py"
     source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
     python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
         > "$STATE_DIR"/user/generated/material_colors.scss
