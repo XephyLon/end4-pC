@@ -104,6 +104,15 @@ The selected project's preview is passed through the existing Material color
 pipeline, and the live wallpaper is restored by the same Hyprland restore hook
 used for video wallpapers.
 
+Because a live wallpaper renders on its own surface that the shell cannot sample,
+applying one also renders a full-scene still at monitor resolution (cached per
+project under the cache directory). Lock/unlock and switches between live
+wallpapers peel that still with the configured wallpaper-change animation, so the
+transition stays sharp and correctly framed instead of using the tiny Workshop
+preview. A still is a frozen frame; if a scene changes, use the re-render button
+in the Wallpaper Engine toolbar to refresh it. Rendering a still needs
+`linux-wallpaperengine`'s `--screenshot` support.
+
 ## 🙏 Credits
 
 Huge thanks to the people who made this possible:
