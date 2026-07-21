@@ -85,15 +85,58 @@ generate_screenshot() {
     # live wallpaper's framing. A geometry-less --screenshot renders a small
     # square buffer instead, which would crop-zoom on a wide screen. The window
     # is short-lived and lands on a hidden workspace, so it never displays.
-    local geo="0x0x1920x1080"
+    local monitor_width=1920 monitor_height=1080
     if command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
         local detected
-        detected="$(hyprctl monitors -j 2>/dev/null | jq -r 'first(.[] | select(.focused)) | "0x0x\(.width)x\(.height)"')"
-        [[ "$detected" =~ ^0x0x[0-9]+x[0-9]+$ ]] && geo="$detected"
+        detected="$(hyprctl monitors -j 2>/dev/null | jq -r 'first(.[] | select(.focused)) | "\(.width)x\(.height)"' 2>/dev/null)"
+        if [[ "$detected" =~ ^([0-9]+)x([0-9]+)$ ]]; then
+            monitor_width="${BASH_REMATCH[1]}"
+            monitor_height="${BASH_REMATCH[2]}"
+        fi
     fi
+    local geo="0x0x${monitor_width}x${monitor_height}"
 
     local tmp
     tmp="$(mktemp --suffix=.png)" || return 1
+
+    # linux-wallpaperengine's screenshot mode returns a video's native frame
+    # instead of the requested window geometry. Decode video projects directly
+    # and compose them into the monitor-sized canvas so cached lock/transition
+    # stills have exactly the same framing as the live renderer.
+    local manifest="$dir/project.json" video_name="" video_path=""
+    if command -v jq >/dev/null 2>&1 && [[ -r "$manifest" ]]; then
+        video_name="$(jq -r 'select(.type == "video") | .file // empty' "$manifest" 2>/dev/null)"
+    fi
+    if [[ -n "$video_name" ]]; then
+        video_path="$(readlink -f -- "$dir/$video_name" 2>/dev/null || true)"
+        local resolved_dir
+        resolved_dir="$(readlink -f -- "$dir")"
+        if [[ "$video_path" == "$resolved_dir/"* && -f "$video_path" ]] \
+                && command -v ffmpeg >/dev/null 2>&1; then
+            local filter
+            case "$scaling" in
+                stretch)
+                    filter="scale=${monitor_width}:${monitor_height}"
+                    ;;
+                fill)
+                    filter="scale=${monitor_width}:${monitor_height}:force_original_aspect_ratio=increase,crop=${monitor_width}:${monitor_height}"
+                    ;;
+                fit|default)
+                    filter="scale=${monitor_width}:${monitor_height}:force_original_aspect_ratio=decrease,pad=${monitor_width}:${monitor_height}:(ow-iw)/2:(oh-ih)/2:color=black"
+                    ;;
+            esac
+            if ffmpeg -v error -y -ss 5 -i "$video_path" -frames:v 1 -vf "$filter" "$tmp" \
+                    || ffmpeg -v error -y -i "$video_path" -frames:v 1 -vf "$filter" "$tmp"; then
+                if [[ -s "$tmp" ]]; then
+                    mv "$tmp" "$out"
+                    return 0
+                fi
+            fi
+            rm -f "$tmp"
+            tmp="$(mktemp --suffix=.png)" || return 1
+        fi
+    fi
+
     setsid linux-wallpaperengine --window "$geo" --scaling "$scaling" \
         --screenshot "$tmp" --screenshot-delay 5 --silent "$dir" >/dev/null 2>&1 &
     local pid=$! waited=0

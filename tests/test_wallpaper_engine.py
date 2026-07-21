@@ -356,6 +356,19 @@ class WallpaperEngineTests(unittest.TestCase):
         self.assertIn("activeStill", service)
         self.assertIn("property string activeStill:", config)
 
+    def test_video_stills_are_scaled_and_cache_keys_include_framing(self):
+        runner = (ROOT / "scripts/wallpapers/wallpaper-engine.sh").read_text()
+        service = (ROOT / "services/WallpaperEngine.qml").read_text()
+
+        self.assertIn('select(.type == "video") | .file // empty', runner)
+        self.assertIn('force_original_aspect_ratio=increase,crop=', runner)
+        self.assertIn('force_original_aspect_ratio=decrease,pad=', runner)
+        self.assertIn('filter="scale=${monitor_width}:${monitor_height}"', runner)
+        self.assertIn('ffmpeg -v error -y -ss 5', runner)
+        self.assertIn('"$video_path" == "$resolved_dir/"*', runner)
+        self.assertIn('${projectId}-${scaling}-v2.png', service)
+        self.assertIn('Config.options.wallpaperSelector.wallpaperEngine.activeStill = ""', service)
+
     def test_wallpaper_engine_art_is_used_by_user_surfaces(self):
         background = (ROOT / "modules/ii/background/Background.qml").read_text()
         user_card = (ROOT / "modules/ii/background/widgets/usercard/UserCardWidget.qml").read_text()

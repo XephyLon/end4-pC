@@ -63,15 +63,21 @@ Singleton {
     }
 
     function stillPathFor(projectId) {
-        return projectId ? `${root.stillDir}/${projectId}.png` : "";
+        const scaling = Config.options.wallpaperSelector.wallpaperEngine.scaling || "fill";
+        return projectId ? `${root.stillDir}/${projectId}-${scaling}-v2.png` : "";
     }
 
     function load() {
         if (!Config.ready || scanProcess.running) return;
         // Backfill the still for a wallpaper that was already active at startup.
         const we = Config.options.wallpaperSelector.wallpaperEngine;
-        if (we.activeProject && we.activePath && !we.activeStill)
-            root.ensureStill(we.activeProject, we.activePath);
+        if (we.activeProject && we.activePath) {
+            const expectedStill = root.stillPathFor(we.activeProject);
+            if (we.activeStill !== expectedStill) {
+                Config.options.wallpaperSelector.wallpaperEngine.activeStill = "";
+                root.ensureStill(we.activeProject, we.activePath);
+            }
+        }
         refresh();
     }
 
@@ -91,6 +97,10 @@ Singleton {
         Config.options.wallpaperSelector.wallpaperEngine.activeProject = project.id;
         Config.options.wallpaperSelector.wallpaperEngine.activePath = project.path;
         Config.options.wallpaperSelector.wallpaperEngine.activePreview = project.preview;
+        // Never expose the previous project's still while the new cache is
+        // being generated. ensureStill republishes even when the target cache
+        // already exists because the runner exits successfully in that case.
+        Config.options.wallpaperSelector.wallpaperEngine.activeStill = "";
         root.ensureStill(project.id, project.path);
         if (project.preview) {
             root.enqueueTheme(project);
