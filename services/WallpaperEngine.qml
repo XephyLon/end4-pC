@@ -15,6 +15,11 @@ Singleton {
     property string error: ""
     readonly property bool stillGenerating: stillProcess.running
     readonly property bool available: projects.length > 0
+    readonly property string activeArtwork: {
+        const we = Config.options.wallpaperSelector.wallpaperEngine;
+        if (!we.activeProject) return Config.options.background.wallpaperPath;
+        return we.activeStill || we.activePreview || Config.options.background.wallpaperPath;
+    }
     readonly property string scannerPath: `${Directories.scriptPath}/wallpapers/wallpaper_engine.py`
     readonly property string runnerPath: `${Directories.scriptPath}/wallpapers/wallpaper-engine.sh`
     readonly property string stillDir: `${FileUtils.trimFileProtocol(Directories.cache)}/wallpaperEngine`

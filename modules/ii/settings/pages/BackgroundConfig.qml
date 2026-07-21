@@ -69,18 +69,18 @@ ContentPage {
                         largeItemWidthRatio: 0.5
                         mediumItemWidthRatio: 0.485
                         itemSpacing: Appearance.spacing.space100
-                        model: [
-                            Config.options.background.wallpaperPath,
-                            Config.options.background.lockWall !== ""
-                                ? Config.options.background.lockWall
-                                : Config.options.background.wallpaperPath
-                        ]
                         wheelEnabled: false
                         dragEnabled: false
                         clickAction: (index, modelData) => {
                             GlobalStates.wallpaperSelectorTarget = index === 1 ? "lockWall" : "wallpaper"
                             GlobalStates.wallpaperSelectorOpen = true
                         }
+                        model: [
+                            WallpaperEngine.activeArtwork,
+                            Config.options.background.lockWall !== ""
+                                ? Config.options.background.lockWall
+                                : WallpaperEngine.activeArtwork
+                        ]
                     }
 
                     RowLayout {

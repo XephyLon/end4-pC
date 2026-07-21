@@ -361,7 +361,10 @@ ContentPage {
                             onLoaded: {
                                 try {
                                     const data = JSON.parse(text())
-                                    presetDelegate.presetWallpaper = data?.background?.wallpaperPath ?? ""
+                                    const engine = data?.wallpaperSelector?.wallpaperEngine
+                                    presetDelegate.presetWallpaper = engine?.activeProject
+                                        ? (engine.activeStill || engine.activePreview || data?.background?.wallpaperPath || "")
+                                        : (data?.background?.wallpaperPath ?? "")
                                     presetDelegate.presetDescription = data?._presetMeta?.description ?? ""
                                 } catch (e) {
                                     console.log("Failed to parse preset:", e)

@@ -10,6 +10,7 @@ CONFIG_FILE="$CONFIG_DIR/config.json"
 PRESETS_DIR="$CONFIG_DIR/presets"
 SCRIPT_DIR="$HOME/.config/quickshell/end4-pC/scripts"
 SWITCHWALL="$HOME/.config/quickshell/end4-pC/scripts/colors/switchwall.sh"
+WALLPAPER_ENGINE="$HOME/.config/quickshell/end4-pC/scripts/wallpapers/wallpaper-engine.sh"
 
 mkdir -p "$PRESETS_DIR"
 
@@ -42,7 +43,20 @@ case "$action" in
         fi
         jq -s '.[0] * .[1] | del(._presetMeta)' "$CONFIG_FILE" "$preset_file" \
             > "${CONFIG_FILE}.tmp" && mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
-        "$SWITCHWALL" --noswitch
+        engine_path="$(jq -r '.wallpaperSelector.wallpaperEngine.activePath // empty' "$CONFIG_FILE")"
+        if [ -n "$engine_path" ] && [ -d "$engine_path" ]; then
+            engine_preview="$(jq -r '.wallpaperSelector.wallpaperEngine.activePreview // empty' "$CONFIG_FILE")"
+            engine_fps="$(jq -r '.wallpaperSelector.wallpaperEngine.fps // 30' "$CONFIG_FILE")"
+            engine_scaling="$(jq -r '.wallpaperSelector.wallpaperEngine.scaling // "fill"' "$CONFIG_FILE")"
+            engine_silent="$(jq -r '.wallpaperSelector.wallpaperEngine.silent // true' "$CONFIG_FILE")"
+            if [ -n "$engine_preview" ]; then
+                "$SWITCHWALL" --noswitch --coloronly --image "$engine_preview"
+            fi
+            "$WALLPAPER_ENGINE" apply "$engine_path" "$engine_fps" "$engine_scaling" "$engine_silent"
+        else
+            "$WALLPAPER_ENGINE" stop
+            "$SWITCHWALL" --noswitch
+        fi
         ;;
     *)
         echo "Error: unknown action: $action" >&2
