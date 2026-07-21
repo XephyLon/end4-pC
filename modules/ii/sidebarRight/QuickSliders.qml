@@ -63,30 +63,38 @@ Rectangle {
             }
         }
 
-        Loader {
-            anchors { left: parent.left; right: parent.right }
-            visible: active
-            active: Config.options.sidebar.quickSliders.showVolume
-            sourceComponent: QuickSlider {
-                materialSymbol: "volume_up"
-                value: Audio.sink?.audio?.volume ?? 0
-                onMoved: {
-                    if (Audio.sink?.audio)
-                        Audio.sink.audio.volume = value
+        Row {
+            width: parent.width
+            height: Math.max(volumeLoader.implicitHeight, micLoader.implicitHeight)
+            spacing: Appearance.spacing.space50
+
+            Loader {
+                id: volumeLoader
+                width: micLoader.active ? (parent.width - parent.spacing) / 2 : parent.width
+                visible: active
+                active: Config.options.sidebar.quickSliders.showVolume
+                sourceComponent: QuickSlider {
+                    materialSymbol: "volume_up"
+                    value: Audio.sink?.audio?.volume ?? 0
+                    onMoved: {
+                        if (Audio.sink?.audio)
+                            Audio.sink.audio.volume = value
+                    }
                 }
             }
-        }
 
-        Loader {
-            anchors { left: parent.left; right: parent.right }
-            visible: active
-            active: Config.options.sidebar.quickSliders.showMic
-            sourceComponent: QuickSlider {
-                materialSymbol: "mic"
-                value: Audio.source?.audio?.volume ?? 0
-                onMoved: {
-                    if (Audio.source?.audio)
-                        Audio.source.audio.volume = value
+            Loader {
+                id: micLoader
+                width: volumeLoader.active ? (parent.width - parent.spacing) / 2 : parent.width
+                visible: active
+                active: Config.options.sidebar.quickSliders.showMic
+                sourceComponent: QuickSlider {
+                    materialSymbol: "mic"
+                    value: Audio.source?.audio?.volume ?? 0
+                    onMoved: {
+                        if (Audio.source?.audio)
+                            Audio.source.audio.volume = value
+                    }
                 }
             }
         }
