@@ -596,6 +596,9 @@ Variants {
                             // Use the exact source resolved by this background,
                             // including lock wallpaper and video thumbnails.
                             wallpaperPath: bgRoot.wallpaperPath
+                            // Live WE surface for in-shell "blur" frost; null when
+                            // the static image path is active.
+                            weSurfaceItem: bgRoot.weShown ? weLoader.item : null
                         }
                     }
                 }

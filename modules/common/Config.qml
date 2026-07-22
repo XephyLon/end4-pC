@@ -83,6 +83,12 @@ Singleton {
             property JsonObject plugins: JsonObject {
                 property list<string> enabled: []
                 property real blurOpacity: 0.1
+                // How desktop widgets frost their background over the wallpaper:
+                //   "tint" - a translucent palette-tinted panel (cheap, no blur)
+                //   "blur" - a true in-shell blur of the wallpaper region behind
+                //            the widget (samples the live Wallpaper Engine surface
+                //            or the static image)
+                property string frostMode: "blur"
             }
 
             property JsonObject policies: JsonObject {
