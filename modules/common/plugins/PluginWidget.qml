@@ -24,8 +24,10 @@ AbstractBackgroundWidget {
     // behind the widget; "tint" (any non-"blur" value) leaves the widget's own
     // translucent panel to show the sharp wallpaper through it.
     readonly property bool frostBlur: Config.options.plugins.frostMode === "blur"
+    // The in-shell live blur (ShaderEffectSource of the WE surface) works while
+    // locked too, so this stays true when locked - unlike the old compositor
+    // handoff which had to fall back to the static image on lock.
     readonly property bool liveWallpaperActive: rootWidget.weSurfaceItem !== null
-        && !GlobalStates.screenLocked
     readonly property bool hasBlurSurface: !pluginNode.hasCustomBlurRegions
         || pluginNode.blurRegions.length > 0
 
@@ -77,13 +79,16 @@ AbstractBackgroundWidget {
     // In-shell frost: sample + blur the wallpaper region behind each blur region.
     // The sample tracks rootWidget.x/y live so it stays aligned while dragging.
     //
-    // Skipped while the screen is locked: the lock background (Background.qml's
-    // blurLoader) already shows a blurred + zoomed wallpaper, so a per-widget
-    // blur of the un-zoomed wallpaper would mismatch it. Without our opaque blur
-    // surface the widget's own translucent panel shows the lock background
-    // through it, keeping the frost consistent with the lock screen.
+    // While the screen is locked AND the lock blurs the wallpaper
+    // (Background.qml's blurLoader shows a blurred + zoomed wallpaper), skip our
+    // own blur surface - the widget's translucent panel then shows that lock
+    // background through it, keeping the frost consistent with the lock screen.
+    // If the lock does NOT blur the wallpaper, keep blurring per widget so a
+    // blur-enabled widget stays frosted against the sharp wallpaper.
+    readonly property bool lockCoversFrost: GlobalStates.screenLocked
+        && Config.options.lock.blur.enable
     Repeater {
-        model: rootWidget.frostBlur && rootWidget.blurEnabled && !GlobalStates.screenLocked
+        model: rootWidget.frostBlur && rootWidget.blurEnabled && !rootWidget.lockCoversFrost
             && rootWidget.hasBlurSurface && Config.options.appearance.transparency.enable
             ? (pluginNode.hasCustomBlurRegions
                 ? pluginNode.blurRegions
