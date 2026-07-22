@@ -832,6 +832,10 @@ Singleton {
                     property string activeProject: ""
                     property string activePath: ""
                     property string activePreview: ""
+                    // Wallpaper type of the active project (scene/video/web). "web"
+                    // is unsupported by the embedded renderer (needs CEF), so the
+                    // background falls back to the static wallpaper for it.
+                    property string activeType: ""
                     // Full-scene still rendered from the active project, used as
                     // the opaque texture for peel/lock transitions (the live
                     // wallpaper surface itself can't be sampled).

@@ -67,6 +67,10 @@ Singleton {
         Config.options.wallpaperSelector.wallpaperEngine.activeProject = project.id;
         Config.options.wallpaperSelector.wallpaperEngine.activePath = project.path;
         Config.options.wallpaperSelector.wallpaperEngine.activePreview = project.preview ?? "";
+        // "web" wallpapers need CEF/Chromium which the embedded renderer can't run
+        // (it breaks the shell's GL). Record the type so the background can fall
+        // back to the static wallpaper instead of a blank screen.
+        Config.options.wallpaperSelector.wallpaperEngine.activeType = project.type ?? "";
         if (project.preview) root.enqueueTheme(project, darkMode);
     }
 
@@ -87,6 +91,7 @@ Singleton {
     function stop() {
         Config.options.wallpaperSelector.wallpaperEngine.activeProject = "";
         Config.options.wallpaperSelector.wallpaperEngine.activePath = "";
+        Config.options.wallpaperSelector.wallpaperEngine.activeType = "";
         Config.options.wallpaperSelector.wallpaperEngine.activePreview = "";
     }
 
