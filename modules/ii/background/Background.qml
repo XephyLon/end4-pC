@@ -325,7 +325,11 @@ Variants {
                     }
                 }
                 sourceComponent: GaussianBlur {
-                    source: bgRoot.wallpaperAnimation === "" ? wallpaper : transitionEffect
+                    // Blur the live in-shell Wallpaper Engine surface when it is
+                    // the wallpaper; otherwise the static image / transition.
+                    source: bgRoot.weShown
+                        ? weLoader.item
+                        : (bgRoot.wallpaperAnimation === "" ? wallpaper : transitionEffect)
                     radius: GlobalStates.screenLocked ? Config.options.lock.blur.radius : 0
                     samples: Config.options.lock.blur.size 
                     Rectangle {
