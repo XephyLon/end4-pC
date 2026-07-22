@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.WallpaperEngine
+import qs.modules.common
 
 // Thin wrapper around the embedded Wallpaper Engine surface. Kept in its own
 // file and loaded via a source-URL Loader so that on a Quickshell binary
@@ -8,5 +9,8 @@ import Quickshell.WallpaperEngine
 // wallpaper path, keep working.
 WallpaperEngineSurface {
     live: true
-    fps: 60
+    fps: Config.options.wallpaperSelector.wallpaperEngine.fps
+    // "fill" | "fit" | "stretch" | "default" - how the wallpaper is scaled to
+    // the screen (user-selectable, mirrors the static-wallpaper scaling).
+    scaleMode: Config.options.wallpaperSelector.wallpaperEngine.scaling
 }
