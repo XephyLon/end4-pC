@@ -94,12 +94,6 @@ Variants {
 
         //centered Wallpaper
         property bool centeredWallpaperEnabled: Config.options.background.centeredWallpaper && (!Config.options.background.centeredWallpaperOnlyWhenLocked || GlobalStates.screenLocked)
-        readonly property bool wallpaperEngineConfigured: WallpaperEngine.stableConfigured
-        readonly property bool wallpaperEngineActive: wallpaperEngineConfigured && !GlobalStates.screenLocked
-        readonly property string widgetWallpaperPath: wallpaperEngineActive
-            && Config.options.wallpaperSelector.wallpaperEngine.activePreview !== ""
-            ? Config.options.wallpaperSelector.wallpaperEngine.activePreview
-            : bgRoot.wallpaperPath
         property int centeredWallpaperShape: getShapeFromName(Config.options.background.centeredWallpaperShape)
         property int centeredWallpaperSize: Config.options.background.centeredWallpaperSize
         property color centeredWallpaperColor: root.getColorFromName(Config.options.background.centeredWallpaperColor)
@@ -117,8 +111,6 @@ Variants {
         property string effectiveWallpaperPath: {
             if (GlobalStates.screenLocked && Config.options.background.lockWall !== "")
                 return Config.options.background.lockWall
-            if (bgRoot.wallpaperEngineConfigured && Config.options.wallpaperSelector.wallpaperEngine.activePreview !== "")
-                return Config.options.wallpaperSelector.wallpaperEngine.activePreview
             return Config.options.background.wallpaperPath
         }
 
@@ -145,40 +137,6 @@ Variants {
 
         property real transitionProgress: 1.0
         property int wallpaperTransitionGeneration: 0
-        property real engineTransitionProgress: 1.0
-        property bool engineTransitionActive: false
-        property real wallpaperEngineLockProgress: 0
-
-        Behavior on wallpaperEngineLockProgress {
-            NumberAnimation {
-                duration: Appearance.wallpaperTransitionDuration
-                easing.type: Easing.InOutCubic
-            }
-        }
-
-        // Drive the shared WallpaperEngineTransition the same way the lock does:
-        // both sides prefer the sharp monitor-shaped still and fall back to the
-        // project preview only when no still is cached yet. Previews are the raw
-        // Workshop thumbnails (often square), so using them as the destination is
-        // what stretched the incoming wallpaper - the cached still already has the
-        // monitor's aspect baked in and cannot. The live Wallpaper Engine surface
-        // supplies full resolution as soon as the transition completes.
-        function startEngineTransition(fromStill, fromPreview, toStill, toPreview) {
-            engineTransitionAnim.stop()
-            const fromSrc = fromStill || fromPreview
-            const toSrc = toStill || toPreview
-            if (bgRoot.wallpaperAnimation === "" || !fromSrc || !toSrc)
-                return
-            engineSwitchTransition.setSources(fromSrc, fromPreview, toSrc, toPreview)
-            bgRoot.currentShader = bgRoot.wallpaperAnimation === "random"
-                ? bgRoot.shaderList[Math.floor(Math.random() * bgRoot.shaderList.length)]
-                : bgRoot.wallpaperAnimation
-            bgRoot.engineTransitionProgress = 0.0
-            bgRoot.engineTransitionActive = true
-            bgRoot.currentWallpaperSource = toSrc
-            if (engineSwitchTransition.toStatus === Image.Ready)
-                engineTransitionAnim.restart()
-        }
 
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
@@ -187,9 +145,7 @@ Variants {
         // seen while locked. Promote the instant locking begins and hold it there
         // until the reverse transition has fully played out (progress back to 0),
         // otherwise the peel animates while hidden and only its end state pops in.
-        WlrLayershell.layer: wallpaperEngineConfigured
-            ? ((GlobalStates.screenLocked || bgRoot.wallpaperEngineLockProgress > 0) ? WlrLayer.Overlay : WlrLayer.Bottom)
-            : ((GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : WlrLayer.Bottom)
+        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
         WlrLayershell.keyboardFocus: GlobalStates.desktopWidgetKeyboardFocus
             ? WlrKeyboardFocus.OnDemand
@@ -201,12 +157,6 @@ Variants {
             right: true
         }
         color: {
-            // Stay transparent whenever Wallpaper Engine is configured, including
-            // while locked: the peel overlay leaves its unrevealed region clear so
-            // the live wallpaper surface beneath keeps showing through and gets
-            // peeled, instead of being covered by an opaque fill.
-            if (bgRoot.wallpaperEngineConfigured)
-                return "transparent";
             if (!bgRoot.wallpaperSafetyTriggered || bgRoot.wallpaperIsVideo)
                 return "transparent";
             return CF.ColorUtils.mix(Appearance.colors.colLayer0, Appearance.colors.colPrimary, 0.75);
@@ -216,7 +166,6 @@ Variants {
         }
 
         Component.onCompleted: {
-            bgRoot.wallpaperEngineLockProgress = GlobalStates.screenLocked ? 1 : 0
             previousWallpaper.source = ""
             wallpaper.source = bgRoot.wallpaperSafetyTriggered ? "" : bgRoot.wallpaperPath
             bgRoot.currentWallpaperSource = bgRoot.wallpaperPath
@@ -230,17 +179,6 @@ Variants {
         }
 
         onWallpaperPathChanged: {
-            // Wallpaper Engine owns live-wallpaper changes through
-            // startEngineTransition(). Its preview also feeds wallpaperPath,
-            // but the ordinary transition layer is hidden in this mode. Do not
-            // decode and render a second full-screen from/to pair behind it.
-            if (bgRoot.wallpaperEngineConfigured) {
-                transitionAnim.stop()
-                previousWallpaper.source = ""
-                wallpaper.source = ""
-                bgRoot.transitionProgress = 1.0
-                return
-            }
             // Lock/unlock can request a wallpaper that is still in QML's image
             // cache. In that case status may remain Ready and emit no change,
             // so explicitly start the transition on the next event-loop turn.
@@ -276,18 +214,6 @@ Variants {
             })
         }
 
-        onWallpaperEngineConfiguredChanged: {
-            if (bgRoot.wallpaperEngineConfigured) {
-                transitionAnim.stop()
-                previousWallpaper.source = ""
-                wallpaper.source = ""
-                bgRoot.transitionProgress = 1.0
-            } else {
-                wallpaper.source = bgRoot.wallpaperPath
-                bgRoot.currentWallpaperSource = bgRoot.wallpaperPath
-            }
-        }
-
         NumberAnimation {
             id: transitionAnim
             target: bgRoot
@@ -303,57 +229,10 @@ Variants {
             }
         }
 
-        Connections {
-            target: WallpaperEngine
-            function onTransitionRequested(fromStill, fromPreview, toStill, toPreview) {
-                bgRoot.startEngineTransition(fromStill, fromPreview, toStill, toPreview)
-            }
-        }
-
-        Connections {
-            target: GlobalStates
-            function onScreenLockedChanged() {
-                if (!bgRoot.wallpaperEngineConfigured)
-                    return
-                // Pick the shader before kicking off its progress animation. The
-                // Overlay-layer promotion is bound to screenLocked/progress, so the
-                // peel is visible above the lock surface from its first frame.
-                bgRoot.currentShader = bgRoot.wallpaperAnimation === "random"
-                    ? bgRoot.shaderList[Math.floor(Math.random() * bgRoot.shaderList.length)]
-                    : bgRoot.wallpaperAnimation
-                if (GlobalStates.screenLocked) {
-                    // Hold on the sharp still until the lock wallpaper has decoded,
-                    // then peel. The lock surface (session*) blurs whatever shows
-                    // through the peel's to-side, so revealing it before it loads
-                    // flashes the blurred live wallpaper. A large lock wallpaper can
-                    // take a second or two to decode; lockTransition.onToReady kicks
-                    // off the peel once it is ready.
-                    if (lockTransition.toStatus === Image.Ready)
-                        bgRoot.wallpaperEngineLockProgress = 1
-                } else {
-                    bgRoot.wallpaperEngineLockProgress = 0
-                }
-            }
-        }
-
-        NumberAnimation {
-            id: engineTransitionAnim
-            target: bgRoot
-            property: "engineTransitionProgress"
-            from: 0.0
-            to: 1.0
-            duration: Appearance.wallpaperTransitionDuration
-            easing.type: Easing.InOutCubic
-            onFinished: {
-                bgRoot.engineTransitionActive = false
-                engineSwitchTransition.setSources("", "", "", "")
-            }
-        }
-
         Timer {
             id: wallpaperChangeTimer
             interval: Config.options.wallpaperSelector.changeInterval
-            running: Config.options.wallpaperSelector.changeInterval > 0 && !bgRoot.wallpaperEngineActive
+            running: Config.options.wallpaperSelector.changeInterval > 0
             repeat: true
             onTriggered: {
                 if (Wallpapers.folderModel.count > 0) {
@@ -365,31 +244,6 @@ Variants {
         Item {
             anchors.fill: parent
 
-            Item {
-                id: engineTransitionLayer
-                anchors.fill: parent
-                visible: bgRoot.engineTransitionActive
-
-                // Same shared transition the lock uses. preload decodes the
-                // from-side synchronously so it is shown the instant the layer
-                // becomes active - at progress 0 the shader draws only the
-                // from-side, covering the outgoing wallpaper immediately while
-                // the to-side loads (the animation itself waits for onToReady, so
-                // nothing black is ever revealed).
-                WallpaperEngineTransition {
-                    id: engineSwitchTransition
-                    anchors.fill: parent
-                    progress: bgRoot.engineTransitionProgress
-                    shader: bgRoot.currentShader
-                    contentVisible: bgRoot.engineTransitionActive
-                    preload: true
-                    onToReady: {
-                        if (bgRoot.engineTransitionActive && !engineTransitionAnim.running)
-                            engineTransitionAnim.restart()
-                    }
-                }
-            }
-
             Image {
                 id: previousWallpaper
                 anchors.fill: parent
@@ -397,8 +251,7 @@ Variants {
                 cache: true
                 smooth: true
                 asynchronous: true
-                layer.enabled: !bgRoot.wallpaperEngineConfigured
-                    && bgRoot.wallpaperAnimation !== ""
+                layer.enabled: bgRoot.wallpaperAnimation !== ""
                     && bgRoot.transitionProgress < 1
                 visible: false
             }
@@ -410,11 +263,9 @@ Variants {
                 cache: true
                 smooth: true
                 asynchronous: true
-                layer.enabled: !bgRoot.wallpaperEngineConfigured
-                    && bgRoot.wallpaperAnimation !== ""
+                layer.enabled: bgRoot.wallpaperAnimation !== ""
                     && bgRoot.transitionProgress < 1
-                visible: !bgRoot.wallpaperEngineConfigured && !bgRoot.engineTransitionActive
-                    && bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled
+                visible: bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled
                 onStatusChanged: {
                     if (status === Image.Ready && bgRoot.transitionProgress === 0.0) {
                         transitionAnim.restart()
@@ -425,11 +276,7 @@ Variants {
             ShaderEffect {
                 id: transitionEffect
                 anchors.fill: parent
-                // Hidden while a Wallpaper Engine transition is playing so the
-                // still->image peel is not covered by the incoming image popping
-                // in the instant Wallpaper Engine deconfigures mid-transition.
-                visible: !bgRoot.wallpaperEngineConfigured && !bgRoot.engineTransitionActive
-                    && !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled
+                visible: !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled
                 property var fromImage: previousWallpaper
                 property var toImage: wallpaper
                 property real progress: bgRoot.transitionProgress
@@ -444,8 +291,7 @@ Variants {
 
             Loader {
                 id: blurLoader
-                active: !bgRoot.wallpaperEngineConfigured
-                    && Config.options.lock.blur.enable && (GlobalStates.screenLocked || scaleAnim.running)
+                active: Config.options.lock.blur.enable && (GlobalStates.screenLocked || scaleAnim.running)
                 anchors.fill: parent
                 scale: GlobalStates.screenLocked ? Config.options.lock.blur.extraZoom : 1
                 Behavior on scale {
@@ -468,85 +314,11 @@ Variants {
                 }
             }
 
-            Item {
-                id: wallpaperEngineLockOverlay
-                anchors.fill: parent
-                // Visible from the first locked frame - not only once progress
-                // ramps above 0 - so the opaque still covers the live surface
-                // immediately. Otherwise there is a frame where the promoted
-                // (transparent) background shows Hyprland's blur of the live
-                // wallpaper behind the lock surface before the peel starts.
-                visible: bgRoot.wallpaperEngineConfigured
-                    && (GlobalStates.screenLocked || bgRoot.wallpaperEngineLockProgress > 0)
-                layer.enabled: visible && Config.options.lock.blur.enable
-                // Ramp the frost with lock progress so the peel itself stays sharp
-                // and the blur only settles in as the lock finishes (and lifts as
-                // it unlocks), instead of blurring the wallpaper mid-transition.
-                layer.effect: FastBlur { radius: Config.options.lock.blur.radius * bgRoot.wallpaperEngineLockProgress }
-
-                // Same shared transition the switch uses. from = full-scene still
-                // rendered from the live wallpaper (opaque, so it hides the
-                // compositor-blurred live surface and can be parallaxed); to = the
-                // lock wallpaper (lockWall or the project preview). A missing still
-                // falls back to the preview instead of showing blank.
-                WallpaperEngineTransition {
-                    id: lockTransition
-                    anchors.fill: parent
-                    visible: bgRoot.wallpaperAnimation !== ""
-                    fromSource: wallpaperEngineLockOverlay.visible
-                        ? Config.options.wallpaperSelector.wallpaperEngine.activeStill
-                        : ""
-                    fromFallback: Config.options.wallpaperSelector.wallpaperEngine.activePreview
-                    toSource: wallpaperEngineLockOverlay.visible
-                        ? (Config.options.background.lockWall !== ""
-                            ? Config.options.background.lockWall
-                            : Config.options.wallpaperSelector.wallpaperEngine.activePreview)
-                        : ""
-                    progress: bgRoot.wallpaperEngineLockProgress
-                    shader: bgRoot.currentShader
-                    contentVisible: bgRoot.wallpaperAnimation !== ""
-                    // Decode the still synchronously so it covers the live
-                    // surface on the first locked frame (no blur flash).
-                    preload: true
-                    // If locking began before the lock wallpaper finished
-                    // decoding, start the peel now that it is ready.
-                    onToReady: {
-                        if (GlobalStates.screenLocked && bgRoot.wallpaperEngineLockProgress === 0)
-                            bgRoot.wallpaperEngineLockProgress = 1
-                    }
-                }
-
-                // No-animation fallback: cross-fade the lock wallpaper in directly.
-                Image {
-                    id: wallpaperEngineLockImage
-                    anchors.fill: parent
-                    source: wallpaperEngineLockOverlay.visible
-                        ? (Config.options.background.lockWall !== ""
-                            ? Config.options.background.lockWall
-                            : Config.options.wallpaperSelector.wallpaperEngine.activePreview)
-                        : ""
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                    visible: bgRoot.wallpaperAnimation === ""
-                    opacity: bgRoot.wallpaperEngineLockProgress
-                }
-
-                // Dim only ramps in with the lock so the live wallpaper stays at
-                // full brightness until the transition actually covers it.
-                Rectangle {
-                    anchors.fill: parent
-                    visible: wallpaperEngineLockOverlay.visible
-                    color: CF.ColorUtils.transparentize(Appearance.colors.colLayer0, 0.7)
-                    opacity: bgRoot.wallpaperEngineLockProgress
-                }
-            }
-
             Rectangle {
                 id: centeredWallpaperBg
                 anchors.fill: parent
                 color: bgRoot.centeredWallpaperColor
-                opacity: bgRoot.centeredWallpaperEnabled && !bgRoot.wallpaperEngineConfigured ? 1 : 0
+                opacity: bgRoot.centeredWallpaperEnabled ? 1 : 0
                 visible: opacity > 0
 
                 Behavior on opacity {
@@ -564,7 +336,7 @@ Variants {
                 transformOrigin: Item.Center
                 visible: opacity > 0
 
-                state: bgRoot.centeredWallpaperEnabled && !bgRoot.wallpaperEngineConfigured ? "shown" : "hidden"
+                state: bgRoot.centeredWallpaperEnabled ? "shown" : "hidden"
 
                 states: [
                     State {
@@ -761,7 +533,7 @@ Variants {
                         scaledScreenWidth: bgRoot.screen.width
                         scaledScreenHeight: bgRoot.screen.height
                         wallpaperScale: 1
-                        wallpaperPath: bgRoot.widgetWallpaperPath
+                        wallpaperPath: bgRoot.wallpaperPath
                     }
                 }
 
@@ -794,7 +566,7 @@ Variants {
                             wallpaperScale: 1
                             // Use the exact source resolved by this background,
                             // including lock wallpaper and video thumbnails.
-                            wallpaperPath: bgRoot.widgetWallpaperPath
+                            wallpaperPath: bgRoot.wallpaperPath
                         }
                     }
                 }
