@@ -127,6 +127,60 @@ Variants {
         // weShown stays false, so the static wallpaper still shows.
         property bool weShown: weLoader.status === Loader.Ready
 
+        // WE wallpaper switch transition state.
+        property string weLoadedProject: ""     // project currently in the surface
+        property real weTransitionProgress: 1.0  // 0 = old still, 1 = new surface
+        property bool weTransitioning: false
+
+        // Switch the WE surface to `path`, animating a shader transition from a
+        // snapshot of the current frame into the newly-loaded surface. Called on
+        // weProjectPath changes instead of a reactive binding so the old frame can
+        // be captured before the surface reloads.
+        function loadWeWallpaper(path) {
+            if (!weLoader.item || path === bgRoot.weLoadedProject) return
+            const canTransition = bgRoot.weLoadedProject !== "" && weLoader.item.rendered
+                && bgRoot.wallpaperAnimation !== ""
+            if (!canTransition) {
+                bgRoot.weLoadedProject = path
+                weLoader.item.projectPath = path
+                return
+            }
+            // Snapshot the outgoing frame, then swap + run the transition.
+            weLoader.item.grabToImage(function(result) {
+                weOldStill.source = result.url
+                bgRoot.weLoadedProject = path
+                bgRoot.currentShader = bgRoot.wallpaperAnimation === "random"
+                    ? bgRoot.shaderList[Math.floor(Math.random() * bgRoot.shaderList.length)]
+                    : bgRoot.wallpaperAnimation
+                bgRoot.weTransitionProgress = 0.0
+                bgRoot.weTransitioning = true
+                weLoader.item.projectPath = path // reload; onRenderedChanged starts the anim
+            })
+        }
+        onWeProjectPathChanged: loadWeWallpaper(bgRoot.weProjectPath)
+
+        // Hold the old still briefly after the new surface's first frame so the
+        // transition reveals settled content, not a warmup/black frame.
+        Timer {
+            id: weTransitionDelay
+            interval: 300
+            onTriggered: weTransitionAnim.restart()
+        }
+
+        NumberAnimation {
+            id: weTransitionAnim
+            target: bgRoot
+            property: "weTransitionProgress"
+            from: 0.0
+            to: 1.0
+            duration: Appearance.wallpaperTransitionDuration
+            easing.type: Easing.InOutCubic
+            onFinished: {
+                bgRoot.weTransitioning = false
+                weOldStill.source = ""
+            }
+        }
+
         property bool wallpaperIsVideo: bgRoot.effectiveWallpaperPath.endsWith(".mp4") || bgRoot.effectiveWallpaperPath.endsWith(".webm") || bgRoot.effectiveWallpaperPath.endsWith(".mkv") || bgRoot.effectiveWallpaperPath.endsWith(".avi") || bgRoot.effectiveWallpaperPath.endsWith(".mov")
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : bgRoot.effectiveWallpaperPath
         property bool wallpaperSafetyTriggered: {
@@ -266,7 +320,60 @@ Variants {
                 anchors.fill: parent
                 active: bgRoot.weActive
                 source: Qt.resolvedUrl("WallpaperEngineLayer.qml")
-                onLoaded: if (item) item.projectPath = Qt.binding(() => bgRoot.weProjectPath)
+                // projectPath is set imperatively (see loadWeWallpaper) rather than
+                // bound, so a switch can snapshot the old frame before reloading.
+                onLoaded: if (item) {
+                    bgRoot.weLoadedProject = bgRoot.weProjectPath
+                    item.projectPath = bgRoot.weProjectPath
+                }
+                // First rendered frame of a newly-loaded project: kick off the
+                // shader transition against the captured old frame.
+                Connections {
+                    target: weLoader.item
+                    enabled: weLoader.item !== null
+                    function onRenderedChanged() {
+                        // `rendered` flips on the first frame, which can still be a
+                        // warmup/black frame. Hold the old still a touch longer so
+                        // the peel reveals real content, not black.
+                        if (weLoader.item && weLoader.item.rendered
+                                && bgRoot.weTransitioning && bgRoot.weTransitionProgress === 0.0)
+                            weTransitionDelay.restart()
+                    }
+                }
+            }
+
+            // Frozen snapshot of the outgoing WE frame (fromImage of the transition).
+            Image {
+                id: weOldStill
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                cache: false
+                visible: false
+            }
+            // The live incoming WE surface as a sampled texture (toImage).
+            ShaderEffectSource {
+                id: weLiveSource
+                anchors.fill: parent
+                sourceItem: weLoader.item
+                live: true
+                hideSource: false
+                visible: false
+            }
+            // Reuses the same peel/pixelate/etc. shaders as the static-image
+            // transition, blending the old WE still into the live new WE surface.
+            ShaderEffect {
+                id: weTransition
+                anchors.fill: parent
+                z: 1
+                visible: bgRoot.weTransitioning
+                property var fromImage: weOldStill
+                property var toImage: weLiveSource
+                property real progress: bgRoot.weTransitionProgress
+                property real aspectX: width / height
+                property real aspectY: 1.0
+                property vector2d aspectRatio: Qt.vector2d(aspectX, aspectY)
+                property vector2d origin: Qt.vector2d(0.5, 0.5)
+                fragmentShader: Qt.resolvedUrl(`shaders/${bgRoot.currentShader}.frag.qsb`)
             }
 
             Image {
