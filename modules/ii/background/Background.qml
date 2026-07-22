@@ -114,6 +114,16 @@ Variants {
             return Config.options.background.wallpaperPath
         }
 
+        // Embedded Wallpaper Engine: when a WE project is active it is rendered
+        // in-shell (WallpaperEngineLayer) as the wallpaper, replacing the static
+        // image path. Suppressed while the work-safety screen is up.
+        property string weProjectPath: Config.options.wallpaperSelector.wallpaperEngine.activePath ?? ""
+        property bool weActive: bgRoot.weProjectPath !== "" && !bgRoot.wallpaperSafetyTriggered
+        // Only hide the static-image layers once the WE surface has actually
+        // loaded. If the module is missing (stock binary) the Loader errors and
+        // weShown stays false, so the static wallpaper still shows.
+        property bool weShown: weLoader.status === Loader.Ready
+
         property bool wallpaperIsVideo: bgRoot.effectiveWallpaperPath.endsWith(".mp4") || bgRoot.effectiveWallpaperPath.endsWith(".webm") || bgRoot.effectiveWallpaperPath.endsWith(".mkv") || bgRoot.effectiveWallpaperPath.endsWith(".avi") || bgRoot.effectiveWallpaperPath.endsWith(".mov")
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : bgRoot.effectiveWallpaperPath
         property bool wallpaperSafetyTriggered: {
@@ -244,6 +254,18 @@ Variants {
         Item {
             anchors.fill: parent
 
+            // Live Wallpaper Engine layer - bottom of the stack. When active it
+            // is the wallpaper; the static-image layers below are hidden. Loaded
+            // by URL so a stock binary (no WE module) degrades to static images
+            // instead of erroring the whole background.
+            Loader {
+                id: weLoader
+                anchors.fill: parent
+                active: bgRoot.weActive
+                source: Qt.resolvedUrl("WallpaperEngineLayer.qml")
+                onLoaded: if (item) item.projectPath = Qt.binding(() => bgRoot.weProjectPath)
+            }
+
             Image {
                 id: previousWallpaper
                 anchors.fill: parent
@@ -265,7 +287,7 @@ Variants {
                 asynchronous: true
                 layer.enabled: bgRoot.wallpaperAnimation !== ""
                     && bgRoot.transitionProgress < 1
-                visible: bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled
+                visible: !bgRoot.weShown && bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled
                 onStatusChanged: {
                     if (status === Image.Ready && bgRoot.transitionProgress === 0.0) {
                         transitionAnim.restart()
@@ -276,7 +298,7 @@ Variants {
             ShaderEffect {
                 id: transitionEffect
                 anchors.fill: parent
-                visible: !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled
+                visible: !bgRoot.weShown && !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled
                 property var fromImage: previousWallpaper
                 property var toImage: wallpaper
                 property real progress: bgRoot.transitionProgress
