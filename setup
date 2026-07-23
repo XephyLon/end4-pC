@@ -46,8 +46,11 @@ ${STY_BOLD}${STY_CYAN}Access ${STY_UNDERLINE}https://ii.clsty.link${STY_RST} ${S
 "
 }
 case $1 in
+  # No subcommand: launch the whiptail TUI (it self-guards for no TTY/no
+  # whiptail and falls back to `setup install` in that case).
+  "")bash "${REPO_ROOT}/sdata/subcmd-install/tui.sh";exit;;
   # Global help
-  ""|help|--help|-h)showhelp_global;exit;;
+  help|--help|-h)showhelp_global;exit;;
   # Correct subcommand
   install|uninstall|exp-update|exp-merge|resetfirstrun|checkdeps|virtmon)
     SUBCMD_NAME=$1
