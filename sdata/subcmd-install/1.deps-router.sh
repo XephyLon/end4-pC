@@ -28,6 +28,19 @@ function migrate_notify_legacy(){
   pause
 }
 
+# Package-less prior install (config copied manually, no illogical-impulse-*
+# packages): nothing to remove, but flag it so the user knows the config dir is
+# recognized and will be migrated at runtime.
+function migrate_notify_legacy_config(){
+  printf "${STY_YELLOW}"
+  printf "===MIGRATION NOTICE===\n"
+  printf "A prior illogical-impulse config was detected at \"%s\" (no illogical-impulse-* packages found — a manual/config-only install).\n" "$IMI_LEGACY_CONFIG_DIR"
+  printf "It will be migrated to ~/.config/immaterial-impulse automatically on first shell launch.\n"
+  printf "Your existing ~/.config/quickshell will be backed up (see the backup step under \"3. Copying config files\") before it's overwritten.\n"
+  printf "${STY_RST}"
+  pause
+}
+
 function migrate_remove_legacy(){
   local pkgs
   pkgs="$(legacy_packages)"
@@ -51,6 +64,8 @@ function migrate_remove_legacy(){
 
 if has_legacy_packages; then
   migrate_notify_legacy
+elif has_legacy_config; then
+  migrate_notify_legacy_config
 fi
 #####################################################################################
 

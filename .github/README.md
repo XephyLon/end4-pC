@@ -74,9 +74,12 @@ with a periodic table on `Super`+`/`, because why not.
 ## Installation
 
 > Installs the shell to `~/.config/quickshell/ii` and its config to
-> `~/.config/immaterial-impulse`. Coming from illogical-impulse? The old
-> `~/.config/illogical-impulse` directory and your keyring entries migrate
-> automatically on first launch.
+> `~/.config/immaterial-impulse`. **Coming from illogical-impulse?** The installer
+> detects a prior install — either by its `illogical-impulse-*` packages or a
+> leftover `~/.config/illogical-impulse` config (manual installs) — and transitions
+> it: the `immaterial-impulse-*` packages replace the old ones, your
+> `~/.config/quickshell` is backed up before overwrite, and the config dir +
+> keyring entries migrate to the new names on first launch.
 
 ```bash
 git clone https://github.com/XephyLon/end4-pC.git
