@@ -23,7 +23,7 @@ class PresetTests(unittest.TestCase):
     def test_complete_plugin_state_round_trips_between_presets(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
-            config_dir = home / ".config/illogical-impulse"
+            config_dir = home / ".config/immaterial-impulse"
             script_dir = home / ".config/quickshell/ii/scripts"
             wallpaper_dir = script_dir / "wallpapers"
             colors_dir = script_dir / "colors"
@@ -80,7 +80,7 @@ class PresetTests(unittest.TestCase):
     def test_save_prefers_authoritative_in_memory_plugin_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
-            config_dir = home / ".config/illogical-impulse"
+            config_dir = home / ".config/immaterial-impulse"
             (config_dir / "presets").mkdir(parents=True)
             (config_dir / "config.json").write_text(json.dumps({
                 "background": {"wallpaperPath": "/tmp/wallpaper.jpg"},
@@ -123,7 +123,7 @@ class PresetTests(unittest.TestCase):
     def test_position_only_preset_keeps_current_plugin_options(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
-            config_dir = home / ".config/illogical-impulse"
+            config_dir = home / ".config/immaterial-impulse"
             script_dir = home / ".config/quickshell/ii/scripts"
             (config_dir / "presets").mkdir(parents=True)
             (script_dir / "wallpapers").mkdir(parents=True)

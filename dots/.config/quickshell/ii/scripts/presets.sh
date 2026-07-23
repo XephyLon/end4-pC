@@ -5,7 +5,7 @@
 #   presets.sh --remove <name>
 #   presets.sh --apply <name>
 
-CONFIG_DIR="$HOME/.config/illogical-impulse"
+CONFIG_DIR="$HOME/.config/immaterial-impulse"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 PLUGIN_STATE_FILE="$CONFIG_DIR/plugin-state.json"
 PRESETS_DIR="$CONFIG_DIR/presets"
