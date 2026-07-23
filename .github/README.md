@@ -81,9 +81,9 @@ with a periodic table on `Super`+`/`, because why not.
 > `~/.config/quickshell` is backed up before overwrite, and the config dir +
 > keyring entries migrate to the new names on first launch.
 
-```bash
-# Quick install — fetches the suite, then runs the installer
-bash <(curl -fsSL https://raw.githubusercontent.com/XephyLon/immaterial-impulse/main/get.sh)
+```sh
+# Quick install — fetches the suite, then runs the installer (bash/zsh/fish)
+curl -fsSL https://raw.githubusercontent.com/XephyLon/immaterial-impulse/main/get.sh -o /tmp/imi-get.sh && bash /tmp/imi-get.sh
 
 # Or clone and run it yourself
 git clone https://github.com/XephyLon/immaterial-impulse.git
@@ -91,8 +91,10 @@ cd immaterial-impulse
 ./setup
 ```
 
-> Use `bash <(curl …)`, not `curl … | bash` — the installer is an interactive
-> menu, and piping into `bash` would occupy stdin and break the prompts.
+> Download-then-run keeps things portable and correct: `curl … | bash` would
+> occupy stdin and break the installer's interactive menu, and `bash <(curl …)`
+> is bash-only (fails in fish). If you're in bash and prefer a one-liner,
+> `bash <(curl -fsSL …/get.sh)` also works.
 
 `./setup` with no arguments opens a **whiptail menu** to pick:
 
