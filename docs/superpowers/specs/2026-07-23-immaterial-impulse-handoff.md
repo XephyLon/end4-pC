@@ -56,16 +56,37 @@ already `ii` (illogical-impulse); rebranding to **I**mmaterial **I**mpulse keeps
 `~/.config/illogical-impulse/` needs a rename/migration decision (B).
 
 ## Where we stopped / NEXT
-A part 1 (git strategy) approved. **NEXT = A part 2:** what exactly moves where +
-the path/identity fallout —
-- theme identity shifts from `end4-pC` → `ii`;
-- live dir is currently `~/.config/quickshell/end4-pC`;
-- internal QML import roots when the tree moves under `dots/.config/quickshell/ii/`;
-- the `illogical-impulse` data-dir references that bridge into B.
+A part 1 (git strategy) **approved**. A part 2 (path/identity fallout)
+**approved** — decisions D1/D2/D3 below.
 
-Then: present full A design → write the real spec
-`docs/superpowers/specs/2026-07-23-repo-unification-design.md` → user reviews →
-invoke `writing-plans`. Then repeat the cycle for B.
+Full A design written to
+`docs/superpowers/specs/2026-07-23-repo-unification-design.md`.
+**NEXT: user reviews that spec → invoke `writing-plans`.** Then repeat the
+spec → plan → build cycle for B.
+
+### A part 2 decisions (approved)
+- **D1** — dev infra (`tests/`, `docs/`, `AGENT.md`, `CONTRIBUTING.md`) travels
+  with the theme into `dots/.config/quickshell/ii/`, keeping the pctrade subtree
+  self-contained and subtree-mergeable. **Exception:** `.github/` stays at repo
+  root (GitHub reads workflows only from there); `tests.yml` gets the new path.
+- **D2** — `scripts/presets.sh` derives its root from `$0`
+  (`readlink -f`) instead of hardcoding `~/.config/quickshell/end4-pC`;
+  location-independent and survives B untouched.
+- **D3** — `About.qml:29` self-reinstall is stubbed in A, wired to `setup/` in C.
+
+### Key finding: the move is cheaper than expected
+`import qs.*` (~1705 sites) and `Quickshell.shellPath()` (~40 sites) resolve
+against the **shell root** (dir containing `shell.qml`), not the config dir
+name — so relocating the tree needs **zero** import edits. Tests are likewise
+self-locating (`parents[1]` / `$SCRIPT_DIR/..`).
+
+### Logged for B
+- `README.md:46` promises the fork *coexists* with illogical-impulse and never
+  overwrites it. Occupying `~/.config/quickshell/ii` makes that a **supersede** —
+  both READMEs must be rewritten (also `README.md:9,120`, `AGENT.md:13,23,25`).
+- `services/KeyringStorage.qml:24,32` uses `illogical-impulse` as a `secret-tool`
+  **attribute**, not a path — renaming it orphans stored secrets, so it needs a
+  real migration, not a sed pass.
 
 ## Constraints / working defaults (carry over)
 - No Claude/agent attribution in commits or PR bodies.
