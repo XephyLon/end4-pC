@@ -47,7 +47,11 @@ function migrate_remove_legacy(){
   [[ -z "$pkgs" ]] && return 0
   case "$OS_GROUP_ID" in
     arch)
-      v sudo pacman -Rns --noconfirm $pkgs
+      # -Rn, NOT -Rns: remove only the old illogical-impulse-* metapackages, not
+      # their dependencies. The immaterial-impulse-* successors share those deps
+      # (qt6-wayland, cpptrace, kdialog, ...); -s would cascade-remove them as
+      # "orphans" and break the new install / the WE build.
+      v sudo pacman -Rn --noconfirm $pkgs
       ;;
     fedora)
       v sudo dnf remove -y $pkgs

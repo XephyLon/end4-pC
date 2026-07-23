@@ -134,7 +134,11 @@ install_we_build_deps(){
   x sudo pacman -S --needed --noconfirm \
     lz4 ffmpeg mpv glfw glew freeglut libpulse libcups at-spi2-core nss \
     libxcomposite libxdamage nspr \
-    git cmake sdl2 glm wayland-protocols xorg-xrandr
+    git cmake sdl2 glm wayland-protocols xorg-xrandr \
+    `# Quickshell's own build deps - the WE step recompiles Quickshell, and` \
+    `# these are NOT guaranteed present (the migration's -R can drop cpptrace` \
+    `# et al. as orphans of the old quickshell). cpptrace was the cmake blocker.` \
+    cpptrace cli11 ninja qt6-shadertools spirv-tools vulkan-headers wayland jemalloc
 }
 if [[ "${INSTALL_WE:-0}" == "1" ]]; then
   showfun install_we_build_deps
