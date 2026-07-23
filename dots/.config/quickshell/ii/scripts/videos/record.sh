@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-CONFIG_FILE="$HOME/.config/illogical-impulse/config.json"
+CONFIG_FILE="$HOME/.config/immaterial-impulse/config.json"
 JSON_PATH=".screenRecord.savePath"
 CUSTOM_PATH=$(jq -r "$JSON_PATH" "$CONFIG_FILE" 2>/dev/null)
 RECORDING_DIR=""

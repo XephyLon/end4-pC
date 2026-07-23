@@ -43,7 +43,7 @@ apply_kitty() {
 
   # Re-append the managed Kitty background block after regenerating colors.
   python3 "$SCRIPT_DIR/../terminal/apply_terminal_background.py" \
-    --config "$XDG_CONFIG_HOME/illogical-impulse/config.json" \
+    --config "$XDG_CONFIG_HOME/immaterial-impulse/config.json" \
     --theme "$STATE_DIR/user/generated/terminal/kitty-theme.conf" || true
 
   # Reload
@@ -96,7 +96,7 @@ apply_qt() {
 }
 
 # Check if terminal theming is enabled in config
-CONFIG_FILE="$XDG_CONFIG_HOME/illogical-impulse/config.json"
+CONFIG_FILE="$XDG_CONFIG_HOME/immaterial-impulse/config.json"
 if [ -f "$CONFIG_FILE" ]; then
   enable_terminal=$(jq -r '.appearance.wallpaperTheming.enableTerminal' "$CONFIG_FILE")
   if [ "$enable_terminal" = "true" ]; then

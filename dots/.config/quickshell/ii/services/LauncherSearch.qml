@@ -95,7 +95,7 @@ Singleton {
         { page: "Quick",     path: "QuickConfig.qml" },
     ]
 
-    // Load user action scripts from ~/.config/illogical-impulse/actions/
+    // Load user action scripts from ~/.config/immaterial-impulse/actions/
     // Uses FolderListModel to auto-reload when scripts are added/removed
     property var userActionScripts: {
         const actions = [];
