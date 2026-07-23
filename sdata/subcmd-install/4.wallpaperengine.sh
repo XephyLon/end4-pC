@@ -71,7 +71,6 @@ QS_SRC="$BUILD_DIR/build/quickshell"
 
 # bootstrap.sh exports these for its own (commented-out) cmake invocations;
 # re-export them here since that export dies with bootstrap.sh's subshell.
-export WALLPAPERENGINE_INCLUDE_DIR="$WE_SRC/src"
 export WALLPAPERENGINE_SRC="$WE_SRC/src"
 
 # --- 3. Build linux-wallpaperengine (the FBO-driver lib) --------------------
@@ -92,8 +91,14 @@ cmake --build "$WE_SRC/build" -j"$JOBS"
 # them cleanly. rm -rf build2 first so a stale Makefiles-configured dir doesn't
 # block the generator switch.
 rm -rf "$QS_SRC/build2"
+# The WE module (src/wallpaperengine/CMakeLists.txt) reads WALLPAPERENGINE_SRC
+# for its include dir (and derives WALLPAPERENGINE_BUILD from it for the lib) —
+# NOT the WALLPAPERENGINE_INCLUDE_DIR name this step used to pass, which the
+# module ignored, so it fell back to a non-existent default and wethread.cpp
+# couldn't find <WallpaperEngine/Application/ApplicationContext.h>. Pass the
+# real names.
 cmake -GNinja -S "$QS_SRC" -B "$QS_SRC/build2" -DCMAKE_BUILD_TYPE=Release \
-  -DWALLPAPERENGINE_INCLUDE_DIR="$WALLPAPERENGINE_INCLUDE_DIR" \
+  -DWALLPAPERENGINE_SRC="$WE_SRC/src" -DWALLPAPERENGINE_BUILD="$WE_SRC/build" \
   -DSERVICE_MPRIS=ON -DSERVICE_NOTIFICATIONS=ON -DSERVICE_PAM=ON \
   -DSERVICE_PIPEWIRE=ON -DSERVICE_POLKIT=ON -DSERVICE_STATUS_NOTIFIER=ON \
   -DSERVICE_UPOWER=ON -DBLUETOOTH=ON
