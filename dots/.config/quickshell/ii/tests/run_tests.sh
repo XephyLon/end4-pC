@@ -147,6 +147,12 @@ if ! python3 "$SCRIPT_DIR/test_expressive_design_system.py"; then
     exit 1
 fi
 
+echo "Running icon theme scanner tests..."
+if ! python3 "$SCRIPT_DIR/test_scan_icon_themes.py"; then
+    echo "Icon theme scanner tests failed."
+    exit 1
+fi
+
 echo "Running shared widget contract tests..."
 if ! python3 "$SCRIPT_DIR/test_shared_widget_contracts.py"; then
     echo "Shared widget contract tests failed."
