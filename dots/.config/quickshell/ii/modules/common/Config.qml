@@ -124,6 +124,9 @@ Singleton {
             }
 
             property JsonObject appearance: JsonObject {
+                // "" = follow the system icon theme; otherwise the directory
+                // name of an installed icon theme (see IconThemes.qml).
+                property string iconTheme: ""
                 property bool extraBackgroundTint: true
                 property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
                 property JsonObject fonts: JsonObject {
