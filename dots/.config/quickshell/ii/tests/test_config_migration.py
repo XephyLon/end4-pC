@@ -23,16 +23,40 @@ class ConfigMigrationTests(unittest.TestCase):
             self.assertEqual((new / "config.json").read_text(), '{"marker": 1}')
             self.assertFalse(old.exists())
 
-    def test_noop_when_new_exists(self):
+    def test_noop_when_new_has_real_config(self):
+        # New dir already has a genuine config.json -> never clobber it.
         with tempfile.TemporaryDirectory() as d:
             home = Path(d)
-            (home / ".config/illogical-impulse").mkdir(parents=True)
+            old = home / ".config/illogical-impulse"
+            old.mkdir(parents=True)
+            (old / "config.json").write_text('{"old": 1}')
             new = home / ".config/immaterial-impulse"
             new.mkdir(parents=True)
             (new / "config.json").write_text('{"keep": 1}')
             self._run(home)
             self.assertEqual((new / "config.json").read_text(), '{"keep": 1}')
-            self.assertTrue((home / ".config/illogical-impulse").exists())
+            self.assertTrue(old.exists())
+
+    def test_migrates_into_precreated_new_dir(self):
+        # The installer pre-creates ~/.config/immaterial-impulse (installed_true
+        # etc.) but no config.json yet, while the user's real settings are still
+        # under illogical-impulse. Migrate the user data in, keep installer files,
+        # leave the old dir as a backup. (Regression: this used to be skipped and
+        # the user got a default config.)
+        with tempfile.TemporaryDirectory() as d:
+            home = Path(d)
+            old = home / ".config/illogical-impulse"
+            (old / "actions").mkdir(parents=True)
+            (old / "config.json").write_text('{"bar": "mine"}')
+            (old / "actions" / "a.json").write_text("{}")
+            new = home / ".config/immaterial-impulse"
+            new.mkdir(parents=True)
+            (new / "installed_true").write_text("")
+            self._run(home)
+            self.assertEqual((new / "config.json").read_text(), '{"bar": "mine"}')
+            self.assertTrue((new / "actions" / "a.json").is_file())
+            self.assertTrue((new / "installed_true").is_file())  # installer file kept
+            self.assertTrue(old.exists())                        # old kept as backup
 
     def test_noop_when_nothing_to_migrate(self):
         with tempfile.TemporaryDirectory() as d:
