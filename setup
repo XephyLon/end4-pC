@@ -87,6 +87,10 @@ case ${SUBCMD_NAME} in
     if [[ "${SKIP_ALLFILES}" != true ]]; then
       source ${SUBCMD_DIR}/3.files.sh
     fi
+    # Optional: build+install a WE-capable Quickshell (no-op unless INSTALL_WE=1).
+    # Run (not sourced): it uses `exit 0` for its skip path, which must not
+    # exit this whole `setup` process.
+    bash ${SUBCMD_DIR}/4.wallpaperengine.sh
     ;;
   install-deps)
     for function in ${print_os_group_id_functions[@]}; do

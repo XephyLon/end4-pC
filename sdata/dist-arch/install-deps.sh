@@ -121,3 +121,22 @@ case $SKIP_PLASMAINTG in
     esac
     ;;
 esac
+
+## Optional: qs-wallpaperengine build deps (gated by INSTALL_WE, see
+## sdata/subcmd-install/4.wallpaperengine.sh). Package names taken directly
+## from linux-wallpaperengine's packaging/archlinux/PKGBUILD (depends +
+## makedepends) in the Almamu/linux-wallpaperengine tree that
+## qs-wallpaperengine's bootstrap.sh clones and patches. cmake/qt6base/
+## qt6declarative etc. for the Quickshell rebuild itself are already covered
+## by immaterial-impulse-quickshell-git's own PKGBUILD deps above, so they're
+## not repeated here.
+install_we_build_deps(){
+  x sudo pacman -S --needed --noconfirm \
+    lz4 ffmpeg mpv glfw glew freeglut libpulse libcups at-spi2-core nss \
+    libxcomposite libxdamage nspr \
+    git cmake sdl2 glm wayland-protocols xorg-xrandr
+}
+if [[ "${INSTALL_WE:-0}" == "1" ]]; then
+  showfun install_we_build_deps
+  v install_we_build_deps
+fi

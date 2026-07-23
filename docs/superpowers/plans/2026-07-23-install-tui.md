@@ -200,7 +200,7 @@ git commit -m "install: detect + offer transition of a prior illogical-impulse i
 - Create: `sdata/subcmd-install/4.wallpaperengine.sh`
 - Modify: per-distro dep lists to add WE build deps (gated).
 
-- [ ] **Step 1: Write the WE build/install step**
+- [x] **Step 1: Write the WE build/install step**
 
 `sdata/subcmd-install/4.wallpaperengine.sh`:
 ```bash
@@ -226,30 +226,45 @@ sudo install -Dm755 "$QS_BIN" /usr/local/bin/quickshell
 sudo ln -sf /usr/local/bin/quickshell /usr/local/bin/qs
 echo "[ImI] Wallpaper Engine: installed custom quickshell to /usr/local/bin."
 ```
-NOTE: the exact `bootstrap.sh` invocation, the built-binary path, and the runtime
-lib handling (`LD_LIBRARY_PATH` for linux-wallpaperengine's libs) must be
-confirmed against the qs-wallpaperengine repo's README at implementation time —
-read it first and adjust the paths/lib install accordingly (a wrapper that sets
-`LD_LIBRARY_PATH` may be needed instead of a bare binary install).
+NOTE (resolved during implementation, against the actual `~/dev/qs-wallpaperengine`
+repo): `bootstrap.sh` only clones+patches both upstreams and leaves its cmake
+configure/build lines as *comments* ("Scaffold only" status) — the real script
+runs those itself. The real working Quickshell build dir is `build2` (confirmed
+via `launch-shell.sh`, the actual runtime launcher), not the `build` dir named
+in bootstrap.sh's comments. `launch-shell.sh` also confirms the runtime
+`LD_LIBRARY_PATH` need (WE's own `build/output` + `/opt/linux-wallpaperengine{,/lib}`),
+so the install is a wrapper at `/usr/local/bin/quickshell` (+ `qs` symlink) that
+sets `LD_LIBRARY_PATH` and execs the real binary in the cache dir, not a bare
+copy. Also changed from the sketch's `rm -rf` + shallow clone to reusing an
+existing `BUILD_DIR` across re-runs (fetch/checkout in place), so the nested
+upstream builds can rebuild incrementally instead of from scratch every
+install — bootstrap.sh's own `clone_at()` already assumes this idempotency.
 
-- [ ] **Step 2: Add gated WE build deps per distro**
+- [x] **Step 2: Add gated WE build deps per distro**
 
-In each `sdata/dist-*/install-deps.sh`, add a function that installs the WE build
-deps (linux-wallpaperengine's deps: cmake, Qt6 dev, mpv/ffmpeg, glm, etc. — take
-the real list from qs-wallpaperengine's docs) called only when `INSTALL_WE=1`.
+Arch: exact `depends`/`makedepends` from linux-wallpaperengine's
+`packaging/archlinux/PKGBUILD`. Fedora: the dnf list from its README's
+"RHEL/Fedora-based systems" (Fedora 42) section. Gentoo and Nix: left as
+marked TODO blocks — the upstream README has no Gentoo/Nix package lists, and
+both distros' dep mechanisms here are a whole ebuild-overlay pipeline /
+home-manager flake respectively, not ad-hoc package-manager calls, so atom/attr
+names aren't confidently verifiable from this repo alone.
 
-- [ ] **Step 3: Hook it into the pipeline**
+- [x] **Step 3: Hook it into the pipeline**
 
-Add `4.wallpaperengine.sh` to the install step sequence (after config deploy), so
-`setup install` runs it (it self-skips unless `INSTALL_WE=1`).
+Added `bash ${SUBCMD_DIR}/4.wallpaperengine.sh` in `setup`'s `install)` case,
+right after `3.files.sh` (config deploy). Run via `bash`, not `source` — the
+step's own `exit 0` skip path would otherwise exit the whole `setup` process.
 
-- [ ] **Step 4: Verify (structure/dry-run — full build needs a build env)**
+- [x] **Step 4: Verify (structure/dry-run — full build needs a build env)**
 
-Run: `bash -n sdata/subcmd-install/4.wallpaperengine.sh` (syntax) and
-`INSTALL_WE=0 bash sdata/subcmd-install/4.wallpaperengine.sh` → prints "skipped",
-exits 0. A real build is verified manually in a VM/container.
+`bash -n sdata/subcmd-install/4.wallpaperengine.sh` passes.
+`INSTALL_WE=0 bash sdata/subcmd-install/4.wallpaperengine.sh` prints
+"[ImI] Wallpaper Engine: skipped." and exits 0. A real build is verified
+manually in a VM/container (not attempted here — the FBO driver in
+qs-wallpaperengine still has real TODOs per its own README's Status section).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add sdata/subcmd-install/4.wallpaperengine.sh sdata/dist-*/install-deps.sh

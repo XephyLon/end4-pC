@@ -67,3 +67,18 @@ for i in "${metapkgs[@]}"; do
 done
 
 v sudo emerge --depclean
+
+## TODO(qs-wallpaperengine, INSTALL_WE): linux-wallpaperengine's upstream
+## README only documents Ubuntu/Debian/Alt-Linux/Fedora dep lists, no Gentoo
+## atoms, and this distro's dep mechanism is a whole ebuild/overlay pipeline
+## (ii-dots/guru/hyproverlay above) rather than ad-hoc `emerge <pkg>` calls,
+## so package-category names below aren't confidently verifiable from here
+## (e.g. cmake has moved between sys-devel/ and dev-build/ across Gentoo
+## versions). The underlying deps to cover, per linux-wallpaperengine's
+## System Requirements section: cmake, lz4, zlib, sdl2, ffmpeg, X11/XRandr,
+## glfw3, glew, freeglut, glm, mpv, pulseaudio, fftw3, freetype. Gate any
+## addition behind `[[ "${INSTALL_WE:-0}" == "1" ]]` same as dist-arch/
+## dist-fedora, e.g.:
+##   if [[ "${INSTALL_WE:-0}" == "1" ]]; then
+##     v sudo emerge --update --quiet <verified atoms for the deps above>
+##   fi

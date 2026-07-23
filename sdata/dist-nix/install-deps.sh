@@ -82,3 +82,15 @@ fi
 
 showfun hm_deps
 v hm_deps
+
+## TODO(qs-wallpaperengine, INSTALL_WE): linux-wallpaperengine's upstream
+## README has no Nix/nixpkgs section, and this distro's deps are declared in
+## the home-manager flake (sdata/dist-nix/home-manager/), not installed
+## ad-hoc here, so wiring this in means adding packages to that flake's
+## home.packages, not this script. Likely nixpkgs attribute names for the
+## deps (per linux-wallpaperengine's System Requirements: cmake, lz4, zlib,
+## sdl2, ffmpeg, glfw, glew, glm, mpv, pulseaudio (libpulseaudio), fftw,
+## freetype) are straightforward (cmake, lz4, ffmpeg, glfw, glew, glm, mpv,
+## libpulseaudio, fftw, freetype, SDL2) but unverified against the actual
+## flake inputs/overlays in sdata/dist-nix/home-manager/, so not wired in
+## here. Gate any addition behind `INSTALL_WE=1` same as the other distros.
