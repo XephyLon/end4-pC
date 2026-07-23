@@ -114,6 +114,12 @@ FZF_COMMON=(
   --preview="cat '$SYSINFO_FILE'"
   --preview-window='right,32%,border-left'
 )
+# fzf 0.74+ draws a gutter column (default '▌') on every row, which stacks into
+# a stray vertical bar down the left of the list. Blank it where supported;
+# older fzf has no gutter (and would reject the flag), so only add it if known.
+if fzf --help 2>&1 | grep -q -- '--gutter'; then
+  FZF_COMMON+=(--gutter=' ')
+fi
 
 # Toggle menu. Uses globals: ORDER (keys), LABELS[key], STATE[key]=on|off.
 # Redraws on every toggle; a "Continue" sentinel breaks the loop. Mutates STATE.
