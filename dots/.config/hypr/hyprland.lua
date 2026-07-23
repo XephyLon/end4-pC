@@ -42,3 +42,4 @@ end
 
 -- Shell overrides --
 require("hyprland.shellOverrides.main")
+require("hyprland.shellOverrides.animations")
