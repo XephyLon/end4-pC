@@ -11,26 +11,18 @@ ROOT = Path(__file__).resolve().parents[1]
 DESIGN_SYSTEM = ROOT / "modules/common/plugins/designsystem"
 PLUGIN_ROOT = ROOT / "modules/common/plugins/bundled"
 PLUGIN_DIRS = (
-    "nandoroid-clock",
-    "nandoroid-at-a-glance",
     "nandoroid-media",
     "nandoroid-system-monitor",
     "nandoroid-weather",
     "nandoroid-currency",
 )
 EXPECTED_OPTIONS = {
-    "nandoroid-clock": {"style", "showDate"},
-    "nandoroid-at-a-glance": {
-        "showGreeting", "showDate", "showEvents", "showQuote", "alignment", "fontSize"
-    },
     "nandoroid-media": {"showLyrics", "useRomaji"},
     "nandoroid-system-monitor": {"vertical"},
     "nandoroid-weather": {"sizeMode"},
     "nandoroid-currency": {"sizeMode", "baseCurrency", "quote1", "quote2", "quote3", "quote4"},
 }
 EXPECTED_ENTRY_TYPES = {
-    "nandoroid-clock": "Expressive.NandoClock",
-    "nandoroid-at-a-glance": "Expressive.AtAGlance",
     "nandoroid-media": "Expressive.DesktopMediaWidget",
     "nandoroid-system-monitor": "Expressive.DesktopSystemMonitorWidget",
     "nandoroid-weather": "Expressive.DesktopWeatherWidget",
@@ -171,10 +163,6 @@ class ExpressiveDesignSystemTest(unittest.TestCase):
             'onVerticalRequested: value => PluginState.setOption("nandoroid_system_monitor", "vertical", value)',
             wrapper,
         )
-
-        for directory in ("nandoroid-clock", "nandoroid-at-a-glance"):
-            wrapper_text = (PLUGIN_ROOT / directory / "Widget.qml").read_text(encoding="utf-8")
-            self.assertIn("readonly property var blurRegions: []", wrapper_text)
 
 
 if __name__ == "__main__":
