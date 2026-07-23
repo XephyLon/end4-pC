@@ -2,6 +2,58 @@
 # It's not for directly running.
 printf "${STY_CYAN}[$0]: 1. Install dependencies\n${STY_RST}"
 
+#####################################################################################
+# Migration: detect a prior illogical-impulse install (renamed to
+# immaterial-impulse-* in this project). See sdata/lib/migrate-existing.sh.
+source ./sdata/lib/migrate-existing.sh
+
+# The default IMI_PKG_QUERY_CMD ("pacman -Qq") only makes sense on Arch.
+# Override per-distro; if the query tool isn't present the eval silently
+# fails and has_legacy_packages() just reports false (safe no-op).
+case "$OS_GROUP_ID" in
+  fedora) IMI_PKG_QUERY_CMD="rpm -qa --qf '%{NAME}\n'" ;;
+  gentoo) IMI_PKG_QUERY_CMD="qlist -I -C" ;; # requires app-portage/portage-utils
+esac
+
+function migrate_notify_legacy(){
+  printf "${STY_YELLOW}"
+  printf "===MIGRATION NOTICE===\n"
+  printf "A prior illogical-impulse install was detected on this system:\n"
+  legacy_packages | sed 's/^/  - /'
+  printf "\n"
+  printf "The immaterial-impulse-* packages (the renamed successor) will be installed by the step below.\n"
+  printf "The old illogical-impulse-* packages listed above will then be removed automatically afterwards, where supported for this distro.\n"
+  printf "Your existing ~/.config/quickshell will be backed up (see the backup step under \"3. Copying config files\") before it's overwritten.\n"
+  printf "${STY_RST}"
+  pause
+}
+
+function migrate_remove_legacy(){
+  local pkgs
+  pkgs="$(legacy_packages)"
+  [[ -z "$pkgs" ]] && return 0
+  case "$OS_GROUP_ID" in
+    arch)
+      v sudo pacman -Rns --noconfirm $pkgs
+      ;;
+    fedora)
+      v sudo dnf remove -y $pkgs
+      ;;
+    gentoo)
+      printf "${STY_YELLOW}[$0]: Skipping automatic removal of legacy illogical-impulse-* packages on Gentoo (portage category/slot handling isn't uniform enough to do this safely here). Please remove them manually, e.g.:\n"
+      printf "  sudo emerge -C ${pkgs}\n${STY_RST}"
+      ;;
+    *)
+      printf "${STY_YELLOW}[$0]: Don't know how to remove legacy illogical-impulse-* packages for OS_GROUP_ID=\"$OS_GROUP_ID\". Please remove them manually: ${pkgs}${STY_RST}\n"
+      ;;
+  esac
+}
+
+if has_legacy_packages; then
+  migrate_notify_legacy
+fi
+#####################################################################################
+
 function outdate_detect(){
   # Shallow clone prevent latest_commit_timestamp() from working.
   x git_auto_unshallow 2>&1>/dev/null
@@ -105,4 +157,10 @@ elif [[ "$OS_GROUP_ID" =~ ^(arch|gentoo|fedora)$ ]]; then
   fi
   printf "./sdata/dist-${TARGET_ID}/install-deps.sh will be used.\n"
   source ./sdata/dist-${TARGET_ID}/install-deps.sh
+
+  # Migration: the immaterial-impulse-* packages were just installed above.
+  # Now remove the old illogical-impulse-* ones, if any were detected earlier.
+  if has_legacy_packages; then
+    migrate_remove_legacy
+  fi
 fi
