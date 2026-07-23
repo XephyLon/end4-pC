@@ -78,10 +78,13 @@ Singleton {
             if (exitCode === 0) {
                 Config.options.appearance.iconTheme = applyProcess.pendingId;
                 // The shell's Qt icon theme is fixed at process launch, so a QML
-                // reload will not adopt it - relaunch the process. Double-forked
-                // via execDetached so it outlives the shell it kills.
+                // reload will not adopt it - relaunch the process. The kill MUST be
+                // config-scoped (`-c ii`): a bare `qs kill` targets the "default"
+                // config, leaves the ii instance alive, and spawns a duplicate.
+                // Double-forked via execDetached so it outlives the shell it kills;
+                // the sleep is after the kill so the old instance clears first.
                 Quickshell.execDetached(["bash", "-c",
-                    "sleep 0.3; qs kill >/dev/null 2>&1; qs -c ii -d >/dev/null 2>&1 &"]);
+                    "qs -c ii kill >/dev/null 2>&1; sleep 0.5; qs -c ii -d >/dev/null 2>&1 &"]);
             }
             applyProcess.pendingId = "";
         }
