@@ -36,14 +36,17 @@ ContentPage {
     }
 
     function runUpdateDots() {
-        // TODO(C, ImI installer): re-point this at setup/ once the install TUI
-        // exists. The old self-reinstall cloned pctrade/end4-pC into
-        // ~/.config/quickshell and relaunched `qs -c end4-pC`; that is invalid now
-        // that the repo is a full suite rather than a drop-in config dir — running
-        // it would also clobber the hypr/ and matugen/ configs. Disabled for now.
+        // Update = re-run the installer. Fetch get.sh (portable download-then-run
+        // form so it works under the fish login shell too) — it updates the local
+        // suite checkout and launches setup. The installer is idempotent, so it
+        // doubles as the updater; a terminal is opened so the user can follow /
+        // answer the menu. Replaces the old self-reinstall that cloned into
+        // ~/.config/quickshell and relaunched `qs -c end4-pC` (invalid now that
+        // the repo is a full suite rather than a drop-in config dir).
         Quickshell.execDetached([
-            "notify-send", "Immaterial Impulse",
-            "In-app update is disabled pending the installer (setup/)."
+            "kitty", "--hold",
+            "fish", "-i", "-l", "-c",
+            "curl -fsSL https://raw.githubusercontent.com/XephyLon/immaterial-impulse/main/get.sh -o /tmp/imi-get.sh && bash /tmp/imi-get.sh"
         ])
         Qt.callLater(() => GlobalStates.settingsOpen = false)
     }
