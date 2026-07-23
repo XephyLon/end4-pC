@@ -99,3 +99,19 @@ done < <(echo "$deps_data" | yq '.groups | keys[]? | select(length > 0)')
 echo -e "\n========================================"
 echo "All installations are completed."
 echo "========================================"
+
+## Optional: qs-wallpaperengine build deps (gated by INSTALL_WE, see
+## sdata/subcmd-install/4.wallpaperengine.sh). Package names taken directly
+## from the "RHEL/Fedora-based systems" / Fedora 42 dnf list in
+## Almamu/linux-wallpaperengine's README (the upstream qs-wallpaperengine's
+## bootstrap.sh clones and patches). cmake/qt6 for the Quickshell rebuild
+## itself are already covered by the immaterial-impulse-quickshell-git group
+## in feddeps.toml, so they're not repeated here.
+if [[ "${INSTALL_WE:-0}" == "1" ]]; then
+  echo "[ImI] Installing qs-wallpaperengine build deps (INSTALL_WE=1)..."
+  v sudo dnf install -y \
+    gcc g++ cmake libXrandr-devel libXinerama-devel libXcursor-devel \
+    libXi-devel mesa-libGL-devel glew-devel freeglut-devel SDL2-devel \
+    lz4-devel ffmpeg ffmpeg-free-devel libXxf86vm-devel glm-devel \
+    glfw-devel mpv mpv-devel pulseaudio-libs-devel fftw-devel gmp-devel
+fi
