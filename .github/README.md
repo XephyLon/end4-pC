@@ -1,72 +1,82 @@
 <div align="center">
     <img src="assets/immaterial-impulse.svg" alt="Immaterial Impulse logo" width="180">
     <h1>【 Immaterial Impulse 】</h1>
-    <h3>A Material 3 Expressive desktop suite for Hyprland, built on Quickshell.</h3>
-    <p>Shell, Hyprland config, and a guided installer in one repo — install it and go.</p>
+    <h3>The evil twin of <a href="https://github.com/end-4/dots-hyprland">illogical-impulse</a>.</h3>
+    <p><em>illogical-impulse asks "do you really need this?" — Immaterial Impulse asks "but do you <b>want</b> it?"</em></p>
 </div>
 
 ---
 
-## Overview
+## The premise
 
-Immaterial Impulse is a complete, plug-and-play Linux desktop suite. It bundles a
-custom [Quickshell](https://quickshell.outfoxxed.me/) graphical shell, a full
-[Hyprland](https://github.com/hyprwm/hyprland) configuration, and a menu-driven
-installer that wires everything up across Arch, Fedora, Gentoo, and Nix.
+[illogical-impulse](https://github.com/end-4/dots-hyprland) is utility-first: a
+disciplined, beautiful, minimal Material 3 shell that earns every widget.
 
-It is a fork of [illogical-impulse](https://github.com/end-4/dots-hyprland) by
-[@end-4](https://github.com/end-4), rebranded and unified into a single
-self-contained project. It **supersedes** an illogical-impulse install rather
-than sitting beside it — a first run migrates your old config and secrets over,
-losing nothing.
+**Immaterial Impulse takes that same gorgeous base and does the opposite.** It
+leans all the way into the stuff a utility-first shell calls bloat — live
+Wallpaper Engine backgrounds, a full plugin platform, docker controls, Discord
+voice, a periodic-table cheatsheet — and ships it as a single, plug-and-play
+suite. Same DNA. Zero restraint. On purpose.
 
-> **What this is:** the graphical shell + Hyprland config + installer.
-> **What this isn't:** a full system bootstrapper — it won't set up graphics
-> drivers, zram, or your bootloader.
+It's a fork of illogical-impulse by [@end-4](https://github.com/end-4),
+rebranded and unified into one repo: the [Quickshell](https://quickshell.outfoxxed.me/)
+shell, the full [Hyprland](https://github.com/hyprwm/hyprland) config, and a
+guided installer, together. It **supersedes** an illogical-impulse install —
+first launch migrates your old config and secrets over, losing nothing.
+
+> **What it is:** the graphical shell + Hyprland config + installer.
+> **What it isn't:** a full system bootstrapper — no drivers, no zram, no bootloader.
 
 ---
 
-## Features
+## The bloat, lovingly curated
 
-### The shell — Material 3 Expressive, everywhere
-A cohesive Quickshell interface with a horizontal or vertical **bar**, a
-**dock**, left and right **sidebars**, an **overview** with live window
-previews, **notifications**, **on-screen display** and **on-screen keyboard**,
-**media controls with synced lyrics**, a **session/lock screen**, a **polkit**
-agent, and an in-shell **Settings app** that configures all of it — including
-one-click Hyprland animation presets.
+### 🧩 A real plugin platform
+The headline. Not a config file — an extensible widget platform. Drop a plugin
+into `~/.config/immaterial-impulse/plugins/` and it shows up. Two formats:
+**declarative** plugins that describe approved components in a `manifest.json`,
+and **package** plugins that ship their own QML using native shell components
+and tokens. Entry points cover **bar widgets, desktop widgets, control-center
+widgets, launcher providers, whole panels, and settings UIs**, behind a
+declared **permissions** model (`process`, `network`, `filesystem`, `settings`).
+There's a plugin **catalog** with author attribution, **remote install**, and a
+design-system library (`ExpressiveTokens`, a component registry) for authors.
+Bundled examples: **Docker** controls, **Discord voice**, system monitor,
+weather, currency, and clock widgets.
 
-### Material You theming from your wallpaper
-Pick a wallpaper and the whole system re-colors. Colors are generated with
-matugen and propagated to GTK, Hyprland, your terminal, **cava**, **tmux**, and
-the shell itself — one palette, everywhere.
-
-### Wallpapers, including live Wallpaper Engine
-A built-in browser for **local** and **online** wallpapers, plus first-class
+### 🌊 Live wallpapers, not just images
+A browser for **local** and **online** wallpapers — plus first-class
 **Wallpaper Engine** support: animated WE scenes render live inside the shell,
-with **shader-based transitions** when you switch between them. Choose how
-widgets sit over the wallpaper with the **frost** control — a true in-shell
-**blur** of the region behind, or a cheap palette **tint**.
+with **shader transitions** when you switch. The **frost** control decides how
+widgets sit over the wallpaper: a true in-shell **blur** of the region behind,
+or a cheap palette **tint**.
 
-### AI, in the sidebar
-Chat with multiple providers — any OpenAI-compatible endpoint, Google Gemini,
-local Ollama, and more — without leaving your desktop.
+### 🎨 Material You, everywhere at once
+Pick a wallpaper; the whole system re-colors. matugen propagates one palette to
+GTK, Hyprland, your terminal, **cava**, **tmux**, and the shell itself.
 
-### Quality of life
-On-screen **screen translation**, a **region selector** for screenshots and
-Google Lens lookups, anti-flashbang, and a custom lock screen with consistent
-widget frost (or optional hyprlock).
+### 🖥️ A whole desktop, not a bar
+Material 3 Expressive throughout: horizontal or vertical **bar**, **dock**,
+left/right **sidebars**, an **overview** with live window previews,
+**notifications**, **OSD** and **on-screen keyboard**, **media controls with
+synced lyrics**, **session/lock** screens, a **polkit** agent, and an in-shell
+**Settings app** that configures all of it — one-click Hyprland animation
+presets included.
+
+### 🤖 AI + quality-of-life
+Chat with any OpenAI-compatible endpoint, Gemini, or local Ollama from the
+sidebar. On-screen **translation**, a **region selector** for screenshots and
+Google Lens, anti-flashbang, and — yes — a keyboard-shortcut **cheatsheet**
+with a periodic table on `Super`+`/`, because why not.
 
 ---
 
 ## Installation
 
-> Immaterial Impulse installs the shell to `~/.config/quickshell/ii` and its
-> config to `~/.config/immaterial-impulse`. If you're coming from
-> illogical-impulse, the old `~/.config/illogical-impulse` directory and your
-> keyring entries are migrated automatically on first launch.
-
-Clone the repo and run the installer:
+> Installs the shell to `~/.config/quickshell/ii` and its config to
+> `~/.config/immaterial-impulse`. Coming from illogical-impulse? The old
+> `~/.config/illogical-impulse` directory and your keyring entries migrate
+> automatically on first launch.
 
 ```bash
 git clone https://github.com/XephyLon/end4-pC.git
@@ -74,22 +84,22 @@ cd end4-pC
 ./setup
 ```
 
-Running `./setup` with no arguments opens a **whiptail menu** where you pick:
+`./setup` with no arguments opens a **whiptail menu** to pick:
 
 - **Components** — core config and dependencies.
 - **Wallpaper Engine** (optional) — builds a custom Quickshell carrying the
-  Wallpaper Engine module and puts it ahead of the stock binary on `PATH`.
-  Off by default; WE wallpapers gracefully fall back to static otherwise.
+  Wallpaper Engine module and puts it ahead of the stock binary on `PATH`. Off
+  by default; WE wallpapers degrade to static otherwise.
 - **Extras** — fontset, fcitx5 IME, and other situational overlays.
 
-Every command is printed before it runs. For scripting, `./setup install` runs
-the same pipeline non-interactively.
+Every command prints before it runs. For scripting, `./setup install` runs the
+same pipeline non-interactively.
 
-**Keybinds** follow Windows/GNOME muscle memory. A few to start with:
+**Keybinds** follow Windows/GNOME muscle memory:
 
 | Keybind | Action |
 | --- | --- |
-| `Super`+`/` | Full keybind list |
+| `Super`+`/` | Full keybind cheatsheet |
 | `Super`+`Enter` | Terminal |
 
 ---
@@ -99,7 +109,7 @@ the same pipeline non-interactively.
 | Software | Purpose |
 | --- | --- |
 | [Hyprland](https://github.com/hyprwm/hyprland) | Wayland compositor — manages and renders windows |
-| [Quickshell](https://quickshell.outfoxxed.me/) | QtQuick widget system — bar, sidebars, dock, and the rest of the shell |
+| [Quickshell](https://quickshell.outfoxxed.me/) | QtQuick widget system — bar, sidebars, dock, plugins, the lot |
 | matugen | Material You color generation from the wallpaper |
 | Others | See [deps-info.md](../sdata/deps-info.md) |
 
@@ -119,11 +129,10 @@ the same pipeline non-interactively.
 
 ## Credits
 
-Immaterial Impulse stands on the work of the illogical-impulse project and its
-community:
+The good twin and the community it came from:
 
-- [@end-4](https://github.com/end-4) — illogical-impulse, the upstream this
-  suite is forked from.
+- [@end-4](https://github.com/end-4) — illogical-impulse, the upstream this is
+  forked from.
 - [@clsty](https://github.com/clsty) — the original install script and much more.
 - [@midn8hustlr](https://github.com/midn8hustlr) — the color generation system.
 - [@outfoxxed](https://github.com/outfoxxed/) — Quickshell.
@@ -133,4 +142,4 @@ community:
 
 ## License
 
-See the repository license. Feel free to copy and adapt — just follow the terms.
+See the repository license. Copy and adapt freely — just follow the terms.
