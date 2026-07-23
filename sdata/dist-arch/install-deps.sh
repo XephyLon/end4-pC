@@ -78,6 +78,22 @@ install-local-pkgbuild() {
   x pushd $location
 
   source ./PKGBUILD
+
+  # Idempotent local install: if this exact version is already installed and we
+  # were asked for --needed, skip the rebuild+reinstall. Besides saving time,
+  # this stops a broken *rebuild* of an already-installed package (e.g. a pinned
+  # commit that no longer builds against a newer toolchain) from aborting the
+  # whole install — the working installed copy is kept. Version-based pkgs whose
+  # $pkgver comes from a pkgver() function won't match here and just build, which
+  # is the safe default.
+  local _inst
+  _inst="$(pacman -Q "$pkgname" 2>/dev/null | awk '{print $2}')"
+  if [[ "$installflags" == *--needed* && -n "$_inst" && "$_inst" == "$pkgver-$pkgrel" ]]; then
+    printf "${STY_CYAN}[$0]: %s %s already installed; skipping build (--needed).${STY_RST}\n" "$pkgname" "$_inst"
+    x popd
+    return 0
+  fi
+
   x yay -S --sudoloop $installflags --asdeps "${depends[@]}"
   # man makepkg:
   # -A, --ignorearch: Ignore a missing or incomplete arch field in the build script.
