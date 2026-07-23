@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/immaterial-impulse.svg" alt="Immaterial Impulse logo" width="180">
+    <img src="assets/immaterial-impulse.png" alt="Immaterial Impulse logo" width="180">
     <h1>【 Immaterial Impulse 】</h1>
     <h3>The evil twin of <a href="https://github.com/end-4/dots-hyprland">illogical-impulse</a>.</h3>
     <p><em>illogical-impulse asks "do you really need this?" — Immaterial Impulse asks "but do you <b>want</b> it?"</em></p>

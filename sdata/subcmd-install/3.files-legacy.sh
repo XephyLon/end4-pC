@@ -84,4 +84,4 @@ case "${SKIP_HYPRLAND}" in
     ;;
 esac
 
-install_file "dots/.local/share/icons/immaterial-impulse.svg" "${XDG_DATA_HOME}"/icons/immaterial-impulse.svg
+install_file "dots/.local/share/icons/immaterial-impulse.png" "${XDG_DATA_HOME}"/icons/immaterial-impulse.png
