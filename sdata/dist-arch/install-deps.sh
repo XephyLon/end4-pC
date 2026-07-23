@@ -53,9 +53,14 @@ showfun remove_deprecated_dependencies
 v remove_deprecated_dependencies
 
 # Issue #363
+# Non-interactive runs (ask=false, e.g. the TUI's quiet mode) must not stop on
+# pacman's own "Proceed? [Y/n]" — add --noconfirm there, mirroring the pattern
+# used for the local-pkgbuild installs below.
+syuflags=""
+$ask || syuflags="--noconfirm"
 case $SKIP_SYSUPDATE in
   true) true;;
-  *) v sudo pacman -Syu;;
+  *) v sudo pacman -Syu $syuflags;;
 esac
 
 # Use yay. Because paru does not support cleanbuild.
