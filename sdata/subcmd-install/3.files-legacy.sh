@@ -51,10 +51,11 @@ case "${SKIP_HYPRLAND}" in
   *)
     # hyprland/shellOverrides/ holds the user's Settings choices, written+managed
     # by the shell at runtime. Exclude it from the --delete sync so an update
-    # never clobbers it, then seed the default only when it does not exist yet
-    # (same convention custom/ uses below).
+    # never clobbers it, then seed defaults per-file with --ignore-existing:
+    # this adds newly-shipped managed files (e.g. animations.lua) that existing
+    # installs lack, while preserving any file the user's shell already wrote.
     install_dir__sync_exclude dots/.config/hypr/hyprland "$XDG_CONFIG_HOME"/hypr/hyprland shellOverrides
-    install_dir__ignore_existing dots/.config/hypr/hyprland/shellOverrides "$XDG_CONFIG_HOME"/hypr/hyprland/shellOverrides
+    v rsync_dir__ignore_existing dots/.config/hypr/hyprland/shellOverrides "$XDG_CONFIG_HOME"/hypr/hyprland/shellOverrides
     if [ -f "${XDG_CONFIG_HOME}/hypr/hyprland.conf" ]; then
       mv "${XDG_CONFIG_HOME}/hypr/hyprland.conf" "${XDG_CONFIG_HOME}/hypr/hyprland.conf.old" # disable old config
       echo 'hyprland.conf has been renamed to hyprland.conf.old. This is to allow the new lua config to load.'
