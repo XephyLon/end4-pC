@@ -45,7 +45,7 @@ if which pacman &>/dev/null; then
   fi
 fi
 UPDATE_IGNORE_FILE="${REPO_ROOT}/.updateignore"
-XDG_UPDATE_IGNORE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/illogical-impulse/updateignore"
+XDG_UPDATE_IGNORE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/immaterial-impulse/updateignore"
 #TODO: remove in future and add script to migrate to XDG path
 HOME_UPDATE_IGNORE_FILE="${HOME}/.updateignore" # Legacy support 
 

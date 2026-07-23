@@ -59,7 +59,7 @@ _check_quickshell_version() {
   pacman -Q | grep -E 'quickshell|qt6-base'
 }
 _check_PKGBUILD_version() {
-  pacman -Q | grep '^illogical-impulse-'
+  pacman -Q | grep '^immaterial-impulse-'
 }
 
 e "Checking git repo info"

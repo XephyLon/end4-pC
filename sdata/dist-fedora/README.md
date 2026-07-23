@@ -14,7 +14,7 @@ Note:
 - It has been tested on Fedora Everything 44 on the `x86_64` platform.
 
 ## Post installation
-- Fix the issue of the right column crashing when clicking the `Details` button in Wi-Fi mode. Edit this file: `~/.config/illogical-impulse/config.json`
+- Fix the issue of the right column crashing when clicking the `Details` button in Wi-Fi mode. Edit this file: `~/.config/immaterial-impulse/config.json`
 ```diff
 @@ 44,3 44,3 @@
 -  "apps": {
