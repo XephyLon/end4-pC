@@ -1,4 +1,4 @@
-_commit='7511545ee20664e3b8b8d3322c0ffe7567c56f7a'
+_commit='e649d247498512464457aefcd05b73038c4e65a1'
 # Useful links:
 # https://git.outfoxxed.me/quickshell/quickshell/commits/branch/master
 # https://aur.archlinux.org/packages/quickshell-git
@@ -8,7 +8,7 @@ _prefix='immaterial-impulse'
 _pkgname=quickshell
 pkgname="$_prefix-$_pkgname-git"
 pkgver=0.1.0.r1
-pkgrel=8
+pkgrel=9
 pkgdesc="$_pkgname-git pinned commit and extra deps for $_prefix"
 arch=(x86_64 aarch64)
 url='https://git.outfoxxed.me/quickshell/quickshell'
