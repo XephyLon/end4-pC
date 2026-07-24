@@ -58,6 +58,29 @@ say(){ echo "[ImI] Wallpaper Engine: $*"; }
 maybe_sudo(){ if [[ "$PREFIX" == "/usr/local" ]]; then sudo "$@"; else "$@"; fi; }
 verlte(){ [[ "$1" == "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n1)" ]]; }
 
+# Stamp recording which WE_REF the currently-installed wrapper was built/
+# installed from, plus the binary it points at. Lets a re-run (an update where
+# the pin didn't change) skip the whole fetch+build - previously EVERY re-run
+# recompiled from scratch (build-we.sh rm -rf's its build dir), costing
+# 5-40 min for a no-op. WE_FORCE_REBUILD=1 overrides the skip.
+STAMP_FILE="${WE_STAMP_FILE:-$HOME/.cache/immaterial-impulse/we-installed-ref}"
+
+write_stamp(){ # $1 = installed ref, $2 = qs binary path
+  mkdir -p "$(dirname "$STAMP_FILE")"
+  printf '%s %s\n' "$1" "$2" > "$STAMP_FILE"
+}
+
+up_to_date(){
+  [[ "${WE_FORCE_REBUILD:-0}" == "1" ]] && return 1
+  [[ -f "$STAMP_FILE" ]] || return 1
+  local ref bin
+  read -r ref bin < "$STAMP_FILE" || return 1
+  [[ "$ref" == "$WE_REF" ]] || return 1
+  [[ -x "$bin" ]] || return 1                    # build output still on disk
+  [[ -x "$PREFIX/bin/quickshell" ]] || return 1  # wrapper still installed
+  return 0
+}
+
 # Install the LD_LIBRARY_PATH wrapper + `qs` symlink. $1=quickshell binary, $2=lib dir.
 install_wrapper(){
   local qs_bin="$1" lib_dir="$2"
@@ -136,6 +159,7 @@ try_prebuilt(){
   fi
 
   install_wrapper "$qs_bin" "$lib"
+  write_stamp "$WE_REF" "$qs_bin"
   say "installed prebuilt $WE_REF (skipped the ~compile)."
   return 0
 }
@@ -161,7 +185,12 @@ source_build(){
   eval "$paths"
   [[ -x "$QS_BIN" ]] || { say "build finished but $QS_BIN missing. Aborting." >&2; exit 1; }
   install_wrapper "$QS_BIN" "$WE_LIB_DIR"
+  write_stamp "$WE_REF" "$QS_BIN"
 }
 
+if up_to_date; then
+  say "already installed at $WE_REF and the wrapper is in place; skipping (WE_FORCE_REBUILD=1 to rebuild)."
+  exit 0
+fi
 if try_prebuilt; then exit 0; fi
 source_build

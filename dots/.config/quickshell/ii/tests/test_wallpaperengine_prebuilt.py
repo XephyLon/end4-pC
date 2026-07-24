@@ -44,6 +44,7 @@ def make_release(dirpath, tag="v0.0-test", qt_min="6.0.0-1", manifest_arch="x86_
 def run(env_extra):
     env = dict(os.environ)
     env.update({"INSTALL_WE":"1","WE_REF":"v0.0-test"})
+    env.setdefault("WE_STAMP_FILE", env_extra.get("WE_STAMP_FILE", "/dev/null"))
     env.update(env_extra)
     # WE_INSTALL_PREFIX redirects the wrapper install away from /usr/local/bin
     return subprocess.run(["bash", str(SH)], env=env, capture_output=True, text=True)
@@ -84,3 +85,50 @@ def test_smoke_failure_falls_back(tmp_path):
              "WE_SKIP_OPT_CHECK":"1"})
     assert r.returncode != 0
     assert "smoke" in (r.stdout+r.stderr).lower()
+
+
+def test_second_run_skips_when_up_to_date(tmp_path):
+    rel = tmp_path/"rel"; rel.mkdir()
+    make_release(rel)
+    prefix = tmp_path/"prefix"; prefix.mkdir()
+    stamp = tmp_path/"stamp"
+    env = {"WE_PREBUILT_DIR":str(rel), "WE_INSTALL_PREFIX":str(prefix),
+           "BUILD_DIR":str(tmp_path/"b"), "WE_SKIP_OPT_CHECK":"1",
+           "WE_STAMP_FILE":str(stamp)}
+    r1 = run(env)
+    assert r1.returncode == 0, r1.stderr
+    assert stamp.exists(), "stamp not written after install"
+    # Second run: remove the release fixture entirely - the skip path must not
+    # need it (nothing is downloaded or built when the stamp matches).
+    shutil.rmtree(rel)
+    r2 = run(env)
+    assert r2.returncode == 0, r2.stderr
+    assert "skipping" in (r2.stdout+r2.stderr).lower()
+
+def test_force_rebuild_overrides_skip(tmp_path):
+    rel = tmp_path/"rel"; rel.mkdir()
+    make_release(rel)
+    prefix = tmp_path/"prefix"; prefix.mkdir()
+    stamp = tmp_path/"stamp"
+    env = {"WE_PREBUILT_DIR":str(rel), "WE_INSTALL_PREFIX":str(prefix),
+           "BUILD_DIR":str(tmp_path/"b"), "WE_SKIP_OPT_CHECK":"1",
+           "WE_STAMP_FILE":str(stamp)}
+    assert run(env).returncode == 0
+    r = run({**env, "WE_FORCE_REBUILD":"1"})
+    assert r.returncode == 0, r.stderr
+    assert "prebuilt" in (r.stdout+r.stderr).lower()   # went through install again
+    assert "skipping" not in (r.stdout+r.stderr).lower()
+
+def test_stale_stamp_ref_does_not_skip(tmp_path):
+    rel = tmp_path/"rel"; rel.mkdir()
+    make_release(rel)
+    prefix = tmp_path/"prefix"; prefix.mkdir()
+    stamp = tmp_path/"stamp"
+    stamp.write_text("someOldRef /bin/true\n")   # ref mismatch => no skip
+    env = {"WE_PREBUILT_DIR":str(rel), "WE_INSTALL_PREFIX":str(prefix),
+           "BUILD_DIR":str(tmp_path/"b"), "WE_SKIP_OPT_CHECK":"1",
+           "WE_STAMP_FILE":str(stamp)}
+    r = run(env)
+    assert r.returncode == 0, r.stderr
+    assert "skipping" not in (r.stdout+r.stderr).lower()
+    assert stamp.read_text().split()[0] == "v0.0-test"  # stamp refreshed
