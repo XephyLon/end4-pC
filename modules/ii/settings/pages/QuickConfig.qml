@@ -98,7 +98,9 @@ ContentPage {
                         sourceSize.width: 420
                         sourceSize.height: 280
                         fillMode: Image.PreserveAspectCrop
-                        source: Config.options.background.wallpaperPath
+                        source: /\.(mp4|webm|mkv|avi|mov)$/i.test(Config.options.background.wallpaperPath)
+                            ? Config.options.background.thumbnailPath
+                            : Config.options.background.wallpaperPath
                         cache: false
                         layer.enabled: true
                         layer.effect: OpacityMask {

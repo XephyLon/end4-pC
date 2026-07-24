@@ -90,6 +90,7 @@ Variants {
         required property var modelData
         property string currentWallpaperSource: Config.options.background.wallpaperPath
         property string previousWallpaperSource: Config.options.background.wallpaperPath
+        property bool videoRevealed: false
 
         //centered Wallpaper
         property bool centeredWallpaperEnabled: Config.options.background.centeredWallpaper && (!Config.options.background.centeredWallpaperOnlyWhenLocked || GlobalStates.screenLocked)
@@ -167,9 +168,11 @@ Variants {
                     ? bgRoot.shaderList[Math.floor(Math.random() * bgRoot.shaderList.length)]
                     : bgRoot.wallpaperAnimation
             }
+            bgRoot.videoRevealed = bgRoot.wallpaperIsVideo
         }
 
         onWallpaperPathChanged: {
+            bgRoot.videoRevealed = false
             if (wallpaperSafetyTriggered) {
                 previousWallpaper.source = ""
                 wallpaper.source = ""
@@ -179,6 +182,8 @@ Variants {
             if (bgRoot.wallpaperAnimation === "") {
                 wallpaper.source = wallpaperPath
                 bgRoot.currentWallpaperSource = wallpaperPath
+                if (!bgRoot.wallpaperIsVideo) return
+                bgRoot.videoRevealed = true
                 return
             }
 
@@ -205,6 +210,7 @@ Variants {
                 previousWallpaper.source = ""
                 bgRoot.previousWallpaperSource = ""
                 bgRoot.transitionProgress = 1.0
+                bgRoot.videoRevealed = bgRoot.wallpaperIsVideo
             }
         }
 
@@ -242,7 +248,7 @@ Variants {
                 smooth: true
                 asynchronous: true
                 layer.enabled: true
-                visible: bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled
+                visible: bgRoot.wallpaperAnimation === "" && !blurLoader.active && !bgRoot.centeredWallpaperEnabled && !bgRoot.videoRevealed
                 onStatusChanged: {
                     if (status === Image.Ready && bgRoot.transitionProgress === 0.0) {
                         transitionAnim.restart()
@@ -253,7 +259,7 @@ Variants {
             ShaderEffect {
                 id: transitionEffect
                 anchors.fill: parent
-                visible: !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled
+                visible: !blurLoader.active && bgRoot.wallpaperAnimation !== "" && !bgRoot.centeredWallpaperEnabled && !bgRoot.videoRevealed
                 property var fromImage: previousWallpaper
                 property var toImage: wallpaper
                 property real progress: bgRoot.transitionProgress

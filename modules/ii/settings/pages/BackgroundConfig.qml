@@ -37,6 +37,12 @@ ContentPage {
         }
     }
 
+    function displayPathFor(path) {
+        return /\.(mp4|webm|mkv|avi|mov)$/i.test(path)
+            ? Config.options.background.thumbnailPath
+            : path
+    }
+
     ColumnLayout {
         id: mainLayout 
         Layout.fillWidth: true   
@@ -70,10 +76,12 @@ ContentPage {
                         mediumItemWidthRatio: 0.485
                         itemSpacing: 8
                         model: [
-                            Config.options.background.wallpaperPath,
-                            Config.options.background.lockWall !== ""
-                                ? Config.options.background.lockWall
-                                : Config.options.background.wallpaperPath
+                            page.displayPathFor(Config.options.background.wallpaperPath),
+                            page.displayPathFor(
+                                Config.options.background.lockWall !== ""
+                                    ? Config.options.background.lockWall
+                                    : Config.options.background.wallpaperPath
+                            )
                         ]
                         wheelEnabled: false
                         dragEnabled: false
