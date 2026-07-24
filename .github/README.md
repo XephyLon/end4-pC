@@ -132,6 +132,18 @@ same pipeline non-interactively.
 
 ## Screenshots
 
+### One base, any mood
+
+Same shell, three palettes — Material You recolors everything from the wallpaper.
+
+<table>
+  <tr><td colspan="2" align="center"><img src="../dots/.config/quickshell/ii/screenshots/green.png" alt="Green"><br><em>Green</em></td></tr>
+  <tr><td colspan="2" align="center"><img src="../dots/.config/quickshell/ii/screenshots/study.png" alt="Study"><br><em>Study</em></td></tr>
+  <tr><td colspan="2" align="center"><img src="../dots/.config/quickshell/ii/screenshots/red.png" alt="Red"><br><em>Red</em></td></tr>
+</table>
+
+### The tour
+
 | Lyrics | Online wallpapers |
 |:---:|:---:|
 | ![Lyrics](../dots/.config/quickshell/ii/screenshots/1.png) | ![Online wallpapers](../dots/.config/quickshell/ii/screenshots/2.png) |
