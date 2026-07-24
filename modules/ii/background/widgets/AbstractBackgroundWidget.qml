@@ -34,10 +34,12 @@ AbstractWidget {
 
     draggable: placementStrategy === "free" && !Config.options.background.widgetsLocked
     onReleased: {
-        root.targetX = root.x;
-        root.targetY = root.y;
-        configEntry.x = root.targetX;
-        configEntry.y = root.targetY;
+        configEntry.x = root.x;
+        configEntry.y = root.y;
+        root.targetX = Qt.binding(() => Math.max(0, Math.min(configEntry.x, scaledScreenWidth - width)));
+        root.targetY = Qt.binding(() => Math.max(0, Math.min(configEntry.y, scaledScreenHeight - height)));
+        root.x = Qt.binding(() => root.targetX);
+        root.y = Qt.binding(() => root.targetY);
     }
 
     property bool needsColText: false
@@ -99,4 +101,3 @@ AbstractWidget {
         }
     }
 }
-

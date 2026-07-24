@@ -18,7 +18,6 @@ ContentPage {
         if (Config.options.profile.descriptionText === "::uptime::") return "uptime"
         return "distro"
     }
-    property string presetNameInput: ""
     property string hostnameInput: SystemInfo.hostname
 
     FolderListModel {
@@ -26,60 +25,6 @@ ContentPage {
         folder: Config.options.profile.avatarPath !== "" ? Qt.resolvedUrl(Config.options.profile.avatarPath) : ""
         showDirs: false
         nameFilters: ["*.png", "*.svg", "*.jpg", "*.jpeg", "*.webp"]
-    }
-
-    FolderListModel {
-        id: presetsFolderModel
-        folder: Qt.resolvedUrl(Directories.userPresetsPath)
-        showDirs: false
-        nameFilters: ["*.json"]
-    }
-
-    Process {
-        id: saveProc
-        onExited: refreshPresetsFolder()
-    }
-
-    Process {
-        id: deleteProc
-        onExited: refreshPresetsFolder()
-    }
-
-    function refreshPresetsFolder() {
-        const current = presetsFolderModel.folder
-        presetsFolderModel.folder = ""
-        presetsFolderModel.folder = current
-    }
-
-    function savePreset() {
-        const raw = page.presetNameInput.trim()
-        if (raw.length === 0) return
-
-        const commaIndex = raw.indexOf(",")
-        let name = raw
-        let description = ""
-
-        if (commaIndex !== -1) {
-            name = raw.substring(0, commaIndex).trim()
-            description = raw.substring(commaIndex + 1).trim()
-        }
-
-        name = name.replace(/\s/g, "_")
-        if (name.length === 0) return
-
-        saveProc.command = ["bash", Directories.presetsScriptPath, "--save", name, description]
-        saveProc.running = true
-        page.presetNameInput = ""
-    }
-
-    function applyPreset(name) {
-        GlobalStates.settingsOpen = false
-        Quickshell.execDetached(["bash", Directories.presetsScriptPath, "--apply", name])
-    }
-
-    function deletePreset(name) {
-        deleteProc.command = ["bash", Directories.presetsScriptPath, "--remove", name]
-        deleteProc.running = true
     }
 
     Process {
@@ -308,22 +253,11 @@ ContentPage {
                     text: Translation.tr("New")
                     placeholderText: Translation.tr("Name, description (optional)")
 
-                    Timer {
-                        id: presetNameDebounceTimer
-                        interval: 1000
-                        running: false
-                        onTriggered: {
-                            page.presetNameInput = presetNameField.value
-                        }
-                    }
-                    onValueChanged: presetNameDebounceTimer.restart()
-
-                    confirmButtonVisible: page.presetNameInput.trim() !== ""
+                    confirmButtonVisible: presetNameField.value.trim() !== ""
                     confirmButtonIcon: "save"
                     onConfirmClicked: {
-                        page.savePreset()
+                        Presets.save(presetNameField.value)
                         presetNameField.value = ""
-                        page.presetNameInput = ""
                     }
                 }
             }
@@ -331,7 +265,7 @@ ContentPage {
             StyledText {
                 Layout.fillWidth: true
                 Layout.topMargin: 40
-                visible: presetsFolderModel.count === 0
+                visible: Presets.folderModel.count === 0
                 horizontalAlignment: Text.AlignHCenter
                 text: Translation.tr("No presets yet")
                 color: Appearance.colors.colSubtext
@@ -343,10 +277,10 @@ ContentPage {
                 Layout.fillWidth: true
                 width: parent.width
                 spacing: 12
-                visible: presetsFolderModel.count > 0
+                visible: Presets.folderModel.count > 0
 
                 Repeater {
-                    model: presetsFolderModel
+                    model: Presets.folderModel
                     delegate: PresetsCard {
                         id: presetDelegate
                         required property string fileName
@@ -372,8 +306,8 @@ ContentPage {
                         imageSource: presetDelegate.presetWallpaper
                         title: presetDelegate.presetName
                         description: presetDelegate.presetDescription !== "" ? presetDelegate.presetDescription : Translation.tr("Saved preset")
-                        onApply: () => page.applyPreset(presetDelegate.presetName)
-                        onRemove: () => page.deletePreset(presetDelegate.presetName)
+                        onApply: () => Presets.apply(presetDelegate.presetName)
+                        onRemove: () => Presets.remove(presetDelegate.presetName)
                     }
                 }
             }
