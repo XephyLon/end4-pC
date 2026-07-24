@@ -43,6 +43,28 @@ function gen_firstrun(){
   x mkdir -p "$(dirname ${INSTALLED_LISTFILE})"
   realpath -se "${FIRSTRUN_FILE}" >> "${INSTALLED_LISTFILE}"
 }
+function seed_default_config(){
+  # Seed the shell config with the suite's curated defaults on a FRESH install
+  # only (never touch an existing config.json - it is the user's live settings,
+  # and Config.qml merges it over the QML fallbacks at runtime). The curated
+  # file ships with the shell (defaults/config.json, sanitized of any
+  # machine-specific paths) because the QML fallback defaults inherited from
+  # upstream are a poor out-of-the-box experience.
+  local target="${XDG_CONFIG_HOME}/immaterial-impulse/config.json"
+  local source="${XDG_CONFIG_HOME}/quickshell/ii/defaults/config.json"
+  if [[ -f "$target" ]]; then
+    echo -e "${STY_BLUE}[$0]: \"$target\" already exists, keeping the user's config.${STY_RST}"
+    return 0
+  fi
+  if [[ ! -f "$source" ]]; then
+    echo -e "${STY_YELLOW}[$0]: default config \"$source\" not found; the shell will fall back to built-in defaults.${STY_RST}"
+    return 0
+  fi
+  x mkdir -p "$(dirname "$target")"
+  x cp "$source" "$target"
+  x mkdir -p "$(dirname ${INSTALLED_LISTFILE})"
+  realpath -se "$target" >> "${INSTALLED_LISTFILE}"
+}
 cp_file(){
   # NOTE: This function is only for using in other functions
   x mkdir -p "$(dirname $2)"
@@ -256,6 +278,8 @@ fi
 
 #####################################################################################
 
+showfun seed_default_config
+v seed_default_config
 v gen_firstrun
 v dedup_and_sort_listfile "${INSTALLED_LISTFILE}" "${INSTALLED_LISTFILE}"
 

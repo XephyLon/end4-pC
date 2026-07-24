@@ -159,6 +159,12 @@ if ! python3 "$SCRIPT_DIR/test_icon_theme_apply.py"; then
     exit 1
 fi
 
+echo "Running default config tests..."
+if ! python3 "$SCRIPT_DIR/test_default_config.py"; then
+    echo "Default config tests failed."
+    exit 1
+fi
+
 echo "Running shared widget contract tests..."
 if ! python3 "$SCRIPT_DIR/test_shared_widget_contracts.py"; then
     echo "Shared widget contract tests failed."
